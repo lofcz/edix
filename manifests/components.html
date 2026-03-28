@@ -582,7 +582,7 @@
 <main>
   <div class="wrap">
     <div class="note info" style="margin-bottom: 16px;">
-            <strong>Tip:</strong> You are using <code>react-docgen</code> (the default). Generation took <strong>0.5s</strong>. For higher quality prop types, consider switching to <code>react-docgen-typescript</code> in your <code>main.ts</code>:
+            <strong>Tip:</strong> You are using <code>react-docgen</code> (the default). Generation took <strong>0.6s</strong>. For higher quality prop types, consider switching to <code>react-docgen-typescript</code> in your <code>main.ts</code>:
             <pre><code>typescript: {
   reactDocgen: 'react-docgen-typescript',
 }</code></pre>
@@ -974,7 +974,7 @@ const isValidPosition = (doc: DocNode, [path, offset]: Position): boolean =&gt; 
   return false;
 };
 
-const rebasePosition = (position: Position, op: Operation): Position =&gt; {
+export const rebasePosition = (position: Position, op: Operation): Position =&gt; {
   switch (op.type) {
     case TYPE_DELETE: {
       const { start, end } = op;
@@ -1464,10 +1464,6 @@ export const createEditor = &lt;
     throw new Error(initialError);
   }
 
-  const history = createHistory&lt;
-    readonly [doc: T, selection: SelectionSnapshot]
-  &gt;([doc, selection]);
-
   const keydownHandlers: KeyboardHandler[] = [
     hotkey(
       &quot;z&quot;,
@@ -1475,7 +1471,8 @@ export const createEditor = &lt;
         if (!readonly) {
           const nextHistory = history.undo();
           if (nextHistory) {
-            [doc, selection] = nextHistory;
+            doc = nextHistory[0];
+            updateSelection(nextHistory[1]);
             onChange(doc);
           }
         }
@@ -1488,7 +1485,8 @@ export const createEditor = &lt;
         if (!readonly) {
           const nextHistory = history.redo();
           if (nextHistory) {
-            [doc, selection] = nextHistory;
+            doc = nextHistory[0];
+            updateSelection(nextHistory[1]);
             onChange(doc);
           }
         }
@@ -1530,7 +1528,7 @@ export const createEditor = &lt;
   const commit = () =&gt; {
     if (transactions.length) {
       const currentDoc = doc;
-      const currentSelection = selection;
+      const ops: Operation[] = [];
       const length = applyHooks.length;
 
       let tr: Transaction | undefined;
@@ -1557,6 +1555,7 @@ export const createEditor = &lt;
                 if (!isUnsafeOperation(op) || validate(nextDoc, onError)) {
                   doc = nextDoc;
                   selection = nextSelection;
+                  ops.push(op);
                 }
               } catch (e) {
                 // rollback
@@ -1581,7 +1580,7 @@ export const createEditor = &lt;
       }
 
       if (!is(currentDoc, doc)) {
-        history.change([currentDoc, currentSelection], [doc, selection]);
+        history.change(doc, ops);
         onChange(doc);
       }
     }
@@ -1968,6 +1967,8 @@ export const createEditor = &lt;
       };
     },
   };
+
+  const history = createHistory&lt;T&gt;(doc);
 
   return editor;
 };
@@ -2201,10 +2202,6 @@ export const createEditor = &lt;
     throw new Error(initialError);
   }
 
-  const history = createHistory&lt;
-    readonly [doc: T, selection: SelectionSnapshot]
-  &gt;([doc, selection]);
-
   const keydownHandlers: KeyboardHandler[] = [
     hotkey(
       &quot;z&quot;,
@@ -2212,7 +2209,8 @@ export const createEditor = &lt;
         if (!readonly) {
           const nextHistory = history.undo();
           if (nextHistory) {
-            [doc, selection] = nextHistory;
+            doc = nextHistory[0];
+            updateSelection(nextHistory[1]);
             onChange(doc);
           }
         }
@@ -2225,7 +2223,8 @@ export const createEditor = &lt;
         if (!readonly) {
           const nextHistory = history.redo();
           if (nextHistory) {
-            [doc, selection] = nextHistory;
+            doc = nextHistory[0];
+            updateSelection(nextHistory[1]);
             onChange(doc);
           }
         }
@@ -2267,7 +2266,7 @@ export const createEditor = &lt;
   const commit = () =&gt; {
     if (transactions.length) {
       const currentDoc = doc;
-      const currentSelection = selection;
+      const ops: Operation[] = [];
       const length = applyHooks.length;
 
       let tr: Transaction | undefined;
@@ -2294,6 +2293,7 @@ export const createEditor = &lt;
                 if (!isUnsafeOperation(op) || validate(nextDoc, onError)) {
                   doc = nextDoc;
                   selection = nextSelection;
+                  ops.push(op);
                 }
               } catch (e) {
                 // rollback
@@ -2318,7 +2318,7 @@ export const createEditor = &lt;
       }
 
       if (!is(currentDoc, doc)) {
-        history.change([currentDoc, currentSelection], [doc, selection]);
+        history.change(doc, ops);
         onChange(doc);
       }
     }
@@ -2705,6 +2705,8 @@ export const createEditor = &lt;
       };
     },
   };
+
+  const history = createHistory&lt;T&gt;(doc);
 
   return editor;
 };
@@ -4100,7 +4102,7 @@ const isValidPosition = (doc: DocNode, [path, offset]: Position): boolean =&gt; 
   return false;
 };
 
-const rebasePosition = (position: Position, op: Operation): Position =&gt; {
+export const rebasePosition = (position: Position, op: Operation): Position =&gt; {
   switch (op.type) {
     case TYPE_DELETE: {
       const { start, end } = op;
@@ -4590,10 +4592,6 @@ export const createEditor = &lt;
     throw new Error(initialError);
   }
 
-  const history = createHistory&lt;
-    readonly [doc: T, selection: SelectionSnapshot]
-  &gt;([doc, selection]);
-
   const keydownHandlers: KeyboardHandler[] = [
     hotkey(
       &quot;z&quot;,
@@ -4601,7 +4599,8 @@ export const createEditor = &lt;
         if (!readonly) {
           const nextHistory = history.undo();
           if (nextHistory) {
-            [doc, selection] = nextHistory;
+            doc = nextHistory[0];
+            updateSelection(nextHistory[1]);
             onChange(doc);
           }
         }
@@ -4614,7 +4613,8 @@ export const createEditor = &lt;
         if (!readonly) {
           const nextHistory = history.redo();
           if (nextHistory) {
-            [doc, selection] = nextHistory;
+            doc = nextHistory[0];
+            updateSelection(nextHistory[1]);
             onChange(doc);
           }
         }
@@ -4656,7 +4656,7 @@ export const createEditor = &lt;
   const commit = () =&gt; {
     if (transactions.length) {
       const currentDoc = doc;
-      const currentSelection = selection;
+      const ops: Operation[] = [];
       const length = applyHooks.length;
 
       let tr: Transaction | undefined;
@@ -4683,6 +4683,7 @@ export const createEditor = &lt;
                 if (!isUnsafeOperation(op) || validate(nextDoc, onError)) {
                   doc = nextDoc;
                   selection = nextSelection;
+                  ops.push(op);
                 }
               } catch (e) {
                 // rollback
@@ -4707,7 +4708,7 @@ export const createEditor = &lt;
       }
 
       if (!is(currentDoc, doc)) {
-        history.change([currentDoc, currentSelection], [doc, selection]);
+        history.change(doc, ops);
         onChange(doc);
       }
     }
@@ -5094,6 +5095,8 @@ export const createEditor = &lt;
       };
     },
   };
+
+  const history = createHistory&lt;T&gt;(doc);
 
   return editor;
 };
@@ -5327,10 +5330,6 @@ export const createEditor = &lt;
     throw new Error(initialError);
   }
 
-  const history = createHistory&lt;
-    readonly [doc: T, selection: SelectionSnapshot]
-  &gt;([doc, selection]);
-
   const keydownHandlers: KeyboardHandler[] = [
     hotkey(
       &quot;z&quot;,
@@ -5338,7 +5337,8 @@ export const createEditor = &lt;
         if (!readonly) {
           const nextHistory = history.undo();
           if (nextHistory) {
-            [doc, selection] = nextHistory;
+            doc = nextHistory[0];
+            updateSelection(nextHistory[1]);
             onChange(doc);
           }
         }
@@ -5351,7 +5351,8 @@ export const createEditor = &lt;
         if (!readonly) {
           const nextHistory = history.redo();
           if (nextHistory) {
-            [doc, selection] = nextHistory;
+            doc = nextHistory[0];
+            updateSelection(nextHistory[1]);
             onChange(doc);
           }
         }
@@ -5393,7 +5394,7 @@ export const createEditor = &lt;
   const commit = () =&gt; {
     if (transactions.length) {
       const currentDoc = doc;
-      const currentSelection = selection;
+      const ops: Operation[] = [];
       const length = applyHooks.length;
 
       let tr: Transaction | undefined;
@@ -5420,6 +5421,7 @@ export const createEditor = &lt;
                 if (!isUnsafeOperation(op) || validate(nextDoc, onError)) {
                   doc = nextDoc;
                   selection = nextSelection;
+                  ops.push(op);
                 }
               } catch (e) {
                 // rollback
@@ -5444,7 +5446,7 @@ export const createEditor = &lt;
       }
 
       if (!is(currentDoc, doc)) {
-        history.change([currentDoc, currentSelection], [doc, selection]);
+        history.change(doc, ops);
         onChange(doc);
       }
     }
@@ -5831,6 +5833,8 @@ export const createEditor = &lt;
       };
     },
   };
+
+  const history = createHistory&lt;T&gt;(doc);
 
   return editor;
 };
@@ -7189,7 +7193,7 @@ const isValidPosition = (doc: DocNode, [path, offset]: Position): boolean =&gt; 
   return false;
 };
 
-const rebasePosition = (position: Position, op: Operation): Position =&gt; {
+export const rebasePosition = (position: Position, op: Operation): Position =&gt; {
   switch (op.type) {
     case TYPE_DELETE: {
       const { start, end } = op;
@@ -7679,10 +7683,6 @@ export const createEditor = &lt;
     throw new Error(initialError);
   }
 
-  const history = createHistory&lt;
-    readonly [doc: T, selection: SelectionSnapshot]
-  &gt;([doc, selection]);
-
   const keydownHandlers: KeyboardHandler[] = [
     hotkey(
       &quot;z&quot;,
@@ -7690,7 +7690,8 @@ export const createEditor = &lt;
         if (!readonly) {
           const nextHistory = history.undo();
           if (nextHistory) {
-            [doc, selection] = nextHistory;
+            doc = nextHistory[0];
+            updateSelection(nextHistory[1]);
             onChange(doc);
           }
         }
@@ -7703,7 +7704,8 @@ export const createEditor = &lt;
         if (!readonly) {
           const nextHistory = history.redo();
           if (nextHistory) {
-            [doc, selection] = nextHistory;
+            doc = nextHistory[0];
+            updateSelection(nextHistory[1]);
             onChange(doc);
           }
         }
@@ -7745,7 +7747,7 @@ export const createEditor = &lt;
   const commit = () =&gt; {
     if (transactions.length) {
       const currentDoc = doc;
-      const currentSelection = selection;
+      const ops: Operation[] = [];
       const length = applyHooks.length;
 
       let tr: Transaction | undefined;
@@ -7772,6 +7774,7 @@ export const createEditor = &lt;
                 if (!isUnsafeOperation(op) || validate(nextDoc, onError)) {
                   doc = nextDoc;
                   selection = nextSelection;
+                  ops.push(op);
                 }
               } catch (e) {
                 // rollback
@@ -7796,7 +7799,7 @@ export const createEditor = &lt;
       }
 
       if (!is(currentDoc, doc)) {
-        history.change([currentDoc, currentSelection], [doc, selection]);
+        history.change(doc, ops);
         onChange(doc);
       }
     }
@@ -8183,6 +8186,8 @@ export const createEditor = &lt;
       };
     },
   };
+
+  const history = createHistory&lt;T&gt;(doc);
 
   return editor;
 };
@@ -8416,10 +8421,6 @@ export const createEditor = &lt;
     throw new Error(initialError);
   }
 
-  const history = createHistory&lt;
-    readonly [doc: T, selection: SelectionSnapshot]
-  &gt;([doc, selection]);
-
   const keydownHandlers: KeyboardHandler[] = [
     hotkey(
       &quot;z&quot;,
@@ -8427,7 +8428,8 @@ export const createEditor = &lt;
         if (!readonly) {
           const nextHistory = history.undo();
           if (nextHistory) {
-            [doc, selection] = nextHistory;
+            doc = nextHistory[0];
+            updateSelection(nextHistory[1]);
             onChange(doc);
           }
         }
@@ -8440,7 +8442,8 @@ export const createEditor = &lt;
         if (!readonly) {
           const nextHistory = history.redo();
           if (nextHistory) {
-            [doc, selection] = nextHistory;
+            doc = nextHistory[0];
+            updateSelection(nextHistory[1]);
             onChange(doc);
           }
         }
@@ -8482,7 +8485,7 @@ export const createEditor = &lt;
   const commit = () =&gt; {
     if (transactions.length) {
       const currentDoc = doc;
-      const currentSelection = selection;
+      const ops: Operation[] = [];
       const length = applyHooks.length;
 
       let tr: Transaction | undefined;
@@ -8509,6 +8512,7 @@ export const createEditor = &lt;
                 if (!isUnsafeOperation(op) || validate(nextDoc, onError)) {
                   doc = nextDoc;
                   selection = nextSelection;
+                  ops.push(op);
                 }
               } catch (e) {
                 // rollback
@@ -8533,7 +8537,7 @@ export const createEditor = &lt;
       }
 
       if (!is(currentDoc, doc)) {
-        history.change([currentDoc, currentSelection], [doc, selection]);
+        history.change(doc, ops);
         onChange(doc);
       }
     }
@@ -8920,6 +8924,8 @@ export const createEditor = &lt;
       };
     },
   };
+
+  const history = createHistory&lt;T&gt;(doc);
 
   return editor;
 };
@@ -9909,7 +9915,7 @@ const isValidPosition = (doc: DocNode, [path, offset]: Position): boolean =&gt; 
   return false;
 };
 
-const rebasePosition = (position: Position, op: Operation): Position =&gt; {
+export const rebasePosition = (position: Position, op: Operation): Position =&gt; {
   switch (op.type) {
     case TYPE_DELETE: {
       const { start, end } = op;
@@ -10399,10 +10405,6 @@ export const createEditor = &lt;
     throw new Error(initialError);
   }
 
-  const history = createHistory&lt;
-    readonly [doc: T, selection: SelectionSnapshot]
-  &gt;([doc, selection]);
-
   const keydownHandlers: KeyboardHandler[] = [
     hotkey(
       &quot;z&quot;,
@@ -10410,7 +10412,8 @@ export const createEditor = &lt;
         if (!readonly) {
           const nextHistory = history.undo();
           if (nextHistory) {
-            [doc, selection] = nextHistory;
+            doc = nextHistory[0];
+            updateSelection(nextHistory[1]);
             onChange(doc);
           }
         }
@@ -10423,7 +10426,8 @@ export const createEditor = &lt;
         if (!readonly) {
           const nextHistory = history.redo();
           if (nextHistory) {
-            [doc, selection] = nextHistory;
+            doc = nextHistory[0];
+            updateSelection(nextHistory[1]);
             onChange(doc);
           }
         }
@@ -10465,7 +10469,7 @@ export const createEditor = &lt;
   const commit = () =&gt; {
     if (transactions.length) {
       const currentDoc = doc;
-      const currentSelection = selection;
+      const ops: Operation[] = [];
       const length = applyHooks.length;
 
       let tr: Transaction | undefined;
@@ -10492,6 +10496,7 @@ export const createEditor = &lt;
                 if (!isUnsafeOperation(op) || validate(nextDoc, onError)) {
                   doc = nextDoc;
                   selection = nextSelection;
+                  ops.push(op);
                 }
               } catch (e) {
                 // rollback
@@ -10516,7 +10521,7 @@ export const createEditor = &lt;
       }
 
       if (!is(currentDoc, doc)) {
-        history.change([currentDoc, currentSelection], [doc, selection]);
+        history.change(doc, ops);
         onChange(doc);
       }
     }
@@ -10903,6 +10908,8 @@ export const createEditor = &lt;
       };
     },
   };
+
+  const history = createHistory&lt;T&gt;(doc);
 
   return editor;
 };
@@ -11136,10 +11143,6 @@ export const createEditor = &lt;
     throw new Error(initialError);
   }
 
-  const history = createHistory&lt;
-    readonly [doc: T, selection: SelectionSnapshot]
-  &gt;([doc, selection]);
-
   const keydownHandlers: KeyboardHandler[] = [
     hotkey(
       &quot;z&quot;,
@@ -11147,7 +11150,8 @@ export const createEditor = &lt;
         if (!readonly) {
           const nextHistory = history.undo();
           if (nextHistory) {
-            [doc, selection] = nextHistory;
+            doc = nextHistory[0];
+            updateSelection(nextHistory[1]);
             onChange(doc);
           }
         }
@@ -11160,7 +11164,8 @@ export const createEditor = &lt;
         if (!readonly) {
           const nextHistory = history.redo();
           if (nextHistory) {
-            [doc, selection] = nextHistory;
+            doc = nextHistory[0];
+            updateSelection(nextHistory[1]);
             onChange(doc);
           }
         }
@@ -11202,7 +11207,7 @@ export const createEditor = &lt;
   const commit = () =&gt; {
     if (transactions.length) {
       const currentDoc = doc;
-      const currentSelection = selection;
+      const ops: Operation[] = [];
       const length = applyHooks.length;
 
       let tr: Transaction | undefined;
@@ -11229,6 +11234,7 @@ export const createEditor = &lt;
                 if (!isUnsafeOperation(op) || validate(nextDoc, onError)) {
                   doc = nextDoc;
                   selection = nextSelection;
+                  ops.push(op);
                 }
               } catch (e) {
                 // rollback
@@ -11253,7 +11259,7 @@ export const createEditor = &lt;
       }
 
       if (!is(currentDoc, doc)) {
-        history.change([currentDoc, currentSelection], [doc, selection]);
+        history.change(doc, ops);
         onChange(doc);
       }
     }
@@ -11640,6 +11646,8 @@ export const createEditor = &lt;
       };
     },
   };
+
+  const history = createHistory&lt;T&gt;(doc);
 
   return editor;
 };
@@ -12563,7 +12571,7 @@ const isValidPosition = (doc: DocNode, [path, offset]: Position): boolean =&gt; 
   return false;
 };
 
-const rebasePosition = (position: Position, op: Operation): Position =&gt; {
+export const rebasePosition = (position: Position, op: Operation): Position =&gt; {
   switch (op.type) {
     case TYPE_DELETE: {
       const { start, end } = op;
@@ -13053,10 +13061,6 @@ export const createEditor = &lt;
     throw new Error(initialError);
   }
 
-  const history = createHistory&lt;
-    readonly [doc: T, selection: SelectionSnapshot]
-  &gt;([doc, selection]);
-
   const keydownHandlers: KeyboardHandler[] = [
     hotkey(
       &quot;z&quot;,
@@ -13064,7 +13068,8 @@ export const createEditor = &lt;
         if (!readonly) {
           const nextHistory = history.undo();
           if (nextHistory) {
-            [doc, selection] = nextHistory;
+            doc = nextHistory[0];
+            updateSelection(nextHistory[1]);
             onChange(doc);
           }
         }
@@ -13077,7 +13082,8 @@ export const createEditor = &lt;
         if (!readonly) {
           const nextHistory = history.redo();
           if (nextHistory) {
-            [doc, selection] = nextHistory;
+            doc = nextHistory[0];
+            updateSelection(nextHistory[1]);
             onChange(doc);
           }
         }
@@ -13119,7 +13125,7 @@ export const createEditor = &lt;
   const commit = () =&gt; {
     if (transactions.length) {
       const currentDoc = doc;
-      const currentSelection = selection;
+      const ops: Operation[] = [];
       const length = applyHooks.length;
 
       let tr: Transaction | undefined;
@@ -13146,6 +13152,7 @@ export const createEditor = &lt;
                 if (!isUnsafeOperation(op) || validate(nextDoc, onError)) {
                   doc = nextDoc;
                   selection = nextSelection;
+                  ops.push(op);
                 }
               } catch (e) {
                 // rollback
@@ -13170,7 +13177,7 @@ export const createEditor = &lt;
       }
 
       if (!is(currentDoc, doc)) {
-        history.change([currentDoc, currentSelection], [doc, selection]);
+        history.change(doc, ops);
         onChange(doc);
       }
     }
@@ -13557,6 +13564,8 @@ export const createEditor = &lt;
       };
     },
   };
+
+  const history = createHistory&lt;T&gt;(doc);
 
   return editor;
 };
@@ -13790,10 +13799,6 @@ export const createEditor = &lt;
     throw new Error(initialError);
   }
 
-  const history = createHistory&lt;
-    readonly [doc: T, selection: SelectionSnapshot]
-  &gt;([doc, selection]);
-
   const keydownHandlers: KeyboardHandler[] = [
     hotkey(
       &quot;z&quot;,
@@ -13801,7 +13806,8 @@ export const createEditor = &lt;
         if (!readonly) {
           const nextHistory = history.undo();
           if (nextHistory) {
-            [doc, selection] = nextHistory;
+            doc = nextHistory[0];
+            updateSelection(nextHistory[1]);
             onChange(doc);
           }
         }
@@ -13814,7 +13820,8 @@ export const createEditor = &lt;
         if (!readonly) {
           const nextHistory = history.redo();
           if (nextHistory) {
-            [doc, selection] = nextHistory;
+            doc = nextHistory[0];
+            updateSelection(nextHistory[1]);
             onChange(doc);
           }
         }
@@ -13856,7 +13863,7 @@ export const createEditor = &lt;
   const commit = () =&gt; {
     if (transactions.length) {
       const currentDoc = doc;
-      const currentSelection = selection;
+      const ops: Operation[] = [];
       const length = applyHooks.length;
 
       let tr: Transaction | undefined;
@@ -13883,6 +13890,7 @@ export const createEditor = &lt;
                 if (!isUnsafeOperation(op) || validate(nextDoc, onError)) {
                   doc = nextDoc;
                   selection = nextSelection;
+                  ops.push(op);
                 }
               } catch (e) {
                 // rollback
@@ -13907,7 +13915,7 @@ export const createEditor = &lt;
       }
 
       if (!is(currentDoc, doc)) {
-        history.change([currentDoc, currentSelection], [doc, selection]);
+        history.change(doc, ops);
         onChange(doc);
       }
     }
@@ -14294,6 +14302,8 @@ export const createEditor = &lt;
       };
     },
   };
+
+  const history = createHistory&lt;T&gt;(doc);
 
   return editor;
 };
@@ -15250,7 +15260,7 @@ const isValidPosition = (doc: DocNode, [path, offset]: Position): boolean =&gt; 
   return false;
 };
 
-const rebasePosition = (position: Position, op: Operation): Position =&gt; {
+export const rebasePosition = (position: Position, op: Operation): Position =&gt; {
   switch (op.type) {
     case TYPE_DELETE: {
       const { start, end } = op;
@@ -15740,10 +15750,6 @@ export const createEditor = &lt;
     throw new Error(initialError);
   }
 
-  const history = createHistory&lt;
-    readonly [doc: T, selection: SelectionSnapshot]
-  &gt;([doc, selection]);
-
   const keydownHandlers: KeyboardHandler[] = [
     hotkey(
       &quot;z&quot;,
@@ -15751,7 +15757,8 @@ export const createEditor = &lt;
         if (!readonly) {
           const nextHistory = history.undo();
           if (nextHistory) {
-            [doc, selection] = nextHistory;
+            doc = nextHistory[0];
+            updateSelection(nextHistory[1]);
             onChange(doc);
           }
         }
@@ -15764,7 +15771,8 @@ export const createEditor = &lt;
         if (!readonly) {
           const nextHistory = history.redo();
           if (nextHistory) {
-            [doc, selection] = nextHistory;
+            doc = nextHistory[0];
+            updateSelection(nextHistory[1]);
             onChange(doc);
           }
         }
@@ -15806,7 +15814,7 @@ export const createEditor = &lt;
   const commit = () =&gt; {
     if (transactions.length) {
       const currentDoc = doc;
-      const currentSelection = selection;
+      const ops: Operation[] = [];
       const length = applyHooks.length;
 
       let tr: Transaction | undefined;
@@ -15833,6 +15841,7 @@ export const createEditor = &lt;
                 if (!isUnsafeOperation(op) || validate(nextDoc, onError)) {
                   doc = nextDoc;
                   selection = nextSelection;
+                  ops.push(op);
                 }
               } catch (e) {
                 // rollback
@@ -15857,7 +15866,7 @@ export const createEditor = &lt;
       }
 
       if (!is(currentDoc, doc)) {
-        history.change([currentDoc, currentSelection], [doc, selection]);
+        history.change(doc, ops);
         onChange(doc);
       }
     }
@@ -16244,6 +16253,8 @@ export const createEditor = &lt;
       };
     },
   };
+
+  const history = createHistory&lt;T&gt;(doc);
 
   return editor;
 };
@@ -16477,10 +16488,6 @@ export const createEditor = &lt;
     throw new Error(initialError);
   }
 
-  const history = createHistory&lt;
-    readonly [doc: T, selection: SelectionSnapshot]
-  &gt;([doc, selection]);
-
   const keydownHandlers: KeyboardHandler[] = [
     hotkey(
       &quot;z&quot;,
@@ -16488,7 +16495,8 @@ export const createEditor = &lt;
         if (!readonly) {
           const nextHistory = history.undo();
           if (nextHistory) {
-            [doc, selection] = nextHistory;
+            doc = nextHistory[0];
+            updateSelection(nextHistory[1]);
             onChange(doc);
           }
         }
@@ -16501,7 +16509,8 @@ export const createEditor = &lt;
         if (!readonly) {
           const nextHistory = history.redo();
           if (nextHistory) {
-            [doc, selection] = nextHistory;
+            doc = nextHistory[0];
+            updateSelection(nextHistory[1]);
             onChange(doc);
           }
         }
@@ -16543,7 +16552,7 @@ export const createEditor = &lt;
   const commit = () =&gt; {
     if (transactions.length) {
       const currentDoc = doc;
-      const currentSelection = selection;
+      const ops: Operation[] = [];
       const length = applyHooks.length;
 
       let tr: Transaction | undefined;
@@ -16570,6 +16579,7 @@ export const createEditor = &lt;
                 if (!isUnsafeOperation(op) || validate(nextDoc, onError)) {
                   doc = nextDoc;
                   selection = nextSelection;
+                  ops.push(op);
                 }
               } catch (e) {
                 // rollback
@@ -16594,7 +16604,7 @@ export const createEditor = &lt;
       }
 
       if (!is(currentDoc, doc)) {
-        history.change([currentDoc, currentSelection], [doc, selection]);
+        history.change(doc, ops);
         onChange(doc);
       }
     }
@@ -16981,6 +16991,8 @@ export const createEditor = &lt;
       };
     },
   };
+
+  const history = createHistory&lt;T&gt;(doc);
 
   return editor;
 };
@@ -17970,7 +17982,7 @@ const isValidPosition = (doc: DocNode, [path, offset]: Position): boolean =&gt; 
   return false;
 };
 
-const rebasePosition = (position: Position, op: Operation): Position =&gt; {
+export const rebasePosition = (position: Position, op: Operation): Position =&gt; {
   switch (op.type) {
     case TYPE_DELETE: {
       const { start, end } = op;
@@ -18460,10 +18472,6 @@ export const createEditor = &lt;
     throw new Error(initialError);
   }
 
-  const history = createHistory&lt;
-    readonly [doc: T, selection: SelectionSnapshot]
-  &gt;([doc, selection]);
-
   const keydownHandlers: KeyboardHandler[] = [
     hotkey(
       &quot;z&quot;,
@@ -18471,7 +18479,8 @@ export const createEditor = &lt;
         if (!readonly) {
           const nextHistory = history.undo();
           if (nextHistory) {
-            [doc, selection] = nextHistory;
+            doc = nextHistory[0];
+            updateSelection(nextHistory[1]);
             onChange(doc);
           }
         }
@@ -18484,7 +18493,8 @@ export const createEditor = &lt;
         if (!readonly) {
           const nextHistory = history.redo();
           if (nextHistory) {
-            [doc, selection] = nextHistory;
+            doc = nextHistory[0];
+            updateSelection(nextHistory[1]);
             onChange(doc);
           }
         }
@@ -18526,7 +18536,7 @@ export const createEditor = &lt;
   const commit = () =&gt; {
     if (transactions.length) {
       const currentDoc = doc;
-      const currentSelection = selection;
+      const ops: Operation[] = [];
       const length = applyHooks.length;
 
       let tr: Transaction | undefined;
@@ -18553,6 +18563,7 @@ export const createEditor = &lt;
                 if (!isUnsafeOperation(op) || validate(nextDoc, onError)) {
                   doc = nextDoc;
                   selection = nextSelection;
+                  ops.push(op);
                 }
               } catch (e) {
                 // rollback
@@ -18577,7 +18588,7 @@ export const createEditor = &lt;
       }
 
       if (!is(currentDoc, doc)) {
-        history.change([currentDoc, currentSelection], [doc, selection]);
+        history.change(doc, ops);
         onChange(doc);
       }
     }
@@ -18964,6 +18975,8 @@ export const createEditor = &lt;
       };
     },
   };
+
+  const history = createHistory&lt;T&gt;(doc);
 
   return editor;
 };
@@ -19197,10 +19210,6 @@ export const createEditor = &lt;
     throw new Error(initialError);
   }
 
-  const history = createHistory&lt;
-    readonly [doc: T, selection: SelectionSnapshot]
-  &gt;([doc, selection]);
-
   const keydownHandlers: KeyboardHandler[] = [
     hotkey(
       &quot;z&quot;,
@@ -19208,7 +19217,8 @@ export const createEditor = &lt;
         if (!readonly) {
           const nextHistory = history.undo();
           if (nextHistory) {
-            [doc, selection] = nextHistory;
+            doc = nextHistory[0];
+            updateSelection(nextHistory[1]);
             onChange(doc);
           }
         }
@@ -19221,7 +19231,8 @@ export const createEditor = &lt;
         if (!readonly) {
           const nextHistory = history.redo();
           if (nextHistory) {
-            [doc, selection] = nextHistory;
+            doc = nextHistory[0];
+            updateSelection(nextHistory[1]);
             onChange(doc);
           }
         }
@@ -19263,7 +19274,7 @@ export const createEditor = &lt;
   const commit = () =&gt; {
     if (transactions.length) {
       const currentDoc = doc;
-      const currentSelection = selection;
+      const ops: Operation[] = [];
       const length = applyHooks.length;
 
       let tr: Transaction | undefined;
@@ -19290,6 +19301,7 @@ export const createEditor = &lt;
                 if (!isUnsafeOperation(op) || validate(nextDoc, onError)) {
                   doc = nextDoc;
                   selection = nextSelection;
+                  ops.push(op);
                 }
               } catch (e) {
                 // rollback
@@ -19314,7 +19326,7 @@ export const createEditor = &lt;
       }
 
       if (!is(currentDoc, doc)) {
-        history.change([currentDoc, currentSelection], [doc, selection]);
+        history.change(doc, ops);
         onChange(doc);
       }
     }
@@ -19701,6 +19713,8 @@ export const createEditor = &lt;
       };
     },
   };
+
+  const history = createHistory&lt;T&gt;(doc);
 
   return editor;
 };
@@ -20630,7 +20644,7 @@ const isValidPosition = (doc: DocNode, [path, offset]: Position): boolean =&gt; 
   return false;
 };
 
-const rebasePosition = (position: Position, op: Operation): Position =&gt; {
+export const rebasePosition = (position: Position, op: Operation): Position =&gt; {
   switch (op.type) {
     case TYPE_DELETE: {
       const { start, end } = op;
@@ -21120,10 +21134,6 @@ export const createEditor = &lt;
     throw new Error(initialError);
   }
 
-  const history = createHistory&lt;
-    readonly [doc: T, selection: SelectionSnapshot]
-  &gt;([doc, selection]);
-
   const keydownHandlers: KeyboardHandler[] = [
     hotkey(
       &quot;z&quot;,
@@ -21131,7 +21141,8 @@ export const createEditor = &lt;
         if (!readonly) {
           const nextHistory = history.undo();
           if (nextHistory) {
-            [doc, selection] = nextHistory;
+            doc = nextHistory[0];
+            updateSelection(nextHistory[1]);
             onChange(doc);
           }
         }
@@ -21144,7 +21155,8 @@ export const createEditor = &lt;
         if (!readonly) {
           const nextHistory = history.redo();
           if (nextHistory) {
-            [doc, selection] = nextHistory;
+            doc = nextHistory[0];
+            updateSelection(nextHistory[1]);
             onChange(doc);
           }
         }
@@ -21186,7 +21198,7 @@ export const createEditor = &lt;
   const commit = () =&gt; {
     if (transactions.length) {
       const currentDoc = doc;
-      const currentSelection = selection;
+      const ops: Operation[] = [];
       const length = applyHooks.length;
 
       let tr: Transaction | undefined;
@@ -21213,6 +21225,7 @@ export const createEditor = &lt;
                 if (!isUnsafeOperation(op) || validate(nextDoc, onError)) {
                   doc = nextDoc;
                   selection = nextSelection;
+                  ops.push(op);
                 }
               } catch (e) {
                 // rollback
@@ -21237,7 +21250,7 @@ export const createEditor = &lt;
       }
 
       if (!is(currentDoc, doc)) {
-        history.change([currentDoc, currentSelection], [doc, selection]);
+        history.change(doc, ops);
         onChange(doc);
       }
     }
@@ -21624,6 +21637,8 @@ export const createEditor = &lt;
       };
     },
   };
+
+  const history = createHistory&lt;T&gt;(doc);
 
   return editor;
 };
@@ -21857,10 +21872,6 @@ export const createEditor = &lt;
     throw new Error(initialError);
   }
 
-  const history = createHistory&lt;
-    readonly [doc: T, selection: SelectionSnapshot]
-  &gt;([doc, selection]);
-
   const keydownHandlers: KeyboardHandler[] = [
     hotkey(
       &quot;z&quot;,
@@ -21868,7 +21879,8 @@ export const createEditor = &lt;
         if (!readonly) {
           const nextHistory = history.undo();
           if (nextHistory) {
-            [doc, selection] = nextHistory;
+            doc = nextHistory[0];
+            updateSelection(nextHistory[1]);
             onChange(doc);
           }
         }
@@ -21881,7 +21893,8 @@ export const createEditor = &lt;
         if (!readonly) {
           const nextHistory = history.redo();
           if (nextHistory) {
-            [doc, selection] = nextHistory;
+            doc = nextHistory[0];
+            updateSelection(nextHistory[1]);
             onChange(doc);
           }
         }
@@ -21923,7 +21936,7 @@ export const createEditor = &lt;
   const commit = () =&gt; {
     if (transactions.length) {
       const currentDoc = doc;
-      const currentSelection = selection;
+      const ops: Operation[] = [];
       const length = applyHooks.length;
 
       let tr: Transaction | undefined;
@@ -21950,6 +21963,7 @@ export const createEditor = &lt;
                 if (!isUnsafeOperation(op) || validate(nextDoc, onError)) {
                   doc = nextDoc;
                   selection = nextSelection;
+                  ops.push(op);
                 }
               } catch (e) {
                 // rollback
@@ -21974,7 +21988,7 @@ export const createEditor = &lt;
       }
 
       if (!is(currentDoc, doc)) {
-        history.change([currentDoc, currentSelection], [doc, selection]);
+        history.change(doc, ops);
         onChange(doc);
       }
     }
@@ -22361,6 +22375,8 @@ export const createEditor = &lt;
       };
     },
   };
+
+  const history = createHistory&lt;T&gt;(doc);
 
   return editor;
 };
@@ -23299,7 +23315,7 @@ const isValidPosition = (doc: DocNode, [path, offset]: Position): boolean =&gt; 
   return false;
 };
 
-const rebasePosition = (position: Position, op: Operation): Position =&gt; {
+export const rebasePosition = (position: Position, op: Operation): Position =&gt; {
   switch (op.type) {
     case TYPE_DELETE: {
       const { start, end } = op;
@@ -23789,10 +23805,6 @@ export const createEditor = &lt;
     throw new Error(initialError);
   }
 
-  const history = createHistory&lt;
-    readonly [doc: T, selection: SelectionSnapshot]
-  &gt;([doc, selection]);
-
   const keydownHandlers: KeyboardHandler[] = [
     hotkey(
       &quot;z&quot;,
@@ -23800,7 +23812,8 @@ export const createEditor = &lt;
         if (!readonly) {
           const nextHistory = history.undo();
           if (nextHistory) {
-            [doc, selection] = nextHistory;
+            doc = nextHistory[0];
+            updateSelection(nextHistory[1]);
             onChange(doc);
           }
         }
@@ -23813,7 +23826,8 @@ export const createEditor = &lt;
         if (!readonly) {
           const nextHistory = history.redo();
           if (nextHistory) {
-            [doc, selection] = nextHistory;
+            doc = nextHistory[0];
+            updateSelection(nextHistory[1]);
             onChange(doc);
           }
         }
@@ -23855,7 +23869,7 @@ export const createEditor = &lt;
   const commit = () =&gt; {
     if (transactions.length) {
       const currentDoc = doc;
-      const currentSelection = selection;
+      const ops: Operation[] = [];
       const length = applyHooks.length;
 
       let tr: Transaction | undefined;
@@ -23882,6 +23896,7 @@ export const createEditor = &lt;
                 if (!isUnsafeOperation(op) || validate(nextDoc, onError)) {
                   doc = nextDoc;
                   selection = nextSelection;
+                  ops.push(op);
                 }
               } catch (e) {
                 // rollback
@@ -23906,7 +23921,7 @@ export const createEditor = &lt;
       }
 
       if (!is(currentDoc, doc)) {
-        history.change([currentDoc, currentSelection], [doc, selection]);
+        history.change(doc, ops);
         onChange(doc);
       }
     }
@@ -24293,6 +24308,8 @@ export const createEditor = &lt;
       };
     },
   };
+
+  const history = createHistory&lt;T&gt;(doc);
 
   return editor;
 };
@@ -24526,10 +24543,6 @@ export const createEditor = &lt;
     throw new Error(initialError);
   }
 
-  const history = createHistory&lt;
-    readonly [doc: T, selection: SelectionSnapshot]
-  &gt;([doc, selection]);
-
   const keydownHandlers: KeyboardHandler[] = [
     hotkey(
       &quot;z&quot;,
@@ -24537,7 +24550,8 @@ export const createEditor = &lt;
         if (!readonly) {
           const nextHistory = history.undo();
           if (nextHistory) {
-            [doc, selection] = nextHistory;
+            doc = nextHistory[0];
+            updateSelection(nextHistory[1]);
             onChange(doc);
           }
         }
@@ -24550,7 +24564,8 @@ export const createEditor = &lt;
         if (!readonly) {
           const nextHistory = history.redo();
           if (nextHistory) {
-            [doc, selection] = nextHistory;
+            doc = nextHistory[0];
+            updateSelection(nextHistory[1]);
             onChange(doc);
           }
         }
@@ -24592,7 +24607,7 @@ export const createEditor = &lt;
   const commit = () =&gt; {
     if (transactions.length) {
       const currentDoc = doc;
-      const currentSelection = selection;
+      const ops: Operation[] = [];
       const length = applyHooks.length;
 
       let tr: Transaction | undefined;
@@ -24619,6 +24634,7 @@ export const createEditor = &lt;
                 if (!isUnsafeOperation(op) || validate(nextDoc, onError)) {
                   doc = nextDoc;
                   selection = nextSelection;
+                  ops.push(op);
                 }
               } catch (e) {
                 // rollback
@@ -24643,7 +24659,7 @@ export const createEditor = &lt;
       }
 
       if (!is(currentDoc, doc)) {
-        history.change([currentDoc, currentSelection], [doc, selection]);
+        history.change(doc, ops);
         onChange(doc);
       }
     }
@@ -25030,6 +25046,8 @@ export const createEditor = &lt;
       };
     },
   };
+
+  const history = createHistory&lt;T&gt;(doc);
 
   return editor;
 };
@@ -25981,7 +25999,7 @@ const isValidPosition = (doc: DocNode, [path, offset]: Position): boolean =&gt; 
   return false;
 };
 
-const rebasePosition = (position: Position, op: Operation): Position =&gt; {
+export const rebasePosition = (position: Position, op: Operation): Position =&gt; {
   switch (op.type) {
     case TYPE_DELETE: {
       const { start, end } = op;
@@ -26471,10 +26489,6 @@ export const createEditor = &lt;
     throw new Error(initialError);
   }
 
-  const history = createHistory&lt;
-    readonly [doc: T, selection: SelectionSnapshot]
-  &gt;([doc, selection]);
-
   const keydownHandlers: KeyboardHandler[] = [
     hotkey(
       &quot;z&quot;,
@@ -26482,7 +26496,8 @@ export const createEditor = &lt;
         if (!readonly) {
           const nextHistory = history.undo();
           if (nextHistory) {
-            [doc, selection] = nextHistory;
+            doc = nextHistory[0];
+            updateSelection(nextHistory[1]);
             onChange(doc);
           }
         }
@@ -26495,7 +26510,8 @@ export const createEditor = &lt;
         if (!readonly) {
           const nextHistory = history.redo();
           if (nextHistory) {
-            [doc, selection] = nextHistory;
+            doc = nextHistory[0];
+            updateSelection(nextHistory[1]);
             onChange(doc);
           }
         }
@@ -26537,7 +26553,7 @@ export const createEditor = &lt;
   const commit = () =&gt; {
     if (transactions.length) {
       const currentDoc = doc;
-      const currentSelection = selection;
+      const ops: Operation[] = [];
       const length = applyHooks.length;
 
       let tr: Transaction | undefined;
@@ -26564,6 +26580,7 @@ export const createEditor = &lt;
                 if (!isUnsafeOperation(op) || validate(nextDoc, onError)) {
                   doc = nextDoc;
                   selection = nextSelection;
+                  ops.push(op);
                 }
               } catch (e) {
                 // rollback
@@ -26588,7 +26605,7 @@ export const createEditor = &lt;
       }
 
       if (!is(currentDoc, doc)) {
-        history.change([currentDoc, currentSelection], [doc, selection]);
+        history.change(doc, ops);
         onChange(doc);
       }
     }
@@ -26975,6 +26992,8 @@ export const createEditor = &lt;
       };
     },
   };
+
+  const history = createHistory&lt;T&gt;(doc);
 
   return editor;
 };
@@ -27208,10 +27227,6 @@ export const createEditor = &lt;
     throw new Error(initialError);
   }
 
-  const history = createHistory&lt;
-    readonly [doc: T, selection: SelectionSnapshot]
-  &gt;([doc, selection]);
-
   const keydownHandlers: KeyboardHandler[] = [
     hotkey(
       &quot;z&quot;,
@@ -27219,7 +27234,8 @@ export const createEditor = &lt;
         if (!readonly) {
           const nextHistory = history.undo();
           if (nextHistory) {
-            [doc, selection] = nextHistory;
+            doc = nextHistory[0];
+            updateSelection(nextHistory[1]);
             onChange(doc);
           }
         }
@@ -27232,7 +27248,8 @@ export const createEditor = &lt;
         if (!readonly) {
           const nextHistory = history.redo();
           if (nextHistory) {
-            [doc, selection] = nextHistory;
+            doc = nextHistory[0];
+            updateSelection(nextHistory[1]);
             onChange(doc);
           }
         }
@@ -27274,7 +27291,7 @@ export const createEditor = &lt;
   const commit = () =&gt; {
     if (transactions.length) {
       const currentDoc = doc;
-      const currentSelection = selection;
+      const ops: Operation[] = [];
       const length = applyHooks.length;
 
       let tr: Transaction | undefined;
@@ -27301,6 +27318,7 @@ export const createEditor = &lt;
                 if (!isUnsafeOperation(op) || validate(nextDoc, onError)) {
                   doc = nextDoc;
                   selection = nextSelection;
+                  ops.push(op);
                 }
               } catch (e) {
                 // rollback
@@ -27325,7 +27343,7 @@ export const createEditor = &lt;
       }
 
       if (!is(currentDoc, doc)) {
-        history.change([currentDoc, currentSelection], [doc, selection]);
+        history.change(doc, ops);
         onChange(doc);
       }
     }
@@ -27712,6 +27730,8 @@ export const createEditor = &lt;
       };
     },
   };
+
+  const history = createHistory&lt;T&gt;(doc);
 
   return editor;
 };
@@ -28633,7 +28653,7 @@ const isValidPosition = (doc: DocNode, [path, offset]: Position): boolean =&gt; 
   return false;
 };
 
-const rebasePosition = (position: Position, op: Operation): Position =&gt; {
+export const rebasePosition = (position: Position, op: Operation): Position =&gt; {
   switch (op.type) {
     case TYPE_DELETE: {
       const { start, end } = op;
@@ -29123,10 +29143,6 @@ export const createEditor = &lt;
     throw new Error(initialError);
   }
 
-  const history = createHistory&lt;
-    readonly [doc: T, selection: SelectionSnapshot]
-  &gt;([doc, selection]);
-
   const keydownHandlers: KeyboardHandler[] = [
     hotkey(
       &quot;z&quot;,
@@ -29134,7 +29150,8 @@ export const createEditor = &lt;
         if (!readonly) {
           const nextHistory = history.undo();
           if (nextHistory) {
-            [doc, selection] = nextHistory;
+            doc = nextHistory[0];
+            updateSelection(nextHistory[1]);
             onChange(doc);
           }
         }
@@ -29147,7 +29164,8 @@ export const createEditor = &lt;
         if (!readonly) {
           const nextHistory = history.redo();
           if (nextHistory) {
-            [doc, selection] = nextHistory;
+            doc = nextHistory[0];
+            updateSelection(nextHistory[1]);
             onChange(doc);
           }
         }
@@ -29189,7 +29207,7 @@ export const createEditor = &lt;
   const commit = () =&gt; {
     if (transactions.length) {
       const currentDoc = doc;
-      const currentSelection = selection;
+      const ops: Operation[] = [];
       const length = applyHooks.length;
 
       let tr: Transaction | undefined;
@@ -29216,6 +29234,7 @@ export const createEditor = &lt;
                 if (!isUnsafeOperation(op) || validate(nextDoc, onError)) {
                   doc = nextDoc;
                   selection = nextSelection;
+                  ops.push(op);
                 }
               } catch (e) {
                 // rollback
@@ -29240,7 +29259,7 @@ export const createEditor = &lt;
       }
 
       if (!is(currentDoc, doc)) {
-        history.change([currentDoc, currentSelection], [doc, selection]);
+        history.change(doc, ops);
         onChange(doc);
       }
     }
@@ -29627,6 +29646,8 @@ export const createEditor = &lt;
       };
     },
   };
+
+  const history = createHistory&lt;T&gt;(doc);
 
   return editor;
 };
@@ -29860,10 +29881,6 @@ export const createEditor = &lt;
     throw new Error(initialError);
   }
 
-  const history = createHistory&lt;
-    readonly [doc: T, selection: SelectionSnapshot]
-  &gt;([doc, selection]);
-
   const keydownHandlers: KeyboardHandler[] = [
     hotkey(
       &quot;z&quot;,
@@ -29871,7 +29888,8 @@ export const createEditor = &lt;
         if (!readonly) {
           const nextHistory = history.undo();
           if (nextHistory) {
-            [doc, selection] = nextHistory;
+            doc = nextHistory[0];
+            updateSelection(nextHistory[1]);
             onChange(doc);
           }
         }
@@ -29884,7 +29902,8 @@ export const createEditor = &lt;
         if (!readonly) {
           const nextHistory = history.redo();
           if (nextHistory) {
-            [doc, selection] = nextHistory;
+            doc = nextHistory[0];
+            updateSelection(nextHistory[1]);
             onChange(doc);
           }
         }
@@ -29926,7 +29945,7 @@ export const createEditor = &lt;
   const commit = () =&gt; {
     if (transactions.length) {
       const currentDoc = doc;
-      const currentSelection = selection;
+      const ops: Operation[] = [];
       const length = applyHooks.length;
 
       let tr: Transaction | undefined;
@@ -29953,6 +29972,7 @@ export const createEditor = &lt;
                 if (!isUnsafeOperation(op) || validate(nextDoc, onError)) {
                   doc = nextDoc;
                   selection = nextSelection;
+                  ops.push(op);
                 }
               } catch (e) {
                 // rollback
@@ -29977,7 +29997,7 @@ export const createEditor = &lt;
       }
 
       if (!is(currentDoc, doc)) {
-        history.change([currentDoc, currentSelection], [doc, selection]);
+        history.change(doc, ops);
         onChange(doc);
       }
     }
@@ -30364,6 +30384,8 @@ export const createEditor = &lt;
       };
     },
   };
+
+  const history = createHistory&lt;T&gt;(doc);
 
   return editor;
 };
@@ -31337,7 +31359,7 @@ const isValidPosition = (doc: DocNode, [path, offset]: Position): boolean =&gt; 
   return false;
 };
 
-const rebasePosition = (position: Position, op: Operation): Position =&gt; {
+export const rebasePosition = (position: Position, op: Operation): Position =&gt; {
   switch (op.type) {
     case TYPE_DELETE: {
       const { start, end } = op;
@@ -31827,10 +31849,6 @@ export const createEditor = &lt;
     throw new Error(initialError);
   }
 
-  const history = createHistory&lt;
-    readonly [doc: T, selection: SelectionSnapshot]
-  &gt;([doc, selection]);
-
   const keydownHandlers: KeyboardHandler[] = [
     hotkey(
       &quot;z&quot;,
@@ -31838,7 +31856,8 @@ export const createEditor = &lt;
         if (!readonly) {
           const nextHistory = history.undo();
           if (nextHistory) {
-            [doc, selection] = nextHistory;
+            doc = nextHistory[0];
+            updateSelection(nextHistory[1]);
             onChange(doc);
           }
         }
@@ -31851,7 +31870,8 @@ export const createEditor = &lt;
         if (!readonly) {
           const nextHistory = history.redo();
           if (nextHistory) {
-            [doc, selection] = nextHistory;
+            doc = nextHistory[0];
+            updateSelection(nextHistory[1]);
             onChange(doc);
           }
         }
@@ -31893,7 +31913,7 @@ export const createEditor = &lt;
   const commit = () =&gt; {
     if (transactions.length) {
       const currentDoc = doc;
-      const currentSelection = selection;
+      const ops: Operation[] = [];
       const length = applyHooks.length;
 
       let tr: Transaction | undefined;
@@ -31920,6 +31940,7 @@ export const createEditor = &lt;
                 if (!isUnsafeOperation(op) || validate(nextDoc, onError)) {
                   doc = nextDoc;
                   selection = nextSelection;
+                  ops.push(op);
                 }
               } catch (e) {
                 // rollback
@@ -31944,7 +31965,7 @@ export const createEditor = &lt;
       }
 
       if (!is(currentDoc, doc)) {
-        history.change([currentDoc, currentSelection], [doc, selection]);
+        history.change(doc, ops);
         onChange(doc);
       }
     }
@@ -32331,6 +32352,8 @@ export const createEditor = &lt;
       };
     },
   };
+
+  const history = createHistory&lt;T&gt;(doc);
 
   return editor;
 };
@@ -32564,10 +32587,6 @@ export const createEditor = &lt;
     throw new Error(initialError);
   }
 
-  const history = createHistory&lt;
-    readonly [doc: T, selection: SelectionSnapshot]
-  &gt;([doc, selection]);
-
   const keydownHandlers: KeyboardHandler[] = [
     hotkey(
       &quot;z&quot;,
@@ -32575,7 +32594,8 @@ export const createEditor = &lt;
         if (!readonly) {
           const nextHistory = history.undo();
           if (nextHistory) {
-            [doc, selection] = nextHistory;
+            doc = nextHistory[0];
+            updateSelection(nextHistory[1]);
             onChange(doc);
           }
         }
@@ -32588,7 +32608,8 @@ export const createEditor = &lt;
         if (!readonly) {
           const nextHistory = history.redo();
           if (nextHistory) {
-            [doc, selection] = nextHistory;
+            doc = nextHistory[0];
+            updateSelection(nextHistory[1]);
             onChange(doc);
           }
         }
@@ -32630,7 +32651,7 @@ export const createEditor = &lt;
   const commit = () =&gt; {
     if (transactions.length) {
       const currentDoc = doc;
-      const currentSelection = selection;
+      const ops: Operation[] = [];
       const length = applyHooks.length;
 
       let tr: Transaction | undefined;
@@ -32657,6 +32678,7 @@ export const createEditor = &lt;
                 if (!isUnsafeOperation(op) || validate(nextDoc, onError)) {
                   doc = nextDoc;
                   selection = nextSelection;
+                  ops.push(op);
                 }
               } catch (e) {
                 // rollback
@@ -32681,7 +32703,7 @@ export const createEditor = &lt;
       }
 
       if (!is(currentDoc, doc)) {
-        history.change([currentDoc, currentSelection], [doc, selection]);
+        history.change(doc, ops);
         onChange(doc);
       }
     }
@@ -33068,6 +33090,8 @@ export const createEditor = &lt;
       };
     },
   };
+
+  const history = createHistory&lt;T&gt;(doc);
 
   return editor;
 };
@@ -34463,7 +34487,7 @@ const isValidPosition = (doc: DocNode, [path, offset]: Position): boolean =&gt; 
   return false;
 };
 
-const rebasePosition = (position: Position, op: Operation): Position =&gt; {
+export const rebasePosition = (position: Position, op: Operation): Position =&gt; {
   switch (op.type) {
     case TYPE_DELETE: {
       const { start, end } = op;
@@ -34953,10 +34977,6 @@ export const createEditor = &lt;
     throw new Error(initialError);
   }
 
-  const history = createHistory&lt;
-    readonly [doc: T, selection: SelectionSnapshot]
-  &gt;([doc, selection]);
-
   const keydownHandlers: KeyboardHandler[] = [
     hotkey(
       &quot;z&quot;,
@@ -34964,7 +34984,8 @@ export const createEditor = &lt;
         if (!readonly) {
           const nextHistory = history.undo();
           if (nextHistory) {
-            [doc, selection] = nextHistory;
+            doc = nextHistory[0];
+            updateSelection(nextHistory[1]);
             onChange(doc);
           }
         }
@@ -34977,7 +34998,8 @@ export const createEditor = &lt;
         if (!readonly) {
           const nextHistory = history.redo();
           if (nextHistory) {
-            [doc, selection] = nextHistory;
+            doc = nextHistory[0];
+            updateSelection(nextHistory[1]);
             onChange(doc);
           }
         }
@@ -35019,7 +35041,7 @@ export const createEditor = &lt;
   const commit = () =&gt; {
     if (transactions.length) {
       const currentDoc = doc;
-      const currentSelection = selection;
+      const ops: Operation[] = [];
       const length = applyHooks.length;
 
       let tr: Transaction | undefined;
@@ -35046,6 +35068,7 @@ export const createEditor = &lt;
                 if (!isUnsafeOperation(op) || validate(nextDoc, onError)) {
                   doc = nextDoc;
                   selection = nextSelection;
+                  ops.push(op);
                 }
               } catch (e) {
                 // rollback
@@ -35070,7 +35093,7 @@ export const createEditor = &lt;
       }
 
       if (!is(currentDoc, doc)) {
-        history.change([currentDoc, currentSelection], [doc, selection]);
+        history.change(doc, ops);
         onChange(doc);
       }
     }
@@ -35457,6 +35480,8 @@ export const createEditor = &lt;
       };
     },
   };
+
+  const history = createHistory&lt;T&gt;(doc);
 
   return editor;
 };
@@ -35690,10 +35715,6 @@ export const createEditor = &lt;
     throw new Error(initialError);
   }
 
-  const history = createHistory&lt;
-    readonly [doc: T, selection: SelectionSnapshot]
-  &gt;([doc, selection]);
-
   const keydownHandlers: KeyboardHandler[] = [
     hotkey(
       &quot;z&quot;,
@@ -35701,7 +35722,8 @@ export const createEditor = &lt;
         if (!readonly) {
           const nextHistory = history.undo();
           if (nextHistory) {
-            [doc, selection] = nextHistory;
+            doc = nextHistory[0];
+            updateSelection(nextHistory[1]);
             onChange(doc);
           }
         }
@@ -35714,7 +35736,8 @@ export const createEditor = &lt;
         if (!readonly) {
           const nextHistory = history.redo();
           if (nextHistory) {
-            [doc, selection] = nextHistory;
+            doc = nextHistory[0];
+            updateSelection(nextHistory[1]);
             onChange(doc);
           }
         }
@@ -35756,7 +35779,7 @@ export const createEditor = &lt;
   const commit = () =&gt; {
     if (transactions.length) {
       const currentDoc = doc;
-      const currentSelection = selection;
+      const ops: Operation[] = [];
       const length = applyHooks.length;
 
       let tr: Transaction | undefined;
@@ -35783,6 +35806,7 @@ export const createEditor = &lt;
                 if (!isUnsafeOperation(op) || validate(nextDoc, onError)) {
                   doc = nextDoc;
                   selection = nextSelection;
+                  ops.push(op);
                 }
               } catch (e) {
                 // rollback
@@ -35807,7 +35831,7 @@ export const createEditor = &lt;
       }
 
       if (!is(currentDoc, doc)) {
-        history.change([currentDoc, currentSelection], [doc, selection]);
+        history.change(doc, ops);
         onChange(doc);
       }
     }
@@ -36194,6 +36218,8 @@ export const createEditor = &lt;
       };
     },
   };
+
+  const history = createHistory&lt;T&gt;(doc);
 
   return editor;
 };
@@ -37552,7 +37578,7 @@ const isValidPosition = (doc: DocNode, [path, offset]: Position): boolean =&gt; 
   return false;
 };
 
-const rebasePosition = (position: Position, op: Operation): Position =&gt; {
+export const rebasePosition = (position: Position, op: Operation): Position =&gt; {
   switch (op.type) {
     case TYPE_DELETE: {
       const { start, end } = op;
@@ -38042,10 +38068,6 @@ export const createEditor = &lt;
     throw new Error(initialError);
   }
 
-  const history = createHistory&lt;
-    readonly [doc: T, selection: SelectionSnapshot]
-  &gt;([doc, selection]);
-
   const keydownHandlers: KeyboardHandler[] = [
     hotkey(
       &quot;z&quot;,
@@ -38053,7 +38075,8 @@ export const createEditor = &lt;
         if (!readonly) {
           const nextHistory = history.undo();
           if (nextHistory) {
-            [doc, selection] = nextHistory;
+            doc = nextHistory[0];
+            updateSelection(nextHistory[1]);
             onChange(doc);
           }
         }
@@ -38066,7 +38089,8 @@ export const createEditor = &lt;
         if (!readonly) {
           const nextHistory = history.redo();
           if (nextHistory) {
-            [doc, selection] = nextHistory;
+            doc = nextHistory[0];
+            updateSelection(nextHistory[1]);
             onChange(doc);
           }
         }
@@ -38108,7 +38132,7 @@ export const createEditor = &lt;
   const commit = () =&gt; {
     if (transactions.length) {
       const currentDoc = doc;
-      const currentSelection = selection;
+      const ops: Operation[] = [];
       const length = applyHooks.length;
 
       let tr: Transaction | undefined;
@@ -38135,6 +38159,7 @@ export const createEditor = &lt;
                 if (!isUnsafeOperation(op) || validate(nextDoc, onError)) {
                   doc = nextDoc;
                   selection = nextSelection;
+                  ops.push(op);
                 }
               } catch (e) {
                 // rollback
@@ -38159,7 +38184,7 @@ export const createEditor = &lt;
       }
 
       if (!is(currentDoc, doc)) {
-        history.change([currentDoc, currentSelection], [doc, selection]);
+        history.change(doc, ops);
         onChange(doc);
       }
     }
@@ -38546,6 +38571,8 @@ export const createEditor = &lt;
       };
     },
   };
+
+  const history = createHistory&lt;T&gt;(doc);
 
   return editor;
 };
@@ -38779,10 +38806,6 @@ export const createEditor = &lt;
     throw new Error(initialError);
   }
 
-  const history = createHistory&lt;
-    readonly [doc: T, selection: SelectionSnapshot]
-  &gt;([doc, selection]);
-
   const keydownHandlers: KeyboardHandler[] = [
     hotkey(
       &quot;z&quot;,
@@ -38790,7 +38813,8 @@ export const createEditor = &lt;
         if (!readonly) {
           const nextHistory = history.undo();
           if (nextHistory) {
-            [doc, selection] = nextHistory;
+            doc = nextHistory[0];
+            updateSelection(nextHistory[1]);
             onChange(doc);
           }
         }
@@ -38803,7 +38827,8 @@ export const createEditor = &lt;
         if (!readonly) {
           const nextHistory = history.redo();
           if (nextHistory) {
-            [doc, selection] = nextHistory;
+            doc = nextHistory[0];
+            updateSelection(nextHistory[1]);
             onChange(doc);
           }
         }
@@ -38845,7 +38870,7 @@ export const createEditor = &lt;
   const commit = () =&gt; {
     if (transactions.length) {
       const currentDoc = doc;
-      const currentSelection = selection;
+      const ops: Operation[] = [];
       const length = applyHooks.length;
 
       let tr: Transaction | undefined;
@@ -38872,6 +38897,7 @@ export const createEditor = &lt;
                 if (!isUnsafeOperation(op) || validate(nextDoc, onError)) {
                   doc = nextDoc;
                   selection = nextSelection;
+                  ops.push(op);
                 }
               } catch (e) {
                 // rollback
@@ -38896,7 +38922,7 @@ export const createEditor = &lt;
       }
 
       if (!is(currentDoc, doc)) {
-        history.change([currentDoc, currentSelection], [doc, selection]);
+        history.change(doc, ops);
         onChange(doc);
       }
     }
@@ -39283,6 +39309,8 @@ export const createEditor = &lt;
       };
     },
   };
+
+  const history = createHistory&lt;T&gt;(doc);
 
   return editor;
 };
@@ -40272,7 +40300,7 @@ const isValidPosition = (doc: DocNode, [path, offset]: Position): boolean =&gt; 
   return false;
 };
 
-const rebasePosition = (position: Position, op: Operation): Position =&gt; {
+export const rebasePosition = (position: Position, op: Operation): Position =&gt; {
   switch (op.type) {
     case TYPE_DELETE: {
       const { start, end } = op;
@@ -40762,10 +40790,6 @@ export const createEditor = &lt;
     throw new Error(initialError);
   }
 
-  const history = createHistory&lt;
-    readonly [doc: T, selection: SelectionSnapshot]
-  &gt;([doc, selection]);
-
   const keydownHandlers: KeyboardHandler[] = [
     hotkey(
       &quot;z&quot;,
@@ -40773,7 +40797,8 @@ export const createEditor = &lt;
         if (!readonly) {
           const nextHistory = history.undo();
           if (nextHistory) {
-            [doc, selection] = nextHistory;
+            doc = nextHistory[0];
+            updateSelection(nextHistory[1]);
             onChange(doc);
           }
         }
@@ -40786,7 +40811,8 @@ export const createEditor = &lt;
         if (!readonly) {
           const nextHistory = history.redo();
           if (nextHistory) {
-            [doc, selection] = nextHistory;
+            doc = nextHistory[0];
+            updateSelection(nextHistory[1]);
             onChange(doc);
           }
         }
@@ -40828,7 +40854,7 @@ export const createEditor = &lt;
   const commit = () =&gt; {
     if (transactions.length) {
       const currentDoc = doc;
-      const currentSelection = selection;
+      const ops: Operation[] = [];
       const length = applyHooks.length;
 
       let tr: Transaction | undefined;
@@ -40855,6 +40881,7 @@ export const createEditor = &lt;
                 if (!isUnsafeOperation(op) || validate(nextDoc, onError)) {
                   doc = nextDoc;
                   selection = nextSelection;
+                  ops.push(op);
                 }
               } catch (e) {
                 // rollback
@@ -40879,7 +40906,7 @@ export const createEditor = &lt;
       }
 
       if (!is(currentDoc, doc)) {
-        history.change([currentDoc, currentSelection], [doc, selection]);
+        history.change(doc, ops);
         onChange(doc);
       }
     }
@@ -41266,6 +41293,8 @@ export const createEditor = &lt;
       };
     },
   };
+
+  const history = createHistory&lt;T&gt;(doc);
 
   return editor;
 };
@@ -41499,10 +41528,6 @@ export const createEditor = &lt;
     throw new Error(initialError);
   }
 
-  const history = createHistory&lt;
-    readonly [doc: T, selection: SelectionSnapshot]
-  &gt;([doc, selection]);
-
   const keydownHandlers: KeyboardHandler[] = [
     hotkey(
       &quot;z&quot;,
@@ -41510,7 +41535,8 @@ export const createEditor = &lt;
         if (!readonly) {
           const nextHistory = history.undo();
           if (nextHistory) {
-            [doc, selection] = nextHistory;
+            doc = nextHistory[0];
+            updateSelection(nextHistory[1]);
             onChange(doc);
           }
         }
@@ -41523,7 +41549,8 @@ export const createEditor = &lt;
         if (!readonly) {
           const nextHistory = history.redo();
           if (nextHistory) {
-            [doc, selection] = nextHistory;
+            doc = nextHistory[0];
+            updateSelection(nextHistory[1]);
             onChange(doc);
           }
         }
@@ -41565,7 +41592,7 @@ export const createEditor = &lt;
   const commit = () =&gt; {
     if (transactions.length) {
       const currentDoc = doc;
-      const currentSelection = selection;
+      const ops: Operation[] = [];
       const length = applyHooks.length;
 
       let tr: Transaction | undefined;
@@ -41592,6 +41619,7 @@ export const createEditor = &lt;
                 if (!isUnsafeOperation(op) || validate(nextDoc, onError)) {
                   doc = nextDoc;
                   selection = nextSelection;
+                  ops.push(op);
                 }
               } catch (e) {
                 // rollback
@@ -41616,7 +41644,7 @@ export const createEditor = &lt;
       }
 
       if (!is(currentDoc, doc)) {
-        history.change([currentDoc, currentSelection], [doc, selection]);
+        history.change(doc, ops);
         onChange(doc);
       }
     }
@@ -42003,6 +42031,8 @@ export const createEditor = &lt;
       };
     },
   };
+
+  const history = createHistory&lt;T&gt;(doc);
 
   return editor;
 };
@@ -42926,7 +42956,7 @@ const isValidPosition = (doc: DocNode, [path, offset]: Position): boolean =&gt; 
   return false;
 };
 
-const rebasePosition = (position: Position, op: Operation): Position =&gt; {
+export const rebasePosition = (position: Position, op: Operation): Position =&gt; {
   switch (op.type) {
     case TYPE_DELETE: {
       const { start, end } = op;
@@ -43416,10 +43446,6 @@ export const createEditor = &lt;
     throw new Error(initialError);
   }
 
-  const history = createHistory&lt;
-    readonly [doc: T, selection: SelectionSnapshot]
-  &gt;([doc, selection]);
-
   const keydownHandlers: KeyboardHandler[] = [
     hotkey(
       &quot;z&quot;,
@@ -43427,7 +43453,8 @@ export const createEditor = &lt;
         if (!readonly) {
           const nextHistory = history.undo();
           if (nextHistory) {
-            [doc, selection] = nextHistory;
+            doc = nextHistory[0];
+            updateSelection(nextHistory[1]);
             onChange(doc);
           }
         }
@@ -43440,7 +43467,8 @@ export const createEditor = &lt;
         if (!readonly) {
           const nextHistory = history.redo();
           if (nextHistory) {
-            [doc, selection] = nextHistory;
+            doc = nextHistory[0];
+            updateSelection(nextHistory[1]);
             onChange(doc);
           }
         }
@@ -43482,7 +43510,7 @@ export const createEditor = &lt;
   const commit = () =&gt; {
     if (transactions.length) {
       const currentDoc = doc;
-      const currentSelection = selection;
+      const ops: Operation[] = [];
       const length = applyHooks.length;
 
       let tr: Transaction | undefined;
@@ -43509,6 +43537,7 @@ export const createEditor = &lt;
                 if (!isUnsafeOperation(op) || validate(nextDoc, onError)) {
                   doc = nextDoc;
                   selection = nextSelection;
+                  ops.push(op);
                 }
               } catch (e) {
                 // rollback
@@ -43533,7 +43562,7 @@ export const createEditor = &lt;
       }
 
       if (!is(currentDoc, doc)) {
-        history.change([currentDoc, currentSelection], [doc, selection]);
+        history.change(doc, ops);
         onChange(doc);
       }
     }
@@ -43920,6 +43949,8 @@ export const createEditor = &lt;
       };
     },
   };
+
+  const history = createHistory&lt;T&gt;(doc);
 
   return editor;
 };
@@ -44153,10 +44184,6 @@ export const createEditor = &lt;
     throw new Error(initialError);
   }
 
-  const history = createHistory&lt;
-    readonly [doc: T, selection: SelectionSnapshot]
-  &gt;([doc, selection]);
-
   const keydownHandlers: KeyboardHandler[] = [
     hotkey(
       &quot;z&quot;,
@@ -44164,7 +44191,8 @@ export const createEditor = &lt;
         if (!readonly) {
           const nextHistory = history.undo();
           if (nextHistory) {
-            [doc, selection] = nextHistory;
+            doc = nextHistory[0];
+            updateSelection(nextHistory[1]);
             onChange(doc);
           }
         }
@@ -44177,7 +44205,8 @@ export const createEditor = &lt;
         if (!readonly) {
           const nextHistory = history.redo();
           if (nextHistory) {
-            [doc, selection] = nextHistory;
+            doc = nextHistory[0];
+            updateSelection(nextHistory[1]);
             onChange(doc);
           }
         }
@@ -44219,7 +44248,7 @@ export const createEditor = &lt;
   const commit = () =&gt; {
     if (transactions.length) {
       const currentDoc = doc;
-      const currentSelection = selection;
+      const ops: Operation[] = [];
       const length = applyHooks.length;
 
       let tr: Transaction | undefined;
@@ -44246,6 +44275,7 @@ export const createEditor = &lt;
                 if (!isUnsafeOperation(op) || validate(nextDoc, onError)) {
                   doc = nextDoc;
                   selection = nextSelection;
+                  ops.push(op);
                 }
               } catch (e) {
                 // rollback
@@ -44270,7 +44300,7 @@ export const createEditor = &lt;
       }
 
       if (!is(currentDoc, doc)) {
-        history.change([currentDoc, currentSelection], [doc, selection]);
+        history.change(doc, ops);
         onChange(doc);
       }
     }
@@ -44657,6 +44687,8 @@ export const createEditor = &lt;
       };
     },
   };
+
+  const history = createHistory&lt;T&gt;(doc);
 
   return editor;
 };
@@ -45613,7 +45645,7 @@ const isValidPosition = (doc: DocNode, [path, offset]: Position): boolean =&gt; 
   return false;
 };
 
-const rebasePosition = (position: Position, op: Operation): Position =&gt; {
+export const rebasePosition = (position: Position, op: Operation): Position =&gt; {
   switch (op.type) {
     case TYPE_DELETE: {
       const { start, end } = op;
@@ -46103,10 +46135,6 @@ export const createEditor = &lt;
     throw new Error(initialError);
   }
 
-  const history = createHistory&lt;
-    readonly [doc: T, selection: SelectionSnapshot]
-  &gt;([doc, selection]);
-
   const keydownHandlers: KeyboardHandler[] = [
     hotkey(
       &quot;z&quot;,
@@ -46114,7 +46142,8 @@ export const createEditor = &lt;
         if (!readonly) {
           const nextHistory = history.undo();
           if (nextHistory) {
-            [doc, selection] = nextHistory;
+            doc = nextHistory[0];
+            updateSelection(nextHistory[1]);
             onChange(doc);
           }
         }
@@ -46127,7 +46156,8 @@ export const createEditor = &lt;
         if (!readonly) {
           const nextHistory = history.redo();
           if (nextHistory) {
-            [doc, selection] = nextHistory;
+            doc = nextHistory[0];
+            updateSelection(nextHistory[1]);
             onChange(doc);
           }
         }
@@ -46169,7 +46199,7 @@ export const createEditor = &lt;
   const commit = () =&gt; {
     if (transactions.length) {
       const currentDoc = doc;
-      const currentSelection = selection;
+      const ops: Operation[] = [];
       const length = applyHooks.length;
 
       let tr: Transaction | undefined;
@@ -46196,6 +46226,7 @@ export const createEditor = &lt;
                 if (!isUnsafeOperation(op) || validate(nextDoc, onError)) {
                   doc = nextDoc;
                   selection = nextSelection;
+                  ops.push(op);
                 }
               } catch (e) {
                 // rollback
@@ -46220,7 +46251,7 @@ export const createEditor = &lt;
       }
 
       if (!is(currentDoc, doc)) {
-        history.change([currentDoc, currentSelection], [doc, selection]);
+        history.change(doc, ops);
         onChange(doc);
       }
     }
@@ -46607,6 +46638,8 @@ export const createEditor = &lt;
       };
     },
   };
+
+  const history = createHistory&lt;T&gt;(doc);
 
   return editor;
 };
@@ -46840,10 +46873,6 @@ export const createEditor = &lt;
     throw new Error(initialError);
   }
 
-  const history = createHistory&lt;
-    readonly [doc: T, selection: SelectionSnapshot]
-  &gt;([doc, selection]);
-
   const keydownHandlers: KeyboardHandler[] = [
     hotkey(
       &quot;z&quot;,
@@ -46851,7 +46880,8 @@ export const createEditor = &lt;
         if (!readonly) {
           const nextHistory = history.undo();
           if (nextHistory) {
-            [doc, selection] = nextHistory;
+            doc = nextHistory[0];
+            updateSelection(nextHistory[1]);
             onChange(doc);
           }
         }
@@ -46864,7 +46894,8 @@ export const createEditor = &lt;
         if (!readonly) {
           const nextHistory = history.redo();
           if (nextHistory) {
-            [doc, selection] = nextHistory;
+            doc = nextHistory[0];
+            updateSelection(nextHistory[1]);
             onChange(doc);
           }
         }
@@ -46906,7 +46937,7 @@ export const createEditor = &lt;
   const commit = () =&gt; {
     if (transactions.length) {
       const currentDoc = doc;
-      const currentSelection = selection;
+      const ops: Operation[] = [];
       const length = applyHooks.length;
 
       let tr: Transaction | undefined;
@@ -46933,6 +46964,7 @@ export const createEditor = &lt;
                 if (!isUnsafeOperation(op) || validate(nextDoc, onError)) {
                   doc = nextDoc;
                   selection = nextSelection;
+                  ops.push(op);
                 }
               } catch (e) {
                 // rollback
@@ -46957,7 +46989,7 @@ export const createEditor = &lt;
       }
 
       if (!is(currentDoc, doc)) {
-        history.change([currentDoc, currentSelection], [doc, selection]);
+        history.change(doc, ops);
         onChange(doc);
       }
     }
@@ -47344,6 +47376,8 @@ export const createEditor = &lt;
       };
     },
   };
+
+  const history = createHistory&lt;T&gt;(doc);
 
   return editor;
 };
@@ -48333,7 +48367,7 @@ const isValidPosition = (doc: DocNode, [path, offset]: Position): boolean =&gt; 
   return false;
 };
 
-const rebasePosition = (position: Position, op: Operation): Position =&gt; {
+export const rebasePosition = (position: Position, op: Operation): Position =&gt; {
   switch (op.type) {
     case TYPE_DELETE: {
       const { start, end } = op;
@@ -48823,10 +48857,6 @@ export const createEditor = &lt;
     throw new Error(initialError);
   }
 
-  const history = createHistory&lt;
-    readonly [doc: T, selection: SelectionSnapshot]
-  &gt;([doc, selection]);
-
   const keydownHandlers: KeyboardHandler[] = [
     hotkey(
       &quot;z&quot;,
@@ -48834,7 +48864,8 @@ export const createEditor = &lt;
         if (!readonly) {
           const nextHistory = history.undo();
           if (nextHistory) {
-            [doc, selection] = nextHistory;
+            doc = nextHistory[0];
+            updateSelection(nextHistory[1]);
             onChange(doc);
           }
         }
@@ -48847,7 +48878,8 @@ export const createEditor = &lt;
         if (!readonly) {
           const nextHistory = history.redo();
           if (nextHistory) {
-            [doc, selection] = nextHistory;
+            doc = nextHistory[0];
+            updateSelection(nextHistory[1]);
             onChange(doc);
           }
         }
@@ -48889,7 +48921,7 @@ export const createEditor = &lt;
   const commit = () =&gt; {
     if (transactions.length) {
       const currentDoc = doc;
-      const currentSelection = selection;
+      const ops: Operation[] = [];
       const length = applyHooks.length;
 
       let tr: Transaction | undefined;
@@ -48916,6 +48948,7 @@ export const createEditor = &lt;
                 if (!isUnsafeOperation(op) || validate(nextDoc, onError)) {
                   doc = nextDoc;
                   selection = nextSelection;
+                  ops.push(op);
                 }
               } catch (e) {
                 // rollback
@@ -48940,7 +48973,7 @@ export const createEditor = &lt;
       }
 
       if (!is(currentDoc, doc)) {
-        history.change([currentDoc, currentSelection], [doc, selection]);
+        history.change(doc, ops);
         onChange(doc);
       }
     }
@@ -49327,6 +49360,8 @@ export const createEditor = &lt;
       };
     },
   };
+
+  const history = createHistory&lt;T&gt;(doc);
 
   return editor;
 };
@@ -49560,10 +49595,6 @@ export const createEditor = &lt;
     throw new Error(initialError);
   }
 
-  const history = createHistory&lt;
-    readonly [doc: T, selection: SelectionSnapshot]
-  &gt;([doc, selection]);
-
   const keydownHandlers: KeyboardHandler[] = [
     hotkey(
       &quot;z&quot;,
@@ -49571,7 +49602,8 @@ export const createEditor = &lt;
         if (!readonly) {
           const nextHistory = history.undo();
           if (nextHistory) {
-            [doc, selection] = nextHistory;
+            doc = nextHistory[0];
+            updateSelection(nextHistory[1]);
             onChange(doc);
           }
         }
@@ -49584,7 +49616,8 @@ export const createEditor = &lt;
         if (!readonly) {
           const nextHistory = history.redo();
           if (nextHistory) {
-            [doc, selection] = nextHistory;
+            doc = nextHistory[0];
+            updateSelection(nextHistory[1]);
             onChange(doc);
           }
         }
@@ -49626,7 +49659,7 @@ export const createEditor = &lt;
   const commit = () =&gt; {
     if (transactions.length) {
       const currentDoc = doc;
-      const currentSelection = selection;
+      const ops: Operation[] = [];
       const length = applyHooks.length;
 
       let tr: Transaction | undefined;
@@ -49653,6 +49686,7 @@ export const createEditor = &lt;
                 if (!isUnsafeOperation(op) || validate(nextDoc, onError)) {
                   doc = nextDoc;
                   selection = nextSelection;
+                  ops.push(op);
                 }
               } catch (e) {
                 // rollback
@@ -49677,7 +49711,7 @@ export const createEditor = &lt;
       }
 
       if (!is(currentDoc, doc)) {
-        history.change([currentDoc, currentSelection], [doc, selection]);
+        history.change(doc, ops);
         onChange(doc);
       }
     }
@@ -50064,6 +50098,8 @@ export const createEditor = &lt;
       };
     },
   };
+
+  const history = createHistory&lt;T&gt;(doc);
 
   return editor;
 };
@@ -50993,7 +51029,7 @@ const isValidPosition = (doc: DocNode, [path, offset]: Position): boolean =&gt; 
   return false;
 };
 
-const rebasePosition = (position: Position, op: Operation): Position =&gt; {
+export const rebasePosition = (position: Position, op: Operation): Position =&gt; {
   switch (op.type) {
     case TYPE_DELETE: {
       const { start, end } = op;
@@ -51483,10 +51519,6 @@ export const createEditor = &lt;
     throw new Error(initialError);
   }
 
-  const history = createHistory&lt;
-    readonly [doc: T, selection: SelectionSnapshot]
-  &gt;([doc, selection]);
-
   const keydownHandlers: KeyboardHandler[] = [
     hotkey(
       &quot;z&quot;,
@@ -51494,7 +51526,8 @@ export const createEditor = &lt;
         if (!readonly) {
           const nextHistory = history.undo();
           if (nextHistory) {
-            [doc, selection] = nextHistory;
+            doc = nextHistory[0];
+            updateSelection(nextHistory[1]);
             onChange(doc);
           }
         }
@@ -51507,7 +51540,8 @@ export const createEditor = &lt;
         if (!readonly) {
           const nextHistory = history.redo();
           if (nextHistory) {
-            [doc, selection] = nextHistory;
+            doc = nextHistory[0];
+            updateSelection(nextHistory[1]);
             onChange(doc);
           }
         }
@@ -51549,7 +51583,7 @@ export const createEditor = &lt;
   const commit = () =&gt; {
     if (transactions.length) {
       const currentDoc = doc;
-      const currentSelection = selection;
+      const ops: Operation[] = [];
       const length = applyHooks.length;
 
       let tr: Transaction | undefined;
@@ -51576,6 +51610,7 @@ export const createEditor = &lt;
                 if (!isUnsafeOperation(op) || validate(nextDoc, onError)) {
                   doc = nextDoc;
                   selection = nextSelection;
+                  ops.push(op);
                 }
               } catch (e) {
                 // rollback
@@ -51600,7 +51635,7 @@ export const createEditor = &lt;
       }
 
       if (!is(currentDoc, doc)) {
-        history.change([currentDoc, currentSelection], [doc, selection]);
+        history.change(doc, ops);
         onChange(doc);
       }
     }
@@ -51987,6 +52022,8 @@ export const createEditor = &lt;
       };
     },
   };
+
+  const history = createHistory&lt;T&gt;(doc);
 
   return editor;
 };
@@ -52220,10 +52257,6 @@ export const createEditor = &lt;
     throw new Error(initialError);
   }
 
-  const history = createHistory&lt;
-    readonly [doc: T, selection: SelectionSnapshot]
-  &gt;([doc, selection]);
-
   const keydownHandlers: KeyboardHandler[] = [
     hotkey(
       &quot;z&quot;,
@@ -52231,7 +52264,8 @@ export const createEditor = &lt;
         if (!readonly) {
           const nextHistory = history.undo();
           if (nextHistory) {
-            [doc, selection] = nextHistory;
+            doc = nextHistory[0];
+            updateSelection(nextHistory[1]);
             onChange(doc);
           }
         }
@@ -52244,7 +52278,8 @@ export const createEditor = &lt;
         if (!readonly) {
           const nextHistory = history.redo();
           if (nextHistory) {
-            [doc, selection] = nextHistory;
+            doc = nextHistory[0];
+            updateSelection(nextHistory[1]);
             onChange(doc);
           }
         }
@@ -52286,7 +52321,7 @@ export const createEditor = &lt;
   const commit = () =&gt; {
     if (transactions.length) {
       const currentDoc = doc;
-      const currentSelection = selection;
+      const ops: Operation[] = [];
       const length = applyHooks.length;
 
       let tr: Transaction | undefined;
@@ -52313,6 +52348,7 @@ export const createEditor = &lt;
                 if (!isUnsafeOperation(op) || validate(nextDoc, onError)) {
                   doc = nextDoc;
                   selection = nextSelection;
+                  ops.push(op);
                 }
               } catch (e) {
                 // rollback
@@ -52337,7 +52373,7 @@ export const createEditor = &lt;
       }
 
       if (!is(currentDoc, doc)) {
-        history.change([currentDoc, currentSelection], [doc, selection]);
+        history.change(doc, ops);
         onChange(doc);
       }
     }
@@ -52724,6 +52760,8 @@ export const createEditor = &lt;
       };
     },
   };
+
+  const history = createHistory&lt;T&gt;(doc);
 
   return editor;
 };
@@ -53662,7 +53700,7 @@ const isValidPosition = (doc: DocNode, [path, offset]: Position): boolean =&gt; 
   return false;
 };
 
-const rebasePosition = (position: Position, op: Operation): Position =&gt; {
+export const rebasePosition = (position: Position, op: Operation): Position =&gt; {
   switch (op.type) {
     case TYPE_DELETE: {
       const { start, end } = op;
@@ -54152,10 +54190,6 @@ export const createEditor = &lt;
     throw new Error(initialError);
   }
 
-  const history = createHistory&lt;
-    readonly [doc: T, selection: SelectionSnapshot]
-  &gt;([doc, selection]);
-
   const keydownHandlers: KeyboardHandler[] = [
     hotkey(
       &quot;z&quot;,
@@ -54163,7 +54197,8 @@ export const createEditor = &lt;
         if (!readonly) {
           const nextHistory = history.undo();
           if (nextHistory) {
-            [doc, selection] = nextHistory;
+            doc = nextHistory[0];
+            updateSelection(nextHistory[1]);
             onChange(doc);
           }
         }
@@ -54176,7 +54211,8 @@ export const createEditor = &lt;
         if (!readonly) {
           const nextHistory = history.redo();
           if (nextHistory) {
-            [doc, selection] = nextHistory;
+            doc = nextHistory[0];
+            updateSelection(nextHistory[1]);
             onChange(doc);
           }
         }
@@ -54218,7 +54254,7 @@ export const createEditor = &lt;
   const commit = () =&gt; {
     if (transactions.length) {
       const currentDoc = doc;
-      const currentSelection = selection;
+      const ops: Operation[] = [];
       const length = applyHooks.length;
 
       let tr: Transaction | undefined;
@@ -54245,6 +54281,7 @@ export const createEditor = &lt;
                 if (!isUnsafeOperation(op) || validate(nextDoc, onError)) {
                   doc = nextDoc;
                   selection = nextSelection;
+                  ops.push(op);
                 }
               } catch (e) {
                 // rollback
@@ -54269,7 +54306,7 @@ export const createEditor = &lt;
       }
 
       if (!is(currentDoc, doc)) {
-        history.change([currentDoc, currentSelection], [doc, selection]);
+        history.change(doc, ops);
         onChange(doc);
       }
     }
@@ -54656,6 +54693,8 @@ export const createEditor = &lt;
       };
     },
   };
+
+  const history = createHistory&lt;T&gt;(doc);
 
   return editor;
 };
@@ -54889,10 +54928,6 @@ export const createEditor = &lt;
     throw new Error(initialError);
   }
 
-  const history = createHistory&lt;
-    readonly [doc: T, selection: SelectionSnapshot]
-  &gt;([doc, selection]);
-
   const keydownHandlers: KeyboardHandler[] = [
     hotkey(
       &quot;z&quot;,
@@ -54900,7 +54935,8 @@ export const createEditor = &lt;
         if (!readonly) {
           const nextHistory = history.undo();
           if (nextHistory) {
-            [doc, selection] = nextHistory;
+            doc = nextHistory[0];
+            updateSelection(nextHistory[1]);
             onChange(doc);
           }
         }
@@ -54913,7 +54949,8 @@ export const createEditor = &lt;
         if (!readonly) {
           const nextHistory = history.redo();
           if (nextHistory) {
-            [doc, selection] = nextHistory;
+            doc = nextHistory[0];
+            updateSelection(nextHistory[1]);
             onChange(doc);
           }
         }
@@ -54955,7 +54992,7 @@ export const createEditor = &lt;
   const commit = () =&gt; {
     if (transactions.length) {
       const currentDoc = doc;
-      const currentSelection = selection;
+      const ops: Operation[] = [];
       const length = applyHooks.length;
 
       let tr: Transaction | undefined;
@@ -54982,6 +55019,7 @@ export const createEditor = &lt;
                 if (!isUnsafeOperation(op) || validate(nextDoc, onError)) {
                   doc = nextDoc;
                   selection = nextSelection;
+                  ops.push(op);
                 }
               } catch (e) {
                 // rollback
@@ -55006,7 +55044,7 @@ export const createEditor = &lt;
       }
 
       if (!is(currentDoc, doc)) {
-        history.change([currentDoc, currentSelection], [doc, selection]);
+        history.change(doc, ops);
         onChange(doc);
       }
     }
@@ -55393,6 +55431,8 @@ export const createEditor = &lt;
       };
     },
   };
+
+  const history = createHistory&lt;T&gt;(doc);
 
   return editor;
 };
@@ -56344,7 +56384,7 @@ const isValidPosition = (doc: DocNode, [path, offset]: Position): boolean =&gt; 
   return false;
 };
 
-const rebasePosition = (position: Position, op: Operation): Position =&gt; {
+export const rebasePosition = (position: Position, op: Operation): Position =&gt; {
   switch (op.type) {
     case TYPE_DELETE: {
       const { start, end } = op;
@@ -56834,10 +56874,6 @@ export const createEditor = &lt;
     throw new Error(initialError);
   }
 
-  const history = createHistory&lt;
-    readonly [doc: T, selection: SelectionSnapshot]
-  &gt;([doc, selection]);
-
   const keydownHandlers: KeyboardHandler[] = [
     hotkey(
       &quot;z&quot;,
@@ -56845,7 +56881,8 @@ export const createEditor = &lt;
         if (!readonly) {
           const nextHistory = history.undo();
           if (nextHistory) {
-            [doc, selection] = nextHistory;
+            doc = nextHistory[0];
+            updateSelection(nextHistory[1]);
             onChange(doc);
           }
         }
@@ -56858,7 +56895,8 @@ export const createEditor = &lt;
         if (!readonly) {
           const nextHistory = history.redo();
           if (nextHistory) {
-            [doc, selection] = nextHistory;
+            doc = nextHistory[0];
+            updateSelection(nextHistory[1]);
             onChange(doc);
           }
         }
@@ -56900,7 +56938,7 @@ export const createEditor = &lt;
   const commit = () =&gt; {
     if (transactions.length) {
       const currentDoc = doc;
-      const currentSelection = selection;
+      const ops: Operation[] = [];
       const length = applyHooks.length;
 
       let tr: Transaction | undefined;
@@ -56927,6 +56965,7 @@ export const createEditor = &lt;
                 if (!isUnsafeOperation(op) || validate(nextDoc, onError)) {
                   doc = nextDoc;
                   selection = nextSelection;
+                  ops.push(op);
                 }
               } catch (e) {
                 // rollback
@@ -56951,7 +56990,7 @@ export const createEditor = &lt;
       }
 
       if (!is(currentDoc, doc)) {
-        history.change([currentDoc, currentSelection], [doc, selection]);
+        history.change(doc, ops);
         onChange(doc);
       }
     }
@@ -57338,6 +57377,8 @@ export const createEditor = &lt;
       };
     },
   };
+
+  const history = createHistory&lt;T&gt;(doc);
 
   return editor;
 };
@@ -57571,10 +57612,6 @@ export const createEditor = &lt;
     throw new Error(initialError);
   }
 
-  const history = createHistory&lt;
-    readonly [doc: T, selection: SelectionSnapshot]
-  &gt;([doc, selection]);
-
   const keydownHandlers: KeyboardHandler[] = [
     hotkey(
       &quot;z&quot;,
@@ -57582,7 +57619,8 @@ export const createEditor = &lt;
         if (!readonly) {
           const nextHistory = history.undo();
           if (nextHistory) {
-            [doc, selection] = nextHistory;
+            doc = nextHistory[0];
+            updateSelection(nextHistory[1]);
             onChange(doc);
           }
         }
@@ -57595,7 +57633,8 @@ export const createEditor = &lt;
         if (!readonly) {
           const nextHistory = history.redo();
           if (nextHistory) {
-            [doc, selection] = nextHistory;
+            doc = nextHistory[0];
+            updateSelection(nextHistory[1]);
             onChange(doc);
           }
         }
@@ -57637,7 +57676,7 @@ export const createEditor = &lt;
   const commit = () =&gt; {
     if (transactions.length) {
       const currentDoc = doc;
-      const currentSelection = selection;
+      const ops: Operation[] = [];
       const length = applyHooks.length;
 
       let tr: Transaction | undefined;
@@ -57664,6 +57703,7 @@ export const createEditor = &lt;
                 if (!isUnsafeOperation(op) || validate(nextDoc, onError)) {
                   doc = nextDoc;
                   selection = nextSelection;
+                  ops.push(op);
                 }
               } catch (e) {
                 // rollback
@@ -57688,7 +57728,7 @@ export const createEditor = &lt;
       }
 
       if (!is(currentDoc, doc)) {
-        history.change([currentDoc, currentSelection], [doc, selection]);
+        history.change(doc, ops);
         onChange(doc);
       }
     }
@@ -58075,6 +58115,8 @@ export const createEditor = &lt;
       };
     },
   };
+
+  const history = createHistory&lt;T&gt;(doc);
 
   return editor;
 };
@@ -58996,7 +59038,7 @@ const isValidPosition = (doc: DocNode, [path, offset]: Position): boolean =&gt; 
   return false;
 };
 
-const rebasePosition = (position: Position, op: Operation): Position =&gt; {
+export const rebasePosition = (position: Position, op: Operation): Position =&gt; {
   switch (op.type) {
     case TYPE_DELETE: {
       const { start, end } = op;
@@ -59486,10 +59528,6 @@ export const createEditor = &lt;
     throw new Error(initialError);
   }
 
-  const history = createHistory&lt;
-    readonly [doc: T, selection: SelectionSnapshot]
-  &gt;([doc, selection]);
-
   const keydownHandlers: KeyboardHandler[] = [
     hotkey(
       &quot;z&quot;,
@@ -59497,7 +59535,8 @@ export const createEditor = &lt;
         if (!readonly) {
           const nextHistory = history.undo();
           if (nextHistory) {
-            [doc, selection] = nextHistory;
+            doc = nextHistory[0];
+            updateSelection(nextHistory[1]);
             onChange(doc);
           }
         }
@@ -59510,7 +59549,8 @@ export const createEditor = &lt;
         if (!readonly) {
           const nextHistory = history.redo();
           if (nextHistory) {
-            [doc, selection] = nextHistory;
+            doc = nextHistory[0];
+            updateSelection(nextHistory[1]);
             onChange(doc);
           }
         }
@@ -59552,7 +59592,7 @@ export const createEditor = &lt;
   const commit = () =&gt; {
     if (transactions.length) {
       const currentDoc = doc;
-      const currentSelection = selection;
+      const ops: Operation[] = [];
       const length = applyHooks.length;
 
       let tr: Transaction | undefined;
@@ -59579,6 +59619,7 @@ export const createEditor = &lt;
                 if (!isUnsafeOperation(op) || validate(nextDoc, onError)) {
                   doc = nextDoc;
                   selection = nextSelection;
+                  ops.push(op);
                 }
               } catch (e) {
                 // rollback
@@ -59603,7 +59644,7 @@ export const createEditor = &lt;
       }
 
       if (!is(currentDoc, doc)) {
-        history.change([currentDoc, currentSelection], [doc, selection]);
+        history.change(doc, ops);
         onChange(doc);
       }
     }
@@ -59990,6 +60031,8 @@ export const createEditor = &lt;
       };
     },
   };
+
+  const history = createHistory&lt;T&gt;(doc);
 
   return editor;
 };
@@ -60223,10 +60266,6 @@ export const createEditor = &lt;
     throw new Error(initialError);
   }
 
-  const history = createHistory&lt;
-    readonly [doc: T, selection: SelectionSnapshot]
-  &gt;([doc, selection]);
-
   const keydownHandlers: KeyboardHandler[] = [
     hotkey(
       &quot;z&quot;,
@@ -60234,7 +60273,8 @@ export const createEditor = &lt;
         if (!readonly) {
           const nextHistory = history.undo();
           if (nextHistory) {
-            [doc, selection] = nextHistory;
+            doc = nextHistory[0];
+            updateSelection(nextHistory[1]);
             onChange(doc);
           }
         }
@@ -60247,7 +60287,8 @@ export const createEditor = &lt;
         if (!readonly) {
           const nextHistory = history.redo();
           if (nextHistory) {
-            [doc, selection] = nextHistory;
+            doc = nextHistory[0];
+            updateSelection(nextHistory[1]);
             onChange(doc);
           }
         }
@@ -60289,7 +60330,7 @@ export const createEditor = &lt;
   const commit = () =&gt; {
     if (transactions.length) {
       const currentDoc = doc;
-      const currentSelection = selection;
+      const ops: Operation[] = [];
       const length = applyHooks.length;
 
       let tr: Transaction | undefined;
@@ -60316,6 +60357,7 @@ export const createEditor = &lt;
                 if (!isUnsafeOperation(op) || validate(nextDoc, onError)) {
                   doc = nextDoc;
                   selection = nextSelection;
+                  ops.push(op);
                 }
               } catch (e) {
                 // rollback
@@ -60340,7 +60382,7 @@ export const createEditor = &lt;
       }
 
       if (!is(currentDoc, doc)) {
-        history.change([currentDoc, currentSelection], [doc, selection]);
+        history.change(doc, ops);
         onChange(doc);
       }
     }
@@ -60727,6 +60769,8 @@ export const createEditor = &lt;
       };
     },
   };
+
+  const history = createHistory&lt;T&gt;(doc);
 
   return editor;
 };
