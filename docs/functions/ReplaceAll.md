@@ -6,7 +6,7 @@
 
 > **ReplaceAll**(`this`, `text`): `void`
 
-Defined in: [commands.ts:60](https://github.com/inokawa/edix/blob/96295ed67f7c2da9a7e213e46ab3f24cac805db8/src/commands.ts#L60)
+Defined in: [commands.ts:60](https://github.com/inokawa/edix/blob/ab46ad7639d47a1c04210a60f83b875ef90b7e64/src/commands.ts#L60)
 
 Replace all content in the editor.
 

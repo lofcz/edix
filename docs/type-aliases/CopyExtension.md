@@ -6,7 +6,7 @@
 
 > **CopyExtension** = (`dataTransfer`, `doc`, `element`) => `void`
 
-Defined in: [extensions/copy/types.ts:3](https://github.com/inokawa/edix/blob/96295ed67f7c2da9a7e213e46ab3f24cac805db8/src/extensions/copy/types.ts#L3)
+Defined in: [extensions/copy/types.ts:3](https://github.com/inokawa/edix/blob/ab46ad7639d47a1c04210a60f83b875ef90b7e64/src/extensions/copy/types.ts#L3)
 
 ## Parameters
 

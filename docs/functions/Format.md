@@ -6,7 +6,7 @@
 
 > **Format**\<`T`, `N`, `K`\>(`this`, `key`, `value`, `range`): `void`
 
-Defined in: [commands.ts:83](https://github.com/inokawa/edix/blob/96295ed67f7c2da9a7e213e46ab3f24cac805db8/src/commands.ts#L83)
+Defined in: [commands.ts:83](https://github.com/inokawa/edix/blob/ab46ad7639d47a1c04210a60f83b875ef90b7e64/src/commands.ts#L83)
 
 Format content in the selection or specified range.
 
@@ -22,7 +22,7 @@ Format content in the selection or specified range.
 
 ### K
 
-`K` *extends* `string` \| `number` \| `symbol`
+`K` *extends* `string`
 
 ## Parameters
 

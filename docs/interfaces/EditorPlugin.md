@@ -4,7 +4,7 @@
 
 # Interface: EditorPlugin
 
-Defined in: [plugins/types.ts:3](https://github.com/inokawa/edix/blob/96295ed67f7c2da9a7e213e46ab3f24cac805db8/src/plugins/types.ts#L3)
+Defined in: [plugins/types.ts:3](https://github.com/inokawa/edix/blob/ab46ad7639d47a1c04210a60f83b875ef90b7e64/src/plugins/types.ts#L3)
 
 ## Properties
 
@@ -12,7 +12,7 @@ Defined in: [plugins/types.ts:3](https://github.com/inokawa/edix/blob/96295ed67f
 
 > `optional` **apply**: (`op`, `next`) => `void`
 
-Defined in: [plugins/types.ts:4](https://github.com/inokawa/edix/blob/96295ed67f7c2da9a7e213e46ab3f24cac805db8/src/plugins/types.ts#L4)
+Defined in: [plugins/types.ts:4](https://github.com/inokawa/edix/blob/ab46ad7639d47a1c04210a60f83b875ef90b7e64/src/plugins/types.ts#L4)
 
 #### Parameters
 
@@ -34,7 +34,7 @@ Defined in: [plugins/types.ts:4](https://github.com/inokawa/edix/blob/96295ed67f
 
 > `optional` **mount**: (`element`) => `void` \| () => `void`
 
-Defined in: [plugins/types.ts:5](https://github.com/inokawa/edix/blob/96295ed67f7c2da9a7e213e46ab3f24cac805db8/src/plugins/types.ts#L5)
+Defined in: [plugins/types.ts:5](https://github.com/inokawa/edix/blob/ab46ad7639d47a1c04210a60f83b875ef90b7e64/src/plugins/types.ts#L5)
 
 #### Parameters
 
