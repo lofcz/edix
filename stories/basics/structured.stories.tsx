@@ -252,15 +252,25 @@ export const Tag: StoryObj = {
       return editor.input(ref.current);
     }, []);
 
+    const labelRef = useRef<HTMLInputElement>(null);
+    const valueRef = useRef<HTMLInputElement>(null);
+
     return (
       <div>
         <div>
+          <label>
+            label:
+            <input ref={labelRef} defaultValue="Grape" />
+          </label>
+          <label>
+            value:
+            <input ref={valueRef} defaultValue="123" />
+          </label>
           <button
             onClick={() => {
-              const label = window.prompt("label");
-              if (!label) return;
-              const value = window.prompt("value");
-              if (!value) return;
+              const label = labelRef.current?.value;
+              const value = valueRef.current?.value;
+              if (!label || !value) return;
               editor.apply(InsertNode, { type: "tag", value, label });
             }}
           >
