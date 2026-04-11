@@ -18,6 +18,7 @@ import {
   applyOperation,
   Transaction,
   sliceDoc,
+  isTextNode,
   type Operation,
   isUnsafeOperation,
   isValidSelection,
@@ -135,6 +136,12 @@ export interface EditorOptions<
    */
   isBlock?: (node: HTMLElement) => boolean;
   /**
+   * Automatically scroll the mounted element to keep the caret visible
+   * after document changes. Scroll is coalesced via rAF for zero
+   * synchronous layout cost during input handling.
+   */
+  autoScroll?: boolean;
+  /**
    * Callback invoked when document changes.
    */
   onChange: (doc: T) => void;
@@ -151,12 +158,21 @@ export interface EditorOptions<
  */
 export interface Editor<T extends DocNode = DocNode> {
   readonly doc: T;
+  /**
+   * Whether the document is empty (no text content, no void nodes).
+   * Recomputed once per commit — O(1) read.
+   */
+  readonly isEmpty: boolean;
   selection: SelectionSnapshot;
   /**
    * The getter/setter for the editor's read-only state.
    * `true` to read-only. `false` to editable.
    */
   readonly: boolean;
+  /**
+   * Enable/disable auto-scroll after document changes.
+   */
+  autoScroll: boolean;
   /**
    * Dispatches editing operations.
    * @param tr {@link Transaction} or {@link EditorCommand}
@@ -187,11 +203,35 @@ export const createEditor = <
   copy: copyExtensions = [plainCopy()],
   paste: pasteExtensions = [plainPaste()],
   isBlock = defaultIsBlockNode,
+  autoScroll: _autoScroll = false,
   onChange,
   onError = console.error,
 }: EditorOptions<T, S>): Editor<T> => {
   let selection: SelectionSnapshot = getEmptySelectionSnapshot();
   let setContentEditable: () => void = noop;
+
+  // Auto-scroll state — coalesced via rAF, zero sync layout cost
+  let _mountedEl: HTMLElement | null = null;
+  let _scrollRAF = 0;
+  const scheduleScroll = () => {
+    if (_mountedEl && !_scrollRAF) {
+      const el = _mountedEl;
+      _scrollRAF = requestAnimationFrame(() => {
+        _scrollRAF = 0;
+        el.scrollTop = el.scrollHeight;
+      });
+    }
+  };
+
+  const computeEmpty = (d: DocNode): boolean => {
+    for (const line of d.children) {
+      for (const node of line) {
+        if (!isTextNode(node) || node.text.length > 0) return false;
+      }
+    }
+    return true;
+  };
+  let _empty = computeEmpty(doc);
 
   const validate = (value: T, onError: (m: string) => void): boolean => {
     if (!schema) {
@@ -229,8 +269,10 @@ export const createEditor = <
           const nextHistory = history.undo();
           if (nextHistory) {
             doc = nextHistory[0];
+            _empty = computeEmpty(doc);
             updateSelection(nextHistory[1]);
             onChange(doc);
+            if (_autoScroll) scheduleScroll();
           }
         }
       },
@@ -243,8 +285,10 @@ export const createEditor = <
           const nextHistory = history.redo();
           if (nextHistory) {
             doc = nextHistory[0];
+            _empty = computeEmpty(doc);
             updateSelection(nextHistory[1]);
             onChange(doc);
+            if (_autoScroll) scheduleScroll();
           }
         }
       },
@@ -337,8 +381,10 @@ export const createEditor = <
       }
 
       if (!is(currentDoc, doc)) {
+        _empty = computeEmpty(doc);
         history.change(doc, ops);
         onChange(doc);
+        if (_autoScroll) scheduleScroll();
       }
     }
   };
@@ -353,6 +399,9 @@ export const createEditor = <
     get doc() {
       return doc;
     },
+    get isEmpty() {
+      return _empty;
+    },
     get selection() {
       return selection;
     },
@@ -366,6 +415,12 @@ export const createEditor = <
       readonly = value;
       setContentEditable();
     },
+    get autoScroll() {
+      return _autoScroll;
+    },
+    set autoScroll(value) {
+      _autoScroll = value;
+    },
     apply: (tr: Transaction | EditorCommand<any, T>, ...args: unknown[]) => {
       if (isFunction(tr)) {
         tr.call(editor, ...args);
@@ -375,6 +430,8 @@ export const createEditor = <
       return editor;
     },
     input: (element) => {
+      _mountedEl = element;
+
       if (
         !(window.InputEvent && isFunction(InputEvent.prototype.getTargetRanges))
       ) {
@@ -691,6 +748,12 @@ export const createEditor = <
       return () => {
         if (disposed) return;
         disposed = true;
+
+        if (_scrollRAF) {
+          cancelAnimationFrame(_scrollRAF);
+          _scrollRAF = 0;
+        }
+        _mountedEl = null;
 
         // TODO improve
         setContentEditable = noop;

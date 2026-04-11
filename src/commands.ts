@@ -47,6 +47,25 @@ export function InsertNode<T extends DocNode>(
 }
 
 /**
+ * Insert multiple inline nodes as a single line fragment in one transaction.
+ * When `moveCaret` is true (default), the caret moves to the end of the
+ * inserted content.
+ */
+export function InsertNodes<T extends DocNode>(
+  this: Editor<T>,
+  nodes: InferNode<T>[],
+  position: Position = this.selection[0],
+  moveCaret: boolean = true,
+) {
+  const tr = new Transaction().insertFragment(position, [nodes]);
+  if (moveCaret) {
+    const end = tr.transform(position);
+    tr.selection = [end, end];
+  }
+  this.apply(tr);
+}
+
+/**
  * Replace text in the selection or specified range.
  */
 export function ReplaceText(this: Editor, text: string) {

@@ -3,6 +3,7 @@ export {
   Delete,
   InsertText,
   InsertNode,
+  InsertNodes,
   ReplaceText,
   ReplaceAll,
   Format,
