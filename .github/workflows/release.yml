@@ -1,54 +1,72 @@
-name: Release
+name: Release and Publish to npm
 
 on:
-  push:
-    branches:
-      - main
-
-concurrency: ${{ github.workflow }}-${{ github.ref }}
-
-permissions:
-  contents: write
-  pull-requests: write
-  id-token: write
+  workflow_dispatch:
+    inputs:
+      release_type:
+        description: Release type
+        required: true
+        default: patch
+        type: choice
+        options:
+          - patch
+          - minor
+          - major
 
 jobs:
   release:
-    name: Release
     runs-on: ubuntu-latest
-    timeout-minutes: 10
+    permissions:
+      contents: write
+      id-token: write
 
     steps:
-      - name: Checkout Repo
+      - name: Checkout
         uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
 
-      - name: Setup Git User
-        run: |
-          git config --global user.email "github-actions[bot]@users.noreply.github.com"
-          git config --global user.name "github-actions[bot]"
-
-      - uses: actions/setup-node@v6
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
         with:
           node-version: "lts/*"
           registry-url: "https://registry.npmjs.org"
           cache: "npm"
 
-      - name: Install Dependencies
+      - name: Install dependencies
         run: npm ci
+
+      - name: Typecheck
+        run: npm run tsc
+
+      - name: Run tests
+        run: npm test
 
       - name: Build
         run: npm run build
 
-      - name: Run Tests
-        run: npm test
+      - name: Bump package version
+        id: version
+        run: |
+          npm version "${{ github.event.inputs.release_type }}" --no-git-tag-version
+          echo "version=$(node -p "require('./package.json').version")" >> "$GITHUB_OUTPUT"
 
-      - name: Create Release Pull Request or Publish to npm
-        id: changesets
-        uses: changesets/action@v1
+      - name: Commit release version and create tag
+        run: |
+          git config --local user.email "action@github.com"
+          git config --local user.name "GitHub Action"
+          git add package.json
+          git commit -m "chore: release v${{ steps.version.outputs.version }}"
+          git tag -a "v${{ steps.version.outputs.version }}" -m "Release v${{ steps.version.outputs.version }}"
+
+      - name: Publish to npm
+        run: npm publish --provenance --access public
+
+      - name: Push release commit and tag
+        run: git push --follow-tags
+
+      - name: Create GitHub release
+        uses: softprops/action-gh-release@v2
         with:
-          version: npx changeset version
-          publish: npx changeset publish
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          NPM_TOKEN: ""
-          NPM_CONFIG_PROVENANCE: "true"
+          tag_name: v${{ steps.version.outputs.version }}
+          generate_release_notes: true
