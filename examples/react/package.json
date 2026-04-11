@@ -9,7 +9,7 @@
     "preview": "vite preview"
   },
   "dependencies": {
-    "edix": "0.3.0",
+    "edix": "npm:@lofcz/edix@0.3.0",
     "react": "^19.2.3",
     "react-dom": "^19.2.3"
   },

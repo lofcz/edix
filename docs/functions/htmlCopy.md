@@ -6,7 +6,7 @@
 
 > **htmlCopy**(): [`CopyExtension`](../type-aliases/CopyExtension.md)
 
-Defined in: [extensions/copy/html.ts:7](https://github.com/inokawa/edix/blob/ab46ad7639d47a1c04210a60f83b875ef90b7e64/src/extensions/copy/html.ts#L7)
+Defined in: [extensions/copy/html.ts:7](https://github.com/lofcz/edix/blob/c3e2464dd9fb3308ead13fab4a3705fded785408/src/extensions/copy/html.ts#L7)
 
 An extension to handle copying to HTML.
 

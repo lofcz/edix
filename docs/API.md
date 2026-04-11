@@ -14,6 +14,7 @@
 - [Delete](functions/Delete.md)
 - [InsertText](functions/InsertText.md)
 - [InsertNode](functions/InsertNode.md)
+- [InsertNodes](functions/InsertNodes.md)
 - [ReplaceText](functions/ReplaceText.md)
 - [ReplaceAll](functions/ReplaceAll.md)
 - [Format](functions/Format.md)
@@ -34,6 +35,7 @@
 - [EditorOptions](interfaces/EditorOptions.md)
 - [Editor](interfaces/Editor.md)
 - [PlainEditorOptions](interfaces/PlainEditorOptions.md)
+- [DirtyRange](interfaces/DirtyRange.md)
 - [EditorPlugin](interfaces/EditorPlugin.md)
 
 ## Type Aliases

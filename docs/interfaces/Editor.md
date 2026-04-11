@@ -4,7 +4,7 @@
 
 # Interface: Editor\<T\>
 
-Defined in: [editor.ts:152](https://github.com/inokawa/edix/blob/ab46ad7639d47a1c04210a60f83b875ef90b7e64/src/editor.ts#L152)
+Defined in: [editor.ts:159](https://github.com/lofcz/edix/blob/c3e2464dd9fb3308ead13fab4a3705fded785408/src/editor.ts#L159)
 
 The editor instance.
 
@@ -22,7 +22,7 @@ The editor instance.
 
 > **apply**(`tr`, `immediate?`): `this`
 
-Defined in: [editor.ts:166](https://github.com/inokawa/edix/blob/ab46ad7639d47a1c04210a60f83b875ef90b7e64/src/editor.ts#L166)
+Defined in: [editor.ts:182](https://github.com/lofcz/edix/blob/c3e2464dd9fb3308ead13fab4a3705fded785408/src/editor.ts#L182)
 
 Dispatches editing operations.
 
@@ -48,7 +48,7 @@ If true, flushes queued operations immediately.
 
 > **apply**\<`A`\>(`fn`, ...`args`): `this`
 
-Defined in: [editor.ts:167](https://github.com/inokawa/edix/blob/ab46ad7639d47a1c04210a60f83b875ef90b7e64/src/editor.ts#L167)
+Defined in: [editor.ts:183](https://github.com/lofcz/edix/blob/c3e2464dd9fb3308ead13fab4a3705fded785408/src/editor.ts#L183)
 
 ##### Type Parameters
 
@@ -76,7 +76,18 @@ Defined in: [editor.ts:167](https://github.com/inokawa/edix/blob/ab46ad7639d47a1
 
 > `readonly` **doc**: `T`
 
-Defined in: [editor.ts:153](https://github.com/inokawa/edix/blob/ab46ad7639d47a1c04210a60f83b875ef90b7e64/src/editor.ts#L153)
+Defined in: [editor.ts:160](https://github.com/lofcz/edix/blob/c3e2464dd9fb3308ead13fab4a3705fded785408/src/editor.ts#L160)
+
+***
+
+### isEmpty
+
+> `readonly` **isEmpty**: `boolean`
+
+Defined in: [editor.ts:165](https://github.com/lofcz/edix/blob/c3e2464dd9fb3308ead13fab4a3705fded785408/src/editor.ts#L165)
+
+Whether the document is empty (no text content, no void nodes).
+Recomputed once per commit — O(1) read.
 
 ***
 
@@ -84,7 +95,7 @@ Defined in: [editor.ts:153](https://github.com/inokawa/edix/blob/ab46ad7639d47a1
 
 > **selection**: `SelectionSnapshot`
 
-Defined in: [editor.ts:154](https://github.com/inokawa/edix/blob/ab46ad7639d47a1c04210a60f83b875ef90b7e64/src/editor.ts#L154)
+Defined in: [editor.ts:166](https://github.com/lofcz/edix/blob/c3e2464dd9fb3308ead13fab4a3705fded785408/src/editor.ts#L166)
 
 ***
 
@@ -92,10 +103,20 @@ Defined in: [editor.ts:154](https://github.com/inokawa/edix/blob/ab46ad7639d47a1
 
 > **readonly**: `boolean`
 
-Defined in: [editor.ts:159](https://github.com/inokawa/edix/blob/ab46ad7639d47a1c04210a60f83b875ef90b7e64/src/editor.ts#L159)
+Defined in: [editor.ts:171](https://github.com/lofcz/edix/blob/c3e2464dd9fb3308ead13fab4a3705fded785408/src/editor.ts#L171)
 
 The getter/setter for the editor's read-only state.
 `true` to read-only. `false` to editable.
+
+***
+
+### autoScroll
+
+> **autoScroll**: `boolean`
+
+Defined in: [editor.ts:175](https://github.com/lofcz/edix/blob/c3e2464dd9fb3308ead13fab4a3705fded785408/src/editor.ts#L175)
+
+Enable/disable auto-scroll after document changes.
 
 ***
 
@@ -103,7 +124,7 @@ The getter/setter for the editor's read-only state.
 
 > **input**: (`element`) => () => `void`
 
-Defined in: [editor.ts:172](https://github.com/inokawa/edix/blob/ab46ad7639d47a1c04210a60f83b875ef90b7e64/src/editor.ts#L172)
+Defined in: [editor.ts:188](https://github.com/lofcz/edix/blob/c3e2464dd9fb3308ead13fab4a3705fded785408/src/editor.ts#L188)
 
 A function to make DOM editable.
 

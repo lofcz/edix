@@ -4,7 +4,7 @@
 
 # Interface: PlainEditorOptions
 
-Defined in: [presets/plain.ts:8](https://github.com/inokawa/edix/blob/ab46ad7639d47a1c04210a60f83b875ef90b7e64/src/presets/plain.ts#L8)
+Defined in: [presets/plain.ts:22](https://github.com/lofcz/edix/blob/c3e2464dd9fb3308ead13fab4a3705fded785408/src/presets/plain.ts#L22)
 
 ## Extends
 
@@ -16,7 +16,7 @@ Defined in: [presets/plain.ts:8](https://github.com/inokawa/edix/blob/ab46ad7639
 
 > **text**: `string`
 
-Defined in: [presets/plain.ts:15](https://github.com/inokawa/edix/blob/ab46ad7639d47a1c04210a60f83b875ef90b7e64/src/presets/plain.ts#L15)
+Defined in: [presets/plain.ts:29](https://github.com/lofcz/edix/blob/c3e2464dd9fb3308ead13fab4a3705fded785408/src/presets/plain.ts#L29)
 
 Initial document text.
 
@@ -26,7 +26,7 @@ Initial document text.
 
 > `optional` **singleline**: `boolean`
 
-Defined in: [presets/plain.ts:19](https://github.com/inokawa/edix/blob/ab46ad7639d47a1c04210a60f83b875ef90b7e64/src/presets/plain.ts#L19)
+Defined in: [presets/plain.ts:33](https://github.com/lofcz/edix/blob/c3e2464dd9fb3308ead13fab4a3705fded785408/src/presets/plain.ts#L33)
 
 TODO
 
@@ -34,9 +34,9 @@ TODO
 
 ### onChange()
 
-> **onChange**: (`text`) => `void`
+> **onChange**: (`text`, `dirtyRange`) => `void`
 
-Defined in: [presets/plain.ts:23](https://github.com/inokawa/edix/blob/ab46ad7639d47a1c04210a60f83b875ef90b7e64/src/presets/plain.ts#L23)
+Defined in: [presets/plain.ts:37](https://github.com/lofcz/edix/blob/c3e2464dd9fb3308ead13fab4a3705fded785408/src/presets/plain.ts#L37)
 
 Callback invoked when document changes.
 
@@ -45,6 +45,10 @@ Callback invoked when document changes.
 ##### text
 
 `string`
+
+##### dirtyRange
+
+[`DirtyRange`](DirtyRange.md)
 
 #### Returns
 
@@ -56,7 +60,7 @@ Callback invoked when document changes.
 
 > `optional` **readonly**: `boolean`
 
-Defined in: [editor.ts:112](https://github.com/inokawa/edix/blob/ab46ad7639d47a1c04210a60f83b875ef90b7e64/src/editor.ts#L112)
+Defined in: [editor.ts:113](https://github.com/lofcz/edix/blob/c3e2464dd9fb3308ead13fab4a3705fded785408/src/editor.ts#L113)
 
 The state editable or not.
 
@@ -70,7 +74,7 @@ The state editable or not.
 
 > `optional` **plugins**: [`EditorPlugin`](EditorPlugin.md)[]
 
-Defined in: [editor.ts:116](https://github.com/inokawa/edix/blob/ab46ad7639d47a1c04210a60f83b875ef90b7e64/src/editor.ts#L116)
+Defined in: [editor.ts:117](https://github.com/lofcz/edix/blob/c3e2464dd9fb3308ead13fab4a3705fded785408/src/editor.ts#L117)
 
 TODO
 
@@ -84,7 +88,7 @@ TODO
 
 > `optional` **keyboard**: [`KeyboardHandler`](../type-aliases/KeyboardHandler.md)[]
 
-Defined in: [editor.ts:122](https://github.com/inokawa/edix/blob/ab46ad7639d47a1c04210a60f83b875ef90b7e64/src/editor.ts#L122)
+Defined in: [editor.ts:123](https://github.com/lofcz/edix/blob/c3e2464dd9fb3308ead13fab4a3705fded785408/src/editor.ts#L123)
 
 Functions to handle keyboard events.
 
@@ -100,7 +104,7 @@ Return `true` if you want to stop propagation.
 
 > `optional` **copy**: \[[`CopyExtension`](../type-aliases/CopyExtension.md), `...rest: CopyExtension[]`\]
 
-Defined in: [editor.ts:127](https://github.com/inokawa/edix/blob/ab46ad7639d47a1c04210a60f83b875ef90b7e64/src/editor.ts#L127)
+Defined in: [editor.ts:128](https://github.com/lofcz/edix/blob/c3e2464dd9fb3308ead13fab4a3705fded785408/src/editor.ts#L128)
 
 Functions to handle copy events
 
@@ -120,7 +124,7 @@ Functions to handle copy events
 
 > `optional` **paste**: \[[`PasteExtension`](../type-aliases/PasteExtension.md), `...rest: PasteExtension[]`\]
 
-Defined in: [editor.ts:132](https://github.com/inokawa/edix/blob/ab46ad7639d47a1c04210a60f83b875ef90b7e64/src/editor.ts#L132)
+Defined in: [editor.ts:133](https://github.com/lofcz/edix/blob/c3e2464dd9fb3308ead13fab4a3705fded785408/src/editor.ts#L133)
 
 Functions to handle paste / drop events
 
@@ -140,7 +144,7 @@ Functions to handle paste / drop events
 
 > `optional` **isBlock**: (`node`) => `boolean`
 
-Defined in: [editor.ts:136](https://github.com/inokawa/edix/blob/ab46ad7639d47a1c04210a60f83b875ef90b7e64/src/editor.ts#L136)
+Defined in: [editor.ts:137](https://github.com/lofcz/edix/blob/c3e2464dd9fb3308ead13fab4a3705fded785408/src/editor.ts#L137)
 
 TODO
 
@@ -160,11 +164,27 @@ TODO
 
 ***
 
+### autoScroll?
+
+> `optional` **autoScroll**: `boolean`
+
+Defined in: [editor.ts:143](https://github.com/lofcz/edix/blob/c3e2464dd9fb3308ead13fab4a3705fded785408/src/editor.ts#L143)
+
+Automatically scroll the mounted element to keep the caret visible
+after document changes. Scroll is coalesced via rAF for zero
+synchronous layout cost during input handling.
+
+#### Inherited from
+
+`Omit.autoScroll`
+
+***
+
 ### onError()?
 
 > `optional` **onError**: (`message`) => `void`
 
-Defined in: [editor.ts:146](https://github.com/inokawa/edix/blob/ab46ad7639d47a1c04210a60f83b875ef90b7e64/src/editor.ts#L146)
+Defined in: [editor.ts:153](https://github.com/lofcz/edix/blob/c3e2464dd9fb3308ead13fab4a3705fded785408/src/editor.ts#L153)
 
 Callback invoked when errors happen.
 

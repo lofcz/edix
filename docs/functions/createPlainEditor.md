@@ -6,7 +6,7 @@
 
 > **createPlainEditor**(`__namedParameters`): [`Editor`](../interfaces/Editor.md)\<`PlainDoc`\>
 
-Defined in: [presets/plain.ts:29](https://github.com/inokawa/edix/blob/ab46ad7639d47a1c04210a60f83b875ef90b7e64/src/presets/plain.ts#L29)
+Defined in: [presets/plain.ts:86](https://github.com/lofcz/edix/blob/c3e2464dd9fb3308ead13fab4a3705fded785408/src/presets/plain.ts#L86)
 
 A function to initialize editor with plaintext.
 

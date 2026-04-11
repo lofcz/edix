@@ -6,7 +6,7 @@
 
 > **hotkey**(`key`, `cb`, `__namedParameters`): [`KeyboardHandler`](../type-aliases/KeyboardHandler.md)
 
-Defined in: [hotkey.ts:6](https://github.com/inokawa/edix/blob/ab46ad7639d47a1c04210a60f83b875ef90b7e64/src/hotkey.ts#L6)
+Defined in: [hotkey.ts:6](https://github.com/lofcz/edix/blob/c3e2464dd9fb3308ead13fab4a3705fded785408/src/hotkey.ts#L6)
 
 TODO
 

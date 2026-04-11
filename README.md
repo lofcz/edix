@@ -1,6 +1,6 @@
 # edix
 
-![npm](https://img.shields.io/npm/v/edix) ![npm bundle size](https://img.shields.io/bundlephobia/minzip/edix) ![npm](https://img.shields.io/npm/dw/edix) [![check](https://github.com/inokawa/edix/actions/workflows/check.yml/badge.svg)](https://github.com/inokawa/edix/actions/workflows/check.yml) [![demo](https://github.com/inokawa/edix/actions/workflows/demo.yml/badge.svg)](https://github.com/inokawa/edix/actions/workflows/demo.yml)
+![npm](https://img.shields.io/npm/v/@lofcz/edix) ![npm bundle size](https://img.shields.io/bundlephobia/minzip/@lofcz/edix) ![npm](https://img.shields.io/npm/dw/@lofcz/edix) [![check](https://github.com/lofcz/edix/actions/workflows/check.yml/badge.svg)](https://github.com/lofcz/edix/actions/workflows/check.yml) [![demo](https://github.com/lofcz/edix/actions/workflows/demo.yml/badge.svg)](https://github.com/lofcz/edix/actions/workflows/demo.yml)
 
 > An experimental, framework agnostic, small (4kB+) [contenteditable](https://developer.mozilla.org/en-US/docs/Web/HTML/Global_attributes/contenteditable) state manager.
 
@@ -12,13 +12,21 @@ Web editing is so hard even today. There are excellent libraries to make complex
 
 ## Demo
 
-- [React Storybook](https://inokawa.github.io/edix/)
+- [React Storybook](https://lofcz.github.io/edix/)
 - [Framework examples](#other-examples)
 
 ## Install
 
 ```sh
-npm install edix
+npm install edix@npm:@lofcz/edix
+```
+
+This uses an [npm alias](https://docs.npmjs.com/cli/commands/npm-install) so you can keep using `import { ... } from "edix"` in your code while installing the `@lofcz/edix` fork.
+
+Alternatively, install directly and import from `@lofcz/edix`:
+
+```sh
+npm install @lofcz/edix
 ```
 
 `typescript >=5.0` is recommended.
@@ -27,7 +35,7 @@ npm install edix
 
 Browser versions supporting [beforeinput event](https://developer.mozilla.org/en-US/docs/Web/API/Element/beforeinput_event#browser_compatibility) are supported.
 
-Mobile browsers are also supported, but with some issues (https://github.com/inokawa/edix/issues/97).
+Mobile browsers are also supported, but with some issues (https://github.com/lofcz/edix/issues/97).
 
 ## Getting started
 
@@ -189,13 +197,13 @@ export const App = () => {
 
 ### Other examples
 
-- React ([Demo](https://inokawa.github.io/edix/react), [Source](./examples/react))
-- Vue ([Demo](https://inokawa.github.io/edix/vue), [Source](./examples/vue))
-- Svelte ([Demo](https://inokawa.github.io/edix/svelte), [Source](./examples/svelte))
-- Solid ([Demo](https://inokawa.github.io/edix/solid), [Source](./examples/solid))
-- Angular ([Demo](https://inokawa.github.io/edix/angular), [Source](./examples/angular))
-- Preact ([Demo](https://inokawa.github.io/edix/preact), [Source](./examples/preact))
-- Vanilla ([Demo](https://inokawa.github.io/edix/vanilla), [Source](./examples/vanilla))
+- React ([Demo](https://lofcz.github.io/edix/react), [Source](./examples/react))
+- Vue ([Demo](https://lofcz.github.io/edix/vue), [Source](./examples/vue))
+- Svelte ([Demo](https://lofcz.github.io/edix/svelte), [Source](./examples/svelte))
+- Solid ([Demo](https://lofcz.github.io/edix/solid), [Source](./examples/solid))
+- Angular ([Demo](https://lofcz.github.io/edix/angular), [Source](./examples/angular))
+- Preact ([Demo](https://lofcz.github.io/edix/preact), [Source](./examples/preact))
+- Vanilla ([Demo](https://lofcz.github.io/edix/vanilla), [Source](./examples/vanilla))
 
 ...and more! Contribution welcome!
 
@@ -207,7 +215,7 @@ export const App = () => {
 ## Contribute
 
 All contributions are welcome.
-If you find a problem, feel free to create an [issue](https://github.com/inokawa/edix/issues) or a [PR](https://github.com/inokawa/edix/pulls). If you have a question, ask in [discussions](https://github.com/inokawa/edix/discussions).
+If you find a problem, feel free to create an [issue](https://github.com/lofcz/edix/issues) or a [PR](https://github.com/lofcz/edix/pulls). If you have a question, ask in [discussions](https://github.com/lofcz/edix/discussions).
 
 ### Making a Pull Request
 

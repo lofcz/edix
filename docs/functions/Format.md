@@ -6,7 +6,7 @@
 
 > **Format**\<`T`, `N`, `K`\>(`this`, `key`, `value`, `range`): `void`
 
-Defined in: [commands.ts:83](https://github.com/inokawa/edix/blob/ab46ad7639d47a1c04210a60f83b875ef90b7e64/src/commands.ts#L83)
+Defined in: [commands.ts:102](https://github.com/lofcz/edix/blob/c3e2464dd9fb3308ead13fab4a3705fded785408/src/commands.ts#L102)
 
 Format content in the selection or specified range.
 
