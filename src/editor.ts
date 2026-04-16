@@ -293,23 +293,6 @@ export const createEditor = <
     return (hooks.get(key) || empty) as unknown as EditorHookMap[T][];
   };
 
-  const setHook = <T extends keyof EditorHookMap>(
-    type: T,
-    callback: EditorHookMap[T],
-  ): (() => void) => {
-    let sub = hooks.get(type);
-    if (!sub) {
-      hooks.set(type, (sub = []));
-    }
-    sub.push(callback);
-    return () => {
-      const i = sub.indexOf(callback);
-      if (i !== -1) {
-        sub.splice(i, 1);
-      }
-    };
-  };
-
   const subs = new Map<
     keyof EditorEventMap,
     [cbs: Set<EditorEventMap[keyof EditorEventMap]>, queued: boolean]
@@ -434,7 +417,19 @@ export const createEditor = <
         cbs.delete(callback);
       };
     },
-    hook: setHook,
+    hook: (type, callback) => {
+      let sub = hooks.get(type);
+      if (!sub) {
+        hooks.set(type, (sub = []));
+      }
+      sub.push(callback);
+      return () => {
+        const i = sub.indexOf(callback);
+        if (i !== -1) {
+          sub.splice(i, 1);
+        }
+      };
+    },
     use: (plugin, ...args) => {
       plugin.call(editor, ...args);
       return editor;
