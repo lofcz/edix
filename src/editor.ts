@@ -150,19 +150,11 @@ type EditorEventMap = {
   selectionchange: () => void;
   readonly: () => void;
 };
-type EditorEvent<K extends keyof EditorEventMap> = [
-  type: K,
-  callback: EditorEventMap[K],
-];
 
 type EditorHookMap = {
   apply: (op: Operation, next: (op?: Operation) => void) => void;
   mount: (element: HTMLElement) => void | (() => void);
 };
-type EditorHook<K extends keyof EditorHookMap> = [
-  type: K,
-  callback: EditorHookMap[K],
-];
 
 /**
  * The editor instance.
@@ -187,12 +179,18 @@ export interface Editor<T extends DocNode = DocNode> {
    * A function to subscribe editor events.
    * @returns cleanup function
    */
-  on<K extends keyof EditorEventMap>(...args: EditorEvent<K>): () => void;
+  on<K extends keyof EditorEventMap>(
+    key: K,
+    callback: EditorEventMap[K],
+  ): () => void;
   /**
    * A function to register editor hooks.
    * @returns cleanup function
    */
-  hook<K extends keyof EditorHookMap>(...args: EditorHook<K>): () => void;
+  hook<K extends keyof EditorHookMap>(
+    key: K,
+    callback: EditorHookMap[K],
+  ): () => void;
   /**
    * A function to make DOM editable.
    * @returns A function to stop subscribing DOM changes and restores previous DOM state.
