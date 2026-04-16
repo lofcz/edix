@@ -4,7 +4,7 @@
 
 # Interface: Editor\<T\>
 
-Defined in: [editor.ts:152](https://github.com/inokawa/edix/blob/ab46ad7639d47a1c04210a60f83b875ef90b7e64/src/editor.ts#L152)
+Defined in: [editor.ts:161](https://github.com/inokawa/edix/blob/d7945ff974b9e3a7fc749dac0c94c243a7683db0/src/editor.ts#L161)
 
 The editor instance.
 
@@ -22,7 +22,7 @@ The editor instance.
 
 > **apply**(`tr`, `immediate?`): `this`
 
-Defined in: [editor.ts:166](https://github.com/inokawa/edix/blob/ab46ad7639d47a1c04210a60f83b875ef90b7e64/src/editor.ts#L166)
+Defined in: [editor.ts:175](https://github.com/inokawa/edix/blob/d7945ff974b9e3a7fc749dac0c94c243a7683db0/src/editor.ts#L175)
 
 Dispatches editing operations.
 
@@ -48,7 +48,7 @@ If true, flushes queued operations immediately.
 
 > **apply**\<`A`\>(`fn`, ...`args`): `this`
 
-Defined in: [editor.ts:167](https://github.com/inokawa/edix/blob/ab46ad7639d47a1c04210a60f83b875ef90b7e64/src/editor.ts#L167)
+Defined in: [editor.ts:176](https://github.com/inokawa/edix/blob/d7945ff974b9e3a7fc749dac0c94c243a7683db0/src/editor.ts#L176)
 
 ##### Type Parameters
 
@@ -70,13 +70,45 @@ Defined in: [editor.ts:167](https://github.com/inokawa/edix/blob/ab46ad7639d47a1
 
 `this`
 
+***
+
+### on()
+
+> **on**\<`K`\>(...`args`): () => `void`
+
+Defined in: [editor.ts:181](https://github.com/inokawa/edix/blob/d7945ff974b9e3a7fc749dac0c94c243a7683db0/src/editor.ts#L181)
+
+A function to subscribe editor events.
+
+#### Type Parameters
+
+##### K
+
+`K` *extends* keyof `EditorEventMap`
+
+#### Parameters
+
+##### args
+
+...`EditorEvent`\<`K`\>
+
+#### Returns
+
+cleanup function
+
+> (): `void`
+
+##### Returns
+
+`void`
+
 ## Properties
 
 ### doc
 
 > `readonly` **doc**: `T`
 
-Defined in: [editor.ts:153](https://github.com/inokawa/edix/blob/ab46ad7639d47a1c04210a60f83b875ef90b7e64/src/editor.ts#L153)
+Defined in: [editor.ts:162](https://github.com/inokawa/edix/blob/d7945ff974b9e3a7fc749dac0c94c243a7683db0/src/editor.ts#L162)
 
 ***
 
@@ -84,7 +116,7 @@ Defined in: [editor.ts:153](https://github.com/inokawa/edix/blob/ab46ad7639d47a1
 
 > **selection**: `SelectionSnapshot`
 
-Defined in: [editor.ts:154](https://github.com/inokawa/edix/blob/ab46ad7639d47a1c04210a60f83b875ef90b7e64/src/editor.ts#L154)
+Defined in: [editor.ts:163](https://github.com/inokawa/edix/blob/d7945ff974b9e3a7fc749dac0c94c243a7683db0/src/editor.ts#L163)
 
 ***
 
@@ -92,7 +124,7 @@ Defined in: [editor.ts:154](https://github.com/inokawa/edix/blob/ab46ad7639d47a1
 
 > **readonly**: `boolean`
 
-Defined in: [editor.ts:159](https://github.com/inokawa/edix/blob/ab46ad7639d47a1c04210a60f83b875ef90b7e64/src/editor.ts#L159)
+Defined in: [editor.ts:168](https://github.com/inokawa/edix/blob/d7945ff974b9e3a7fc749dac0c94c243a7683db0/src/editor.ts#L168)
 
 The getter/setter for the editor's read-only state.
 `true` to read-only. `false` to editable.
@@ -103,7 +135,7 @@ The getter/setter for the editor's read-only state.
 
 > **input**: (`element`) => () => `void`
 
-Defined in: [editor.ts:172](https://github.com/inokawa/edix/blob/ab46ad7639d47a1c04210a60f83b875ef90b7e64/src/editor.ts#L172)
+Defined in: [editor.ts:186](https://github.com/inokawa/edix/blob/d7945ff974b9e3a7fc749dac0c94c243a7683db0/src/editor.ts#L186)
 
 A function to make DOM editable.
 

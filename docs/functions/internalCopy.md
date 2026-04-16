@@ -6,7 +6,7 @@
 
 > **internalCopy**(`__namedParameters`): [`CopyExtension`](../type-aliases/CopyExtension.md)
 
-Defined in: [extensions/copy/internal.ts:7](https://github.com/inokawa/edix/blob/ab46ad7639d47a1c04210a60f83b875ef90b7e64/src/extensions/copy/internal.ts#L7)
+Defined in: [extensions/copy/internal.ts:7](https://github.com/inokawa/edix/blob/d7945ff974b9e3a7fc749dac0c94c243a7683db0/src/extensions/copy/internal.ts#L7)
 
 An extension to handle copying to edix editor instance.
 

@@ -6,7 +6,7 @@
 
 > **singlelinePlugin**(): [`EditorPlugin`](../interfaces/EditorPlugin.md)
 
-Defined in: [plugins/singleline.ts:4](https://github.com/inokawa/edix/blob/ab46ad7639d47a1c04210a60f83b875ef90b7e64/src/plugins/singleline.ts#L4)
+Defined in: [plugins/singleline.ts:4](https://github.com/inokawa/edix/blob/d7945ff974b9e3a7fc749dac0c94c243a7683db0/src/plugins/singleline.ts#L4)
 
 ## Returns
 
