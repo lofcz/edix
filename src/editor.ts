@@ -188,7 +188,7 @@ export interface Editor<T extends DocNode = DocNode> {
    */
   on<K extends keyof EditorEventMap>(...args: EditorEvent<K>): () => void;
   /**
-   * A function to set editor hooks.
+   * A function to register editor hooks.
    * @returns cleanup function
    */
   hook<K extends keyof EditorHookMap>(...args: EditorHook<K>): () => void;
