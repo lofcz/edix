@@ -19,7 +19,7 @@ type DeleteOperation = Readonly<{
 }>;
 
 const TYPE_INSERT_TEXT = "insert_text";
-type InsertOperation = Readonly<{
+type InsertTextOperation = Readonly<{
   type: typeof TYPE_INSERT_TEXT;
   at: Position;
   text: string;
@@ -43,7 +43,7 @@ type SetAttrOperation = Readonly<{
 
 export type Operation =
   | DeleteOperation
-  | InsertOperation
+  | InsertTextOperation
   | InsertNodeOperation
   | SetAttrOperation;
 
