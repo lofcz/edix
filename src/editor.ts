@@ -161,7 +161,7 @@ type EditorHookMap = {
  */
 export interface Editor<T extends DocNode = DocNode> {
   readonly doc: T;
-  selection: SelectionSnapshot;
+  readonly selection: SelectionSnapshot;
   /**
    * The getter/setter for the editor's read-only state.
    * `true` to read-only. `false` to editable.
@@ -388,9 +388,9 @@ export const createEditor = <
     get selection() {
       return selection;
     },
-    set selection(value) {
-      updateSelection(value);
-    },
+    // set selection(value) {
+    //   updateSelection(value);
+    // },
     get readonly() {
       return readonly;
     },
