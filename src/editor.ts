@@ -17,7 +17,7 @@ import type { EditorCommand } from "./commands.js";
 import {
   applyOperation,
   Transaction,
-  sliceDoc,
+  sliceFragment,
   type Operation,
   isUnsafeOperation,
   isValidSelection,
@@ -660,7 +660,7 @@ export const createEditor = <
       const copySelected = (dataTransfer: DataTransfer) => {
         syncSelection();
         if (comparePosition(...selection) !== 0) {
-          copy(dataTransfer, sliceDoc(doc, ...toRange(selection)));
+          copy(dataTransfer, sliceFragment(doc, ...toRange(selection)));
         }
       };
 

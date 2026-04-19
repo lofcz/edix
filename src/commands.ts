@@ -1,5 +1,10 @@
 import { toRange } from "./doc/position.js";
-import { getLineSize, isTextNode, sliceDoc, Transaction } from "./doc/edit.js";
+import {
+  getLineSize,
+  isTextNode,
+  sliceFragment,
+  Transaction,
+} from "./doc/edit.js";
 import type { Editor } from "./editor.js";
 import type {
   DocNode,
@@ -101,7 +106,7 @@ export function ToggleFormat<T extends DocNode>(
   key: Extract<ToggleableKey<Omit<InferNode<T>, "text">>, string>,
   range: PositionRange = toRange(this.selection),
 ) {
-  const texts = sliceDoc(this.doc, ...range).flatMap((n) =>
+  const texts = sliceFragment(this.doc, ...range).flatMap((n) =>
     n.filter(isTextNode),
   );
   if (texts.length) {

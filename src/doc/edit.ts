@@ -296,7 +296,7 @@ const replaceRange = <T extends DocNode>(
 /**
  * @internal
  */
-export const sliceDoc = (
+export const sliceFragment = (
   doc: DocNode,
   start: Position,
   end: Position,
@@ -441,7 +441,7 @@ export const applyOperation = <T extends DocNode>(
           doc,
           start,
           end,
-          sliceDoc(doc, start, end).map((line) =>
+          sliceFragment(doc, start, end).map((line) =>
             line.map((node) =>
               isTextNode(node) ? { ...node, [key]: value } : node,
             ),
