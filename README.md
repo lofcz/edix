@@ -170,9 +170,9 @@ export const App = () => {
           padding: 8,
         }}
       >
-        {doc.children.map((r, i) => (
+        {doc.children.map((b, i) => (
           <div key={i}>
-            {r.map((n, j) => (
+            {b.children.map((n, j) => (
               <span
                 key={j}
                 style={{
