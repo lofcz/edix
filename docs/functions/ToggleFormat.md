@@ -6,7 +6,7 @@
 
 > **ToggleFormat**\<`T`\>(`this`, `key`, `range`): `void`
 
-Defined in: [commands.ts:99](https://github.com/inokawa/edix/blob/d7945ff974b9e3a7fc749dac0c94c243a7683db0/src/commands.ts#L99)
+Defined in: [commands.ts:106](https://github.com/inokawa/edix/blob/7b3b21d6457b7fba74e37232c1b46825210d4e94/src/commands.ts#L106)
 
 Toggle formatting in the selection or specified range.
 

@@ -34,10 +34,10 @@
 - [EditorOptions](interfaces/EditorOptions.md)
 - [Editor](interfaces/Editor.md)
 - [PlainEditorOptions](interfaces/PlainEditorOptions.md)
-- [EditorPlugin](interfaces/EditorPlugin.md)
 
 ## Type Aliases
 
-- [KeyboardHandler](type-aliases/KeyboardHandler.md)
-- [CopyExtension](type-aliases/CopyExtension.md)
-- [PasteExtension](type-aliases/PasteExtension.md)
+- [KeyboardHook](type-aliases/KeyboardHook.md)
+- [CopyHook](type-aliases/CopyHook.md)
+- [PasteHook](type-aliases/PasteHook.md)
+- [EditorPlugin](type-aliases/EditorPlugin.md)

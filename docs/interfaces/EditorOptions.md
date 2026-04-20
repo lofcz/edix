@@ -4,7 +4,7 @@
 
 # Interface: EditorOptions\<T, S\>
 
-Defined in: [editor.ts:97](https://github.com/inokawa/edix/blob/d7945ff974b9e3a7fc749dac0c94c243a7683db0/src/editor.ts#L97)
+Defined in: [editor.ts:100](https://github.com/inokawa/edix/blob/7b3b21d6457b7fba74e37232c1b46825210d4e94/src/editor.ts#L100)
 
 Options of [createEditor](../functions/createEditor.md).
 
@@ -24,7 +24,7 @@ Options of [createEditor](../functions/createEditor.md).
 
 > `optional` **schema**: `S`
 
-Defined in: [editor.ts:104](https://github.com/inokawa/edix/blob/d7945ff974b9e3a7fc749dac0c94c243a7683db0/src/editor.ts#L104)
+Defined in: [editor.ts:107](https://github.com/inokawa/edix/blob/7b3b21d6457b7fba74e37232c1b46825210d4e94/src/editor.ts#L107)
 
 Optional [Standard Schema](https://github.com/standard-schema/standard-schema) to validate unsafe edits.
 
@@ -34,7 +34,7 @@ Optional [Standard Schema](https://github.com/standard-schema/standard-schema) t
 
 > **doc**: `T`
 
-Defined in: [editor.ts:108](https://github.com/inokawa/edix/blob/d7945ff974b9e3a7fc749dac0c94c243a7683db0/src/editor.ts#L108)
+Defined in: [editor.ts:111](https://github.com/inokawa/edix/blob/7b3b21d6457b7fba74e37232c1b46825210d4e94/src/editor.ts#L111)
 
 Initial document.
 
@@ -44,27 +44,17 @@ Initial document.
 
 > `optional` **readonly**: `boolean`
 
-Defined in: [editor.ts:112](https://github.com/inokawa/edix/blob/d7945ff974b9e3a7fc749dac0c94c243a7683db0/src/editor.ts#L112)
+Defined in: [editor.ts:115](https://github.com/inokawa/edix/blob/7b3b21d6457b7fba74e37232c1b46825210d4e94/src/editor.ts#L115)
 
 The state editable or not.
 
 ***
 
-### plugins?
-
-> `optional` **plugins**: [`EditorPlugin`](EditorPlugin.md)[]
-
-Defined in: [editor.ts:116](https://github.com/inokawa/edix/blob/d7945ff974b9e3a7fc749dac0c94c243a7683db0/src/editor.ts#L116)
-
-TODO
-
-***
-
 ### keyboard?
 
-> `optional` **keyboard**: [`KeyboardHandler`](../type-aliases/KeyboardHandler.md)[]
+> `optional` **keyboard**: [`KeyboardHook`](../type-aliases/KeyboardHook.md)[]
 
-Defined in: [editor.ts:122](https://github.com/inokawa/edix/blob/d7945ff974b9e3a7fc749dac0c94c243a7683db0/src/editor.ts#L122)
+Defined in: [editor.ts:121](https://github.com/inokawa/edix/blob/7b3b21d6457b7fba74e37232c1b46825210d4e94/src/editor.ts#L121)
 
 Functions to handle keyboard events.
 
@@ -74,9 +64,9 @@ Return `true` if you want to stop propagation.
 
 ### copy?
 
-> `optional` **copy**: \[[`CopyExtension`](../type-aliases/CopyExtension.md), `...rest: CopyExtension[]`\]
+> `optional` **copy**: \[[`CopyHook`](../type-aliases/CopyHook.md), `...rest: CopyHook[]`\]
 
-Defined in: [editor.ts:127](https://github.com/inokawa/edix/blob/d7945ff974b9e3a7fc749dac0c94c243a7683db0/src/editor.ts#L127)
+Defined in: [editor.ts:126](https://github.com/inokawa/edix/blob/7b3b21d6457b7fba74e37232c1b46825210d4e94/src/editor.ts#L126)
 
 Functions to handle copy events
 
@@ -90,9 +80,9 @@ Functions to handle copy events
 
 ### paste?
 
-> `optional` **paste**: \[[`PasteExtension`](../type-aliases/PasteExtension.md), `...rest: PasteExtension[]`\]
+> `optional` **paste**: \[[`PasteHook`](../type-aliases/PasteHook.md), `...rest: PasteHook[]`\]
 
-Defined in: [editor.ts:132](https://github.com/inokawa/edix/blob/d7945ff974b9e3a7fc749dac0c94c243a7683db0/src/editor.ts#L132)
+Defined in: [editor.ts:131](https://github.com/inokawa/edix/blob/7b3b21d6457b7fba74e37232c1b46825210d4e94/src/editor.ts#L131)
 
 Functions to handle paste / drop events
 
@@ -108,7 +98,7 @@ Functions to handle paste / drop events
 
 > `optional` **isBlock**: (`node`) => `boolean`
 
-Defined in: [editor.ts:136](https://github.com/inokawa/edix/blob/d7945ff974b9e3a7fc749dac0c94c243a7683db0/src/editor.ts#L136)
+Defined in: [editor.ts:135](https://github.com/inokawa/edix/blob/7b3b21d6457b7fba74e37232c1b46825210d4e94/src/editor.ts#L135)
 
 TODO
 
@@ -128,7 +118,7 @@ TODO
 
 > **onChange**: (`doc`) => `void`
 
-Defined in: [editor.ts:140](https://github.com/inokawa/edix/blob/d7945ff974b9e3a7fc749dac0c94c243a7683db0/src/editor.ts#L140)
+Defined in: [editor.ts:139](https://github.com/inokawa/edix/blob/7b3b21d6457b7fba74e37232c1b46825210d4e94/src/editor.ts#L139)
 
 Callback invoked when document changes.
 
@@ -148,7 +138,7 @@ Callback invoked when document changes.
 
 > `optional` **onError**: (`message`) => `void`
 
-Defined in: [editor.ts:146](https://github.com/inokawa/edix/blob/d7945ff974b9e3a7fc749dac0c94c243a7683db0/src/editor.ts#L146)
+Defined in: [editor.ts:145](https://github.com/inokawa/edix/blob/7b3b21d6457b7fba74e37232c1b46825210d4e94/src/editor.ts#L145)
 
 Callback invoked when errors happen.
 

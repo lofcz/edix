@@ -4,9 +4,9 @@
 
 # Function: htmlPaste()
 
-> **htmlPaste**\<`T`\>(`serializeText`, `serializers`): [`PasteExtension`](../type-aliases/PasteExtension.md)
+> **htmlPaste**\<`T`\>(`serializeText`, `serializers`): [`PasteHook`](../type-aliases/PasteHook.md)
 
-Defined in: [extensions/paste/html.ts:9](https://github.com/inokawa/edix/blob/d7945ff974b9e3a7fc749dac0c94c243a7683db0/src/extensions/paste/html.ts#L9)
+Defined in: [hooks/paste/html.ts:9](https://github.com/inokawa/edix/blob/7b3b21d6457b7fba74e37232c1b46825210d4e94/src/hooks/paste/html.ts#L9)
 
 An extension to handle pasting / dropping from HTML.
 
@@ -28,4 +28,4 @@ An extension to handle pasting / dropping from HTML.
 
 ## Returns
 
-[`PasteExtension`](../type-aliases/PasteExtension.md)
+[`PasteHook`](../type-aliases/PasteHook.md)

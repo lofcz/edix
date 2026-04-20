@@ -4,9 +4,9 @@
 
 # Function: filePaste()
 
-> **filePaste**(`handlerByMime`): [`PasteExtension`](../type-aliases/PasteExtension.md)
+> **filePaste**(`handlerByMime`): [`PasteHook`](../type-aliases/PasteHook.md)
 
-Defined in: [extensions/paste/file.ts:7](https://github.com/inokawa/edix/blob/d7945ff974b9e3a7fc749dac0c94c243a7683db0/src/extensions/paste/file.ts#L7)
+Defined in: [hooks/paste/file.ts:7](https://github.com/inokawa/edix/blob/7b3b21d6457b7fba74e37232c1b46825210d4e94/src/hooks/paste/file.ts#L7)
 
 An extension to handle pasting / dropping from File.
 
@@ -18,4 +18,4 @@ An extension to handle pasting / dropping from File.
 
 ## Returns
 
-[`PasteExtension`](../type-aliases/PasteExtension.md)
+[`PasteHook`](../type-aliases/PasteHook.md)

@@ -4,9 +4,9 @@
 
 # Function: plainCopy()
 
-> **plainCopy**\<`T`\>(`serializer?`): [`CopyExtension`](../type-aliases/CopyExtension.md)
+> **plainCopy**\<`T`\>(`serializer?`): [`CopyHook`](../type-aliases/CopyHook.md)
 
-Defined in: [extensions/copy/plain.ts:8](https://github.com/inokawa/edix/blob/d7945ff974b9e3a7fc749dac0c94c243a7683db0/src/extensions/copy/plain.ts#L8)
+Defined in: [hooks/copy/plain.ts:8](https://github.com/inokawa/edix/blob/7b3b21d6457b7fba74e37232c1b46825210d4e94/src/hooks/copy/plain.ts#L8)
 
 An extension to handle copying to plain text.
 
@@ -24,4 +24,4 @@ An extension to handle copying to plain text.
 
 ## Returns
 
-[`CopyExtension`](../type-aliases/CopyExtension.md)
+[`CopyHook`](../type-aliases/CopyHook.md)

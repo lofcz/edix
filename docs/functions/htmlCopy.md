@@ -4,12 +4,12 @@
 
 # Function: htmlCopy()
 
-> **htmlCopy**(): [`CopyExtension`](../type-aliases/CopyExtension.md)
+> **htmlCopy**(): [`CopyHook`](../type-aliases/CopyHook.md)
 
-Defined in: [extensions/copy/html.ts:7](https://github.com/inokawa/edix/blob/d7945ff974b9e3a7fc749dac0c94c243a7683db0/src/extensions/copy/html.ts#L7)
+Defined in: [hooks/copy/html.ts:7](https://github.com/inokawa/edix/blob/7b3b21d6457b7fba74e37232c1b46825210d4e94/src/hooks/copy/html.ts#L7)
 
 An extension to handle copying to HTML.
 
 ## Returns
 
-[`CopyExtension`](../type-aliases/CopyExtension.md)
+[`CopyHook`](../type-aliases/CopyHook.md)

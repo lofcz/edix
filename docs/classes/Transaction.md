@@ -4,7 +4,7 @@
 
 # Class: Transaction
 
-Defined in: [doc/edit.ts:56](https://github.com/inokawa/edix/blob/d7945ff974b9e3a7fc749dac0c94c243a7683db0/src/doc/edit.ts#L56)
+Defined in: [doc/edit.ts:57](https://github.com/inokawa/edix/blob/7b3b21d6457b7fba74e37232c1b46825210d4e94/src/doc/edit.ts#L57)
 
 ## Accessors
 
@@ -14,7 +14,7 @@ Defined in: [doc/edit.ts:56](https://github.com/inokawa/edix/blob/d7945ff974b9e3
 
 > **get** **ops**(): readonly `Operation`[]
 
-Defined in: [doc/edit.ts:64](https://github.com/inokawa/edix/blob/d7945ff974b9e3a7fc749dac0c94c243a7683db0/src/doc/edit.ts#L64)
+Defined in: [doc/edit.ts:65](https://github.com/inokawa/edix/blob/7b3b21d6457b7fba74e37232c1b46825210d4e94/src/doc/edit.ts#L65)
 
 ##### Returns
 
@@ -26,7 +26,7 @@ readonly `Operation`[]
 
 > **new Transaction**(`ops?`): `Transaction`
 
-Defined in: [doc/edit.ts:60](https://github.com/inokawa/edix/blob/d7945ff974b9e3a7fc749dac0c94c243a7683db0/src/doc/edit.ts#L60)
+Defined in: [doc/edit.ts:61](https://github.com/inokawa/edix/blob/7b3b21d6457b7fba74e37232c1b46825210d4e94/src/doc/edit.ts#L61)
 
 #### Parameters
 
@@ -44,7 +44,7 @@ readonly `Operation`[]
 
 > **insertText**(`start`, `text`): `this`
 
-Defined in: [doc/edit.ts:68](https://github.com/inokawa/edix/blob/d7945ff974b9e3a7fc749dac0c94c243a7683db0/src/doc/edit.ts#L68)
+Defined in: [doc/edit.ts:69](https://github.com/inokawa/edix/blob/7b3b21d6457b7fba74e37232c1b46825210d4e94/src/doc/edit.ts#L69)
 
 #### Parameters
 
@@ -66,7 +66,7 @@ Defined in: [doc/edit.ts:68](https://github.com/inokawa/edix/blob/d7945ff974b9e3
 
 > **insertFragment**(`start`, `fragment`): `this`
 
-Defined in: [doc/edit.ts:77](https://github.com/inokawa/edix/blob/d7945ff974b9e3a7fc749dac0c94c243a7683db0/src/doc/edit.ts#L77)
+Defined in: [doc/edit.ts:78](https://github.com/inokawa/edix/blob/7b3b21d6457b7fba74e37232c1b46825210d4e94/src/doc/edit.ts#L78)
 
 #### Parameters
 
@@ -76,7 +76,7 @@ Defined in: [doc/edit.ts:77](https://github.com/inokawa/edix/blob/d7945ff974b9e3
 
 ##### fragment
 
-readonly readonly `InlineNode`[][]
+readonly `BlockNode`[]
 
 #### Returns
 
@@ -88,7 +88,7 @@ readonly readonly `InlineNode`[][]
 
 > **delete**(`start`, `end`): `this`
 
-Defined in: [doc/edit.ts:86](https://github.com/inokawa/edix/blob/d7945ff974b9e3a7fc749dac0c94c243a7683db0/src/doc/edit.ts#L86)
+Defined in: [doc/edit.ts:87](https://github.com/inokawa/edix/blob/7b3b21d6457b7fba74e37232c1b46825210d4e94/src/doc/edit.ts#L87)
 
 #### Parameters
 
@@ -110,7 +110,7 @@ Defined in: [doc/edit.ts:86](https://github.com/inokawa/edix/blob/d7945ff974b9e3
 
 > **attr**(`start`, `end`, `key`, `value`): `this`
 
-Defined in: [doc/edit.ts:95](https://github.com/inokawa/edix/blob/d7945ff974b9e3a7fc749dac0c94c243a7683db0/src/doc/edit.ts#L95)
+Defined in: [doc/edit.ts:96](https://github.com/inokawa/edix/blob/7b3b21d6457b7fba74e37232c1b46825210d4e94/src/doc/edit.ts#L96)
 
 #### Parameters
 
@@ -140,7 +140,7 @@ Defined in: [doc/edit.ts:95](https://github.com/inokawa/edix/blob/d7945ff974b9e3
 
 > **transform**(`position`): `Position`
 
-Defined in: [doc/edit.ts:106](https://github.com/inokawa/edix/blob/d7945ff974b9e3a7fc749dac0c94c243a7683db0/src/doc/edit.ts#L106)
+Defined in: [doc/edit.ts:107](https://github.com/inokawa/edix/blob/7b3b21d6457b7fba74e37232c1b46825210d4e94/src/doc/edit.ts#L107)
 
 #### Parameters
 
@@ -158,4 +158,4 @@ Defined in: [doc/edit.ts:106](https://github.com/inokawa/edix/blob/d7945ff974b9e
 
 > `optional` **selection**: `SelectionSnapshot`
 
-Defined in: [doc/edit.ts:58](https://github.com/inokawa/edix/blob/d7945ff974b9e3a7fc749dac0c94c243a7683db0/src/doc/edit.ts#L58)
+Defined in: [doc/edit.ts:59](https://github.com/inokawa/edix/blob/7b3b21d6457b7fba74e37232c1b46825210d4e94/src/doc/edit.ts#L59)
