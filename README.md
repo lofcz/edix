@@ -97,16 +97,16 @@ export const App = () => {
 ```tsx
 import { useState, useEffect, useRef, useMemo } from "react";
 import { createEditor, ToggleFormat } from "edix";
-import * as v from "valibot";
+import * as z from "zod";
 
-const schema = v.strictObject({
-  children: v.array(
-    v.strictObject({
-      children: v.array(
-        v.strictObject({
-          text: v.string(),
-          bold: v.optional(v.boolean()),
-          italic: v.optional(v.boolean()),
+const schema = z.strictObject({
+  children: z.array(
+    z.strictObject({
+      children: z.array(
+        z.strictObject({
+          text: z.string(),
+          bold: z.boolean().optional(),
+          italic: z.boolean().optional(),
         }),
       ),
     }),
@@ -116,7 +116,7 @@ const schema = v.strictObject({
 export const App = () => {
   const ref = useRef<HTMLDivElement>(null);
 
-  type Doc = v.InferOutput<typeof schema>;
+  type Doc = z.infer<typeof schema>;
   const [doc, setDoc] = useState<Doc>({
     children: [
       {
