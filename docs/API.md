@@ -18,6 +18,7 @@
 - [ReplaceAll](functions/ReplaceAll.md)
 - [Format](functions/Format.md)
 - [ToggleFormat](functions/ToggleFormat.md)
+- [SetBlockAttr](functions/SetBlockAttr.md)
 - [createEditor](functions/createEditor.md)
 - [plainCopy](functions/plainCopy.md)
 - [htmlCopy](functions/htmlCopy.md)
