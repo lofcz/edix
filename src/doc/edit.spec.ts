@@ -3096,7 +3096,7 @@ describe("format", () => {
   });
 });
 
-describe("set block attr", () => {
+describe("set attr", () => {
   describe("validation", () => {
     it("path less than min", () => {
       const docText = "abcde";
@@ -3135,7 +3135,7 @@ describe("set block attr", () => {
     });
   });
 
-  it("update node at start", () => {
+  it("update block node at start", () => {
     const docText = "abcde";
     const docText2 = "fghij";
     const doc: Doc = {
@@ -3167,7 +3167,7 @@ describe("set block attr", () => {
     expect(res[1]).toEqual(sel);
   });
 
-  it("update node at end", () => {
+  it("update block node at end", () => {
     const docText = "abcde";
     const docText2 = "fghij";
     const doc: Doc = {
