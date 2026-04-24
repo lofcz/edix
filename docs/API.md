@@ -19,6 +19,7 @@
 - [Format](functions/Format.md)
 - [ToggleFormat](functions/ToggleFormat.md)
 - [SetBlockAttr](functions/SetBlockAttr.md)
+- [ToggleBlockAttr](functions/ToggleBlockAttr.md)
 - [createEditor](functions/createEditor.md)
 - [plainCopy](functions/plainCopy.md)
 - [htmlCopy](functions/htmlCopy.md)

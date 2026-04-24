@@ -6,7 +6,7 @@
 
 > **SetBlockAttr**\<`T`, `N`, `K`\>(`this`, `key`, `value`, `path`): `void`
 
-Defined in: [commands.ts:130](https://github.com/inokawa/edix/blob/8e6d90067f2f7175e9c6e67138fe753f07f08c94/src/commands.ts#L130)
+Defined in: [commands.ts:131](https://github.com/inokawa/edix/blob/56c6943d830f21af003fc5742a32c5b10e223f61/src/commands.ts#L131)
 
 Set attr to a block node at the caret or specified position.
 
@@ -18,7 +18,7 @@ Set attr to a block node at the caret or specified position.
 
 ### N
 
-`N` *extends* `Omit`\<`InferBlockNode`\<`T`\>, `"text"`\>
+`N` *extends* `DocNode` & BlockNode & InlineNode
 
 ### K
 
