@@ -125,7 +125,7 @@ export function ToggleFormat<T extends DocNode>(
 }
 
 /**
- * Insert node at the caret or specified position.
+ * Set attr to a block node at the caret or specified position.
  */
 export function SetBlockAttr<
   T extends DocNode,
