@@ -129,7 +129,7 @@ export function ToggleFormat<T extends DocNode>(
  */
 export function SetBlockAttr<
   T extends DocNode,
-  N extends Omit<InferBlockNode<T>, "text">,
+  N extends InferBlockNode<T>,
   K extends Extract<keyof N, string>,
 >(this: Editor<T>, key: K, value: N[K], path: Path = this.selection[0][0]) {
   this.apply(new Transaction().attr(path, key, value));
