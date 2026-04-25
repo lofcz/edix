@@ -29,6 +29,7 @@
 - [htmlPaste](functions/htmlPaste.md)
 - [internalPaste](functions/internalPaste.md)
 - [createPlainEditor](functions/createPlainEditor.md)
+- [debugPlugin](functions/debugPlugin.md)
 - [singlelinePlugin](functions/singlelinePlugin.md)
 
 ## Interfaces

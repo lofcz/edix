@@ -6,7 +6,7 @@
 
 > **ReplaceText**(`this`, `text`): `void`
 
-Defined in: [commands.ts:62](https://github.com/inokawa/edix/blob/56c6943d830f21af003fc5742a32c5b10e223f61/src/commands.ts#L62)
+Defined in: [commands.ts:62](https://github.com/inokawa/edix/blob/365226366641d169bae878eed0ca595744a805b7/src/commands.ts#L62)
 
 Replace text in the selection or specified range.
 

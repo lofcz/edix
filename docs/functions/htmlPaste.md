@@ -6,7 +6,7 @@
 
 > **htmlPaste**\<`T`\>(`serializeText`, `serializers`): [`PasteHook`](../type-aliases/PasteHook.md)
 
-Defined in: [hooks/paste/html.ts:9](https://github.com/inokawa/edix/blob/56c6943d830f21af003fc5742a32c5b10e223f61/src/hooks/paste/html.ts#L9)
+Defined in: [hooks/paste/html.ts:9](https://github.com/inokawa/edix/blob/365226366641d169bae878eed0ca595744a805b7/src/hooks/paste/html.ts#L9)
 
 An extension to handle pasting / dropping from HTML.
 

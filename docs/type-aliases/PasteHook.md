@@ -6,7 +6,7 @@
 
 > **PasteHook** = (`dataTransfer`, `config`) => `string` \| `Fragment` \| `null`
 
-Defined in: [hooks/paste/types.ts:4](https://github.com/inokawa/edix/blob/56c6943d830f21af003fc5742a32c5b10e223f61/src/hooks/paste/types.ts#L4)
+Defined in: [hooks/paste/types.ts:4](https://github.com/inokawa/edix/blob/365226366641d169bae878eed0ca595744a805b7/src/hooks/paste/types.ts#L4)
 
 ## Parameters
 
