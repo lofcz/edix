@@ -74,14 +74,13 @@ const setRangeToSelection = (
   backward?: boolean,
 ): void => {
   const selection = getDOMSelection(root);
-  if (!force && !getSelectionRangeInEditor(selection, root)) {
-    return;
-  }
-  selection.removeAllRanges();
-  selection.addRange(range);
-  if (backward) {
-    selection.collapseToEnd();
-    selection.extend(range.startContainer, range.startOffset);
+  if (force || getSelectionRangeInEditor(selection, root)) {
+    selection.removeAllRanges();
+    selection.addRange(range);
+    if (backward) {
+      selection.collapseToEnd();
+      selection.extend(range.startContainer, range.startOffset);
+    }
   }
 };
 
