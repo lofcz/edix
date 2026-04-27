@@ -378,14 +378,10 @@ export const sliceFragment = (
   return sliced;
 };
 
-const isValidPath = (doc: DocNode, path: Path): boolean => {
-  return !path.length || (path[0]! >= 0 && path[0]! < doc.children.length);
-};
-
 const isValidPosition = (doc: DocNode, [path, offset]: Position): boolean => {
-  // TODO improve
-  if (isValidPath(doc, path)) {
-    if (offset >= 0 && offset <= getNodeSize(getBlockAt(doc, path))) {
+  const block = getBlockAt(doc, path);
+  if (block) {
+    if (offset >= 0 && offset <= getNodeSize(block)) {
       return true;
     }
   }
