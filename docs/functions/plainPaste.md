@@ -6,7 +6,7 @@
 
 > **plainPaste**(): [`PasteHook`](../type-aliases/PasteHook.md)
 
-Defined in: [hooks/paste/plain.ts:6](https://github.com/inokawa/edix/blob/365226366641d169bae878eed0ca595744a805b7/src/hooks/paste/plain.ts#L6)
+Defined in: [hooks/paste/plain.ts:6](https://github.com/inokawa/edix/blob/b06573dd54507ba85c0ad274b18c999023c6a52b/src/hooks/paste/plain.ts#L6)
 
 An extension to handle pasting / dropping from plain text.
 

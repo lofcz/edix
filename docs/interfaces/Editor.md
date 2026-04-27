@@ -4,7 +4,7 @@
 
 # Interface: Editor\<T\>
 
-Defined in: [editor.ts:162](https://github.com/inokawa/edix/blob/365226366641d169bae878eed0ca595744a805b7/src/editor.ts#L162)
+Defined in: [editor.ts:162](https://github.com/inokawa/edix/blob/b06573dd54507ba85c0ad274b18c999023c6a52b/src/editor.ts#L162)
 
 The editor instance.
 
@@ -22,7 +22,7 @@ The editor instance.
 
 > **apply**(`tr`): `this`
 
-Defined in: [editor.ts:175](https://github.com/inokawa/edix/blob/365226366641d169bae878eed0ca595744a805b7/src/editor.ts#L175)
+Defined in: [editor.ts:175](https://github.com/inokawa/edix/blob/b06573dd54507ba85c0ad274b18c999023c6a52b/src/editor.ts#L175)
 
 Dispatches editing operations.
 
@@ -42,7 +42,7 @@ Dispatches editing operations.
 
 > **apply**\<`A`\>(`fn`, ...`args`): `this`
 
-Defined in: [editor.ts:176](https://github.com/inokawa/edix/blob/365226366641d169bae878eed0ca595744a805b7/src/editor.ts#L176)
+Defined in: [editor.ts:176](https://github.com/inokawa/edix/blob/b06573dd54507ba85c0ad274b18c999023c6a52b/src/editor.ts#L176)
 
 ##### Type Parameters
 
@@ -70,7 +70,7 @@ Defined in: [editor.ts:176](https://github.com/inokawa/edix/blob/365226366641d16
 
 > **on**\<`K`\>(`key`, `callback`): () => `void`
 
-Defined in: [editor.ts:181](https://github.com/inokawa/edix/blob/365226366641d169bae878eed0ca595744a805b7/src/editor.ts#L181)
+Defined in: [editor.ts:181](https://github.com/inokawa/edix/blob/b06573dd54507ba85c0ad274b18c999023c6a52b/src/editor.ts#L181)
 
 A function to subscribe editor events.
 
@@ -94,11 +94,7 @@ A function to subscribe editor events.
 
 cleanup function
 
-> (): `void`
-
-##### Returns
-
-`void`
+() => `void`
 
 ***
 
@@ -106,7 +102,7 @@ cleanup function
 
 > **hook**\<`K`\>(`key`, `callback`): () => `void`
 
-Defined in: [editor.ts:189](https://github.com/inokawa/edix/blob/365226366641d169bae878eed0ca595744a805b7/src/editor.ts#L189)
+Defined in: [editor.ts:189](https://github.com/inokawa/edix/blob/b06573dd54507ba85c0ad274b18c999023c6a52b/src/editor.ts#L189)
 
 A function to register editor hooks.
 
@@ -130,11 +126,7 @@ A function to register editor hooks.
 
 cleanup function
 
-> (): `void`
-
-##### Returns
-
-`void`
+() => `void`
 
 ***
 
@@ -142,7 +134,7 @@ cleanup function
 
 > **use**\<`A`\>(`fn`, ...`args`): `this`
 
-Defined in: [editor.ts:201](https://github.com/inokawa/edix/blob/365226366641d169bae878eed0ca595744a805b7/src/editor.ts#L201)
+Defined in: [editor.ts:201](https://github.com/inokawa/edix/blob/b06573dd54507ba85c0ad274b18c999023c6a52b/src/editor.ts#L201)
 
 A function to use editor plugins.
 
@@ -172,7 +164,7 @@ A function to use editor plugins.
 
 > `readonly` **doc**: `T`
 
-Defined in: [editor.ts:163](https://github.com/inokawa/edix/blob/365226366641d169bae878eed0ca595744a805b7/src/editor.ts#L163)
+Defined in: [editor.ts:163](https://github.com/inokawa/edix/blob/b06573dd54507ba85c0ad274b18c999023c6a52b/src/editor.ts#L163)
 
 ***
 
@@ -180,7 +172,7 @@ Defined in: [editor.ts:163](https://github.com/inokawa/edix/blob/365226366641d16
 
 > `readonly` **selection**: `SelectionSnapshot`
 
-Defined in: [editor.ts:164](https://github.com/inokawa/edix/blob/365226366641d169bae878eed0ca595744a805b7/src/editor.ts#L164)
+Defined in: [editor.ts:164](https://github.com/inokawa/edix/blob/b06573dd54507ba85c0ad274b18c999023c6a52b/src/editor.ts#L164)
 
 ***
 
@@ -188,18 +180,18 @@ Defined in: [editor.ts:164](https://github.com/inokawa/edix/blob/365226366641d16
 
 > **readonly**: `boolean`
 
-Defined in: [editor.ts:169](https://github.com/inokawa/edix/blob/365226366641d169bae878eed0ca595744a805b7/src/editor.ts#L169)
+Defined in: [editor.ts:169](https://github.com/inokawa/edix/blob/b06573dd54507ba85c0ad274b18c999023c6a52b/src/editor.ts#L169)
 
 The getter/setter for the editor's read-only state.
 `true` to read-only. `false` to editable.
 
 ***
 
-### input()
+### input
 
 > **input**: (`element`) => () => `void`
 
-Defined in: [editor.ts:197](https://github.com/inokawa/edix/blob/365226366641d169bae878eed0ca595744a805b7/src/editor.ts#L197)
+Defined in: [editor.ts:197](https://github.com/inokawa/edix/blob/b06573dd54507ba85c0ad274b18c999023c6a52b/src/editor.ts#L197)
 
 A function to make DOM editable.
 
@@ -213,8 +205,4 @@ A function to make DOM editable.
 
 A function to stop subscribing DOM changes and restores previous DOM state.
 
-> (): `void`
-
-##### Returns
-
-`void`
+() => `void`

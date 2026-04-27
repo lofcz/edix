@@ -4,15 +4,15 @@
 
 # Function: internalPaste()
 
-> **internalPaste**(`__namedParameters`): [`PasteHook`](../type-aliases/PasteHook.md)
+> **internalPaste**(`__namedParameters?`): [`PasteHook`](../type-aliases/PasteHook.md)
 
-Defined in: [hooks/paste/internal.ts:7](https://github.com/inokawa/edix/blob/365226366641d169bae878eed0ca595744a805b7/src/hooks/paste/internal.ts#L7)
+Defined in: [hooks/paste/internal.ts:7](https://github.com/inokawa/edix/blob/b06573dd54507ba85c0ad274b18c999023c6a52b/src/hooks/paste/internal.ts#L7)
 
 An extension to handle pasting / dropping from edix editor instance.
 
 ## Parameters
 
-### \_\_namedParameters
+### \_\_namedParameters?
 
 #### key?
 

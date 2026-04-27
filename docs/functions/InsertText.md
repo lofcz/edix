@@ -4,9 +4,9 @@
 
 # Function: InsertText()
 
-> **InsertText**(`this`, `text`, `position`): `void`
+> **InsertText**(`this`, `text`, `position?`): `void`
 
-Defined in: [commands.ts:38](https://github.com/inokawa/edix/blob/365226366641d169bae878eed0ca595744a805b7/src/commands.ts#L38)
+Defined in: [commands.ts:39](https://github.com/inokawa/edix/blob/b06573dd54507ba85c0ad274b18c999023c6a52b/src/commands.ts#L39)
 
 Insert text at the caret or specified position.
 
@@ -20,7 +20,7 @@ Insert text at the caret or specified position.
 
 `string`
 
-### position
+### position?
 
 `Position` = `...`
 

@@ -4,9 +4,9 @@
 
 # Function: InsertNode()
 
-> **InsertNode**\<`T`\>(`this`, `node`, `position`): `void`
+> **InsertNode**\<`T`\>(`this`, `node`, `position?`): `void`
 
-Defined in: [commands.ts:49](https://github.com/inokawa/edix/blob/365226366641d169bae878eed0ca595744a805b7/src/commands.ts#L49)
+Defined in: [commands.ts:50](https://github.com/inokawa/edix/blob/b06573dd54507ba85c0ad274b18c999023c6a52b/src/commands.ts#L50)
 
 Insert node at the caret or specified position.
 
@@ -26,7 +26,7 @@ Insert node at the caret or specified position.
 
 `Exclude`\<`InferInlineNode`\<`T`\>, `TextNode`\>
 
-### position
+### position?
 
 `Position` = `...`
 

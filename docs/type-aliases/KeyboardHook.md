@@ -2,11 +2,11 @@
 
 ***
 
-# Type Alias: KeyboardHook()
+# Type Alias: KeyboardHook
 
 > **KeyboardHook** = (`keyboard`) => `boolean` \| `void`
 
-Defined in: [hooks/keyboard.ts:1](https://github.com/inokawa/edix/blob/365226366641d169bae878eed0ca595744a805b7/src/hooks/keyboard.ts#L1)
+Defined in: [hooks/keyboard.ts:1](https://github.com/inokawa/edix/blob/b06573dd54507ba85c0ad274b18c999023c6a52b/src/hooks/keyboard.ts#L1)
 
 ## Parameters
 

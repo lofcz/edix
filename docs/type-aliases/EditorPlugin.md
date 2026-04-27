@@ -2,11 +2,11 @@
 
 ***
 
-# Type Alias: EditorPlugin()\<A, T\>
+# Type Alias: EditorPlugin\<A, T\>
 
 > **EditorPlugin**\<`A`, `T`\> = (`this`, ...`args`) => `void`
 
-Defined in: [plugins/types.ts:4](https://github.com/inokawa/edix/blob/365226366641d169bae878eed0ca595744a805b7/src/plugins/types.ts#L4)
+Defined in: [plugins/types.ts:4](https://github.com/inokawa/edix/blob/b06573dd54507ba85c0ad274b18c999023c6a52b/src/plugins/types.ts#L4)
 
 ## Type Parameters
 

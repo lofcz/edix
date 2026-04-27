@@ -6,7 +6,7 @@
 
 > **plainCopy**\<`T`\>(`serializer?`): [`CopyHook`](../type-aliases/CopyHook.md)
 
-Defined in: [hooks/copy/plain.ts:8](https://github.com/inokawa/edix/blob/365226366641d169bae878eed0ca595744a805b7/src/hooks/copy/plain.ts#L8)
+Defined in: [hooks/copy/plain.ts:8](https://github.com/inokawa/edix/blob/b06573dd54507ba85c0ad274b18c999023c6a52b/src/hooks/copy/plain.ts#L8)
 
 An extension to handle copying to plain text.
 

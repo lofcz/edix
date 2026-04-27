@@ -4,9 +4,9 @@
 
 # Function: SetBlockAttr()
 
-> **SetBlockAttr**\<`T`, `N`, `K`\>(`this`, `key`, `value`, `path`): `void`
+> **SetBlockAttr**\<`T`, `N`, `K`\>(`this`, `key`, `value`, `path?`): `void`
 
-Defined in: [commands.ts:131](https://github.com/inokawa/edix/blob/365226366641d169bae878eed0ca595744a805b7/src/commands.ts#L131)
+Defined in: [commands.ts:132](https://github.com/inokawa/edix/blob/b06573dd54507ba85c0ad274b18c999023c6a52b/src/commands.ts#L132)
 
 Set attr to a block node at the caret or specified position.
 
@@ -38,7 +38,7 @@ Set attr to a block node at the caret or specified position.
 
 `N`\[`K`\]
 
-### path
+### path?
 
 `Path` = `...`
 

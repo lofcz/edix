@@ -4,9 +4,9 @@
 
 # Function: ToggleBlockAttr()
 
-> **ToggleBlockAttr**\<`T`, `N`, `K`\>(`this`, `key`, `onValue`, `offValue`, `path`): `void`
+> **ToggleBlockAttr**\<`T`, `N`, `K`\>(`this`, `key`, `onValue`, `offValue`, `path?`): `void`
 
-Defined in: [commands.ts:142](https://github.com/inokawa/edix/blob/365226366641d169bae878eed0ca595744a805b7/src/commands.ts#L142)
+Defined in: [commands.ts:143](https://github.com/inokawa/edix/blob/b06573dd54507ba85c0ad274b18c999023c6a52b/src/commands.ts#L143)
 
 Toggle attr of block node at the caret or specified position.
 
@@ -42,7 +42,7 @@ Toggle attr of block node at the caret or specified position.
 
 `N`\[`K`\]
 
-### path
+### path?
 
 `Path` = `...`
 
