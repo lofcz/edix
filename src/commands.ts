@@ -1,7 +1,7 @@
 import { toRange } from "./doc/position.js";
 import {
   getBlockAt,
-  getBlockSize,
+  getNodeSize,
   isTextNode,
   normalizePath,
   sliceFragment,
@@ -77,7 +77,7 @@ export function ReplaceAll(this: Editor, text: string) {
         [[], 0],
         [
           [doc.children.length - 1],
-          getBlockSize(doc.children[doc.children.length - 1]!),
+          getNodeSize(doc.children[doc.children.length - 1]!),
         ],
       )
       .insertText([[], 0], text),
