@@ -249,7 +249,10 @@ const splitBlock = <T extends BlockNode>(block: T, offset: number): [T, T] => {
   return [block, { ...block, children: [] }];
 };
 
-const normalizePath = (path: Path): number => {
+/**
+ * @internal
+ */
+export const normalizePath = (path: Path): number => {
   // TODO support nested node
   return path.length ? path[0]! : 0;
 };

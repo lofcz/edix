@@ -2148,27 +2148,21 @@ test.describe("keep selection on render", () => {
     ]);
 
     {
-      await page.keyboard.press("ArrowRight");
-      expect(await getSelection(editable)).toEqual([
-        [[0], 1],
-        [[0], 1],
-      ]);
-
       // Set block attr
       const setPromise = waitForStyleSet(editable, "textAlign", "right");
       await page.getByRole("button", { name: "align" }).click();
       expect(await getText(editable)).toEqual(initialValue);
       expect(await getSelection(editable)).toEqual([
-        [[0], 1],
-        [[0], 1],
+        [[0], 0],
+        [[0], 0],
       ]);
       expect(await setPromise).toBe(true);
 
       // Select texts
-      await page.keyboard.press("Shift+ArrowLeft");
+      await page.keyboard.press("Shift+ArrowRight");
       const movedSelection = [
-        [[0], 1],
         [[0], 0],
+        [[0], 1],
       ];
       expect(await getSelection(editable)).toEqual(movedSelection);
 

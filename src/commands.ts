@@ -3,6 +3,7 @@ import {
   getBlockAt,
   getBlockSize,
   isTextNode,
+  normalizePath,
   sliceFragment,
   Transaction,
 } from "./doc/edit.js";
@@ -153,7 +154,8 @@ export function ToggleBlockAttr<
   const block = getBlockAt(this.doc, path) as N;
   this.apply(
     new Transaction().attr(
-      path,
+      // TODO remove
+      [normalizePath(path)],
       key,
       block[key] === onValue ? offValue : onValue,
     ),
