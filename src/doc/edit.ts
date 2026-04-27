@@ -154,14 +154,12 @@ const isSameNode = (a: InlineNode, b: InlineNode): boolean => {
   });
 };
 
-const getInlineSize = (node: InlineNode): number =>
-  isTextNode(node) ? node.text.length : 1;
-
-const getBlockSize = (block: BlockNode): number =>
-  block.children.reduce((acc: number, n) => acc + getNodeSize(n), 0);
-
 export const getNodeSize = (node: BlockNode | InlineNode): number =>
-  isBlockNode(node) ? getBlockSize(node) : getInlineSize(node);
+  isBlockNode(node)
+    ? node.children.reduce((acc: number, n) => acc + getNodeSize(n), 0)
+    : isTextNode(node)
+      ? node.text.length
+      : 1;
 
 const normalize = <T extends InlineNode>(
   array: T[],
@@ -222,7 +220,7 @@ const splitBlock = <T extends BlockNode>(block: T, offset: number): [T, T] => {
   const nodes = block.children;
   for (let i = 0; i < nodes.length; i++) {
     const node = nodes[i]!;
-    const size = getInlineSize(node);
+    const size = getNodeSize(node);
     if (size > offset) {
       const before = nodes.slice(0, i);
       const after = nodes.slice(i + 1);
@@ -387,7 +385,7 @@ const isValidPath = (doc: DocNode, path: Path): boolean => {
 const isValidPosition = (doc: DocNode, [path, offset]: Position): boolean => {
   // TODO improve
   if (isValidPath(doc, path)) {
-    if (offset >= 0 && offset <= getBlockSize(getBlockAt(doc, path))) {
+    if (offset >= 0 && offset <= getNodeSize(getBlockAt(doc, path))) {
       return true;
     }
   }
@@ -429,7 +427,7 @@ const rebasePosition = (position: Position, op: Operation): Position => {
         return move(
           position,
           lineDiff,
-          getBlockSize(lines[lineLength - 1]!) - (lineDiff === 0 ? 0 : at[1]),
+          getNodeSize(lines[lineLength - 1]!) - (lineDiff === 0 ? 0 : at[1]),
           comparePath(at[0], position[0]) === 0,
         );
       }
