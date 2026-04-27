@@ -306,16 +306,9 @@ const replaceNodeAt = <
 ): T => {
   if (i < path.length) {
     const index = path[i]!;
-    const children = node.children;
-    return {
-      ...node,
-      children: [
-        ...children.slice(0, index),
-        // TODO improve type
-        replaceNodeAt(children[index]! as T, path, afterNode, i + 1),
-        ...children.slice(index + 1),
-      ],
-    };
+    return replace(node, index, index, [
+      replaceNodeAt(node.children[index]! as T, path, afterNode, i + 1),
+    ]);
   }
   // TODO improve type
   return afterNode as T;
