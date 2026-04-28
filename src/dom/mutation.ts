@@ -25,6 +25,11 @@ export const createMutationObserver = (
     process(mo.takeRecords());
   };
 
+  const flush = (): MutationRecord[] => {
+    sync();
+    return queue.splice(0);
+  };
+
   mo.observe(element, {
     characterData: true,
     characterDataOldValue: true,
@@ -33,17 +38,31 @@ export const createMutationObserver = (
   });
 
   return {
-    _record(enable: boolean) {
+    _revert: (records: MutationRecord[]) => {
+      let m: MutationRecord | undefined;
+      while ((m = records.pop())) {
+        if (m.type === "childList") {
+          const { target, removedNodes, addedNodes, nextSibling } = m;
+          for (let i = removedNodes.length - 1; i >= 0; i--) {
+            target.insertBefore(removedNodes[i]!, nextSibling);
+          }
+          for (let i = addedNodes.length - 1; i >= 0; i--) {
+            target.removeChild(addedNodes[i]!);
+          }
+        } else {
+          (m.target as CharacterData).nodeValue = m.oldValue!;
+        }
+      }
+      flush();
+    },
+    _record: (enable: boolean) => {
       if (!isInputing && enable) {
         sync();
       }
       isInputing = enable;
     },
-    _flush: (): MutationRecord[] => {
-      sync();
-      return queue.splice(0);
-    },
-    _dispose() {
+    _flush: flush,
+    _dispose: () => {
       queue.splice(0);
       mo.disconnect();
     },

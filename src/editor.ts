@@ -517,22 +517,7 @@ export const createEditor = <
         observer._record(false);
 
         if (queue.length) {
-          // Revert DOM
-          let m: MutationRecord | undefined;
-          while ((m = queue.pop())) {
-            if (m.type === "childList") {
-              const { target, removedNodes, addedNodes, nextSibling } = m;
-              for (let i = removedNodes.length - 1; i >= 0; i--) {
-                target.insertBefore(removedNodes[i]!, nextSibling);
-              }
-              for (let i = addedNodes.length - 1; i >= 0; i--) {
-                target.removeChild(addedNodes[i]!);
-              }
-            } else {
-              (m.target as CharacterData).nodeValue = m.oldValue!;
-            }
-          }
-          observer._flush();
+          observer._revert(queue);
 
           // Restore previous selection
           // Updating selection may schedule the next selectionchange event
