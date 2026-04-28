@@ -7,15 +7,15 @@ export interface ParserConfig {
   /**
    * @internal
    */
-  _document: Document;
+  readonly _document: Document;
   /**
    * @internal
    */
-  _isBlock: (node: Element) => boolean;
+  readonly _isBlock: (node: Element) => boolean;
   /**
    * @internal
    */
-  _isVoid: (node: Element) => boolean;
+  readonly _isVoid: (node: Element) => boolean;
 }
 
 const SHOW_ELEMENT = 0x1;
