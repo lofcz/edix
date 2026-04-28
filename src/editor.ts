@@ -10,7 +10,7 @@ import {
   defaultIsVoidNode,
   serializeRange,
 } from "./dom/index.js";
-import { createMutationObserver } from "./mutation.js";
+import { createMutationObserver } from "./dom/mutation.js";
 import type { DocNode, Fragment, SelectionSnapshot } from "./doc/types.js";
 import { is, isFunction, isString, microtask } from "./utils.js";
 import type { EditorCommand } from "./commands.js";
