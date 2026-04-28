@@ -50,7 +50,7 @@ export const createMutationObserver = (
             target.removeChild(addedNodes[i]!);
           }
         } else {
-          (m.target as CharacterData).nodeValue = m.oldValue!;
+          (m.target as CharacterData).data = m.oldValue!;
         }
       }
       flush();
