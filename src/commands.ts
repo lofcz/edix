@@ -1,9 +1,18 @@
 import { toRange } from "./doc/position.js";
-import { getLineSize, isTextNode, sliceDoc, Transaction } from "./doc/edit.js";
+import {
+  getBlockAt,
+  getNodeSize,
+  isTextNode,
+  normalizePath,
+  sliceFragment,
+  Transaction,
+} from "./doc/edit.js";
 import type { Editor } from "./editor.js";
 import type {
   DocNode,
-  InferNode,
+  InferBlockNode,
+  InferInlineNode,
+  Path,
   Position,
   PositionRange,
   TextNode,
@@ -40,10 +49,12 @@ export function InsertText(
  */
 export function InsertNode<T extends DocNode>(
   this: Editor<T>,
-  node: Exclude<InferNode<T>, TextNode>,
+  node: Exclude<InferInlineNode<T>, TextNode>,
   position: Position = this.selection[0],
 ) {
-  this.apply(new Transaction().insertFragment(position, [[node]]));
+  this.apply(
+    new Transaction().insertFragment(position, [{ children: [node] }]),
+  );
 }
 
 /**
@@ -85,7 +96,7 @@ export function ReplaceAll(this: Editor, text: string) {
         [[], 0],
         [
           [doc.children.length - 1],
-          getLineSize(doc.children[doc.children.length - 1]!),
+          getNodeSize(doc.children[doc.children.length - 1]!),
         ],
       )
       .insertText([[], 0], text),
@@ -101,7 +112,7 @@ type ToggleableKey<T> = {
  */
 export function Format<
   T extends DocNode,
-  N extends Omit<InferNode<T>, "text">,
+  N extends Omit<InferInlineNode<T>, "text">,
   K extends Extract<keyof N, string>,
 >(
   this: Editor<T>,
@@ -109,7 +120,7 @@ export function Format<
   value: N[K],
   range: PositionRange = toRange(this.selection),
 ) {
-  this.apply(new Transaction().attr(...range, key, value));
+  this.apply(new Transaction().format(...range, key, value));
 }
 
 /**
@@ -117,19 +128,55 @@ export function Format<
  */
 export function ToggleFormat<T extends DocNode>(
   this: Editor<T>,
-  key: Extract<ToggleableKey<Omit<InferNode<T>, "text">>, string>,
+  key: Extract<ToggleableKey<Omit<InferInlineNode<T>, "text">>, string>,
   range: PositionRange = toRange(this.selection),
 ) {
-  const texts = sliceDoc(this.doc, ...range).flatMap((n) =>
-    n.filter(isTextNode),
+  const texts = sliceFragment(this.doc, ...range).flatMap((n) =>
+    n.children.filter(isTextNode),
   );
   if (texts.length) {
     this.apply(
-      new Transaction().attr(
+      new Transaction().format(
         ...range,
         key,
         texts.some((n) => !n[key as keyof typeof n]) ? true : false,
       ),
     );
   }
+}
+
+/**
+ * Set attr to a block node at the caret or specified position.
+ */
+export function SetBlockAttr<
+  T extends DocNode,
+  N extends InferBlockNode<T>,
+  K extends Extract<keyof N, string>,
+>(this: Editor<T>, key: K, value: N[K], path: Path = this.selection[0][0]) {
+  this.apply(new Transaction().attr(path, key, value));
+}
+
+/**
+ * Toggle attr of block node at the caret or specified position.
+ */
+export function ToggleBlockAttr<
+  T extends DocNode,
+  N extends InferBlockNode<T>,
+  K extends Extract<keyof N, string>,
+>(
+  this: Editor<T>,
+  key: K,
+  onValue: N[K],
+  offValue: N[K],
+  path: Path = this.selection[0][0],
+) {
+  const block = getBlockAt(this.doc, path) as N;
+  this.apply(
+    new Transaction().attr(
+      // TODO remove
+      [normalizePath(path)],
+      key,
+      block[key] === onValue ? offValue : onValue,
+    ),
+  );
 }

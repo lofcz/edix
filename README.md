@@ -1,8 +1,8 @@
 # edix
 
-![npm](https://img.shields.io/npm/v/@lofcz/edix)
+![npm](https://img.shields.io/npm/v/@lofcz/edix) ![npm bundle size](https://img.shields.io/bundlephobia/minzip/@lofcz/edix) ![npm](https://img.shields.io/npm/dw/@lofcz/edix) [![check](https://github.com/lofcz/edix/actions/workflows/check.yml/badge.svg)](https://github.com/lofcz/edix/actions/workflows/check.yml) [![demo](https://github.com/lofcz/edix/actions/workflows/demo.yml/badge.svg)](https://github.com/lofcz/edix/actions/workflows/demo.yml)
 
-> An experimental, framework agnostic, small (4kB+) [contenteditable](https://developer.mozilla.org/en-US/docs/Web/HTML/Global_attributes/contenteditable) state manager.
+> An experimental, type-safe, framework agnostic and small (5kB+) [contenteditable](https://developer.mozilla.org/en-US/docs/Web/HTML/Global_attributes/contenteditable) state manager.
 
 ## Motivation
 
@@ -104,33 +104,38 @@ export const App = () => {
 
 ```tsx
 import { useState, useEffect, useRef, useMemo } from "react";
-import { createEditor, ToggleFormat } from "edix";
-import * as v from "valibot";
+import { createEditor, ToggleFormat, ToggleBlockAttr } from "edix";
+import * as z from "zod";
 
-const schema = v.strictObject({
-  children: v.array(
-    v.array(
-      v.strictObject({
-        text: v.string(),
-        bold: v.optional(v.boolean()),
-        italic: v.optional(v.boolean()),
-      }),
-    ),
+const schema = z.strictObject({
+  children: z.array(
+    z.strictObject({
+      align: z.enum(["left", "right"]).optional(),
+      children: z.array(
+        z.strictObject({
+          text: z.string(),
+          bold: z.boolean().optional(),
+          italic: z.boolean().optional(),
+        }),
+      ),
+    }),
   ),
 });
 
 export const App = () => {
   const ref = useRef<HTMLDivElement>(null);
 
-  type Doc = v.InferOutput<typeof schema>;
+  type Doc = z.infer<typeof schema>;
   const [doc, setDoc] = useState<Doc>({
     children: [
-      [
-        { text: "Hello", bold: true },
-        { text: " " },
-        { text: "World", italic: true },
-        { text: "." },
-      ],
+      {
+        children: [
+          { text: "Hello", bold: true },
+          { text: " " },
+          { text: "World", italic: true },
+          { text: "." },
+        ],
+      },
     ],
   });
 
@@ -165,6 +170,13 @@ export const App = () => {
         >
           italic
         </button>
+        <button
+          onClick={() => {
+            editor.apply(ToggleBlockAttr, "align", "right", undefined);
+          }}
+        >
+          align
+        </button>
       </div>
       <div
         ref={ref}
@@ -174,9 +186,9 @@ export const App = () => {
           padding: 8,
         }}
       >
-        {doc.children.map((r, i) => (
-          <div key={i}>
-            {r.map((n, j) => (
+        {doc.children.map((b, i) => (
+          <div key={i} style={{ textAlign: b.align }}>
+            {b.children.map((n, j) => (
               <span
                 key={j}
                 style={{
@@ -211,6 +223,7 @@ export const App = () => {
 
 - [API reference](./docs/API.md)
 - [Storybook examples](./stories) for more usages
+- [DeepWiki](https://deepwiki.com/inokawa/edix)
 
 ## Contribute
 

@@ -4,7 +4,7 @@
 
 # Class: Transaction
 
-Defined in: [doc/edit.ts:56](https://github.com/lofcz/edix/blob/c3e2464dd9fb3308ead13fab4a3705fded785408/src/doc/edit.ts#L56)
+Defined in: [doc/edit.ts:69](https://github.com/inokawa/edix/blob/b06573dd54507ba85c0ad274b18c999023c6a52b/src/doc/edit.ts#L69)
 
 ## Accessors
 
@@ -14,7 +14,7 @@ Defined in: [doc/edit.ts:56](https://github.com/lofcz/edix/blob/c3e2464dd9fb3308
 
 > **get** **ops**(): readonly `Operation`[]
 
-Defined in: [doc/edit.ts:64](https://github.com/lofcz/edix/blob/c3e2464dd9fb3308ead13fab4a3705fded785408/src/doc/edit.ts#L64)
+Defined in: [doc/edit.ts:76](https://github.com/inokawa/edix/blob/b06573dd54507ba85c0ad274b18c999023c6a52b/src/doc/edit.ts#L76)
 
 ##### Returns
 
@@ -26,7 +26,7 @@ readonly `Operation`[]
 
 > **new Transaction**(`ops?`): `Transaction`
 
-Defined in: [doc/edit.ts:60](https://github.com/lofcz/edix/blob/c3e2464dd9fb3308ead13fab4a3705fded785408/src/doc/edit.ts#L60)
+Defined in: [doc/edit.ts:72](https://github.com/inokawa/edix/blob/b06573dd54507ba85c0ad274b18c999023c6a52b/src/doc/edit.ts#L72)
 
 #### Parameters
 
@@ -44,7 +44,7 @@ readonly `Operation`[]
 
 > **insertText**(`start`, `text`): `this`
 
-Defined in: [doc/edit.ts:68](https://github.com/lofcz/edix/blob/c3e2464dd9fb3308ead13fab4a3705fded785408/src/doc/edit.ts#L68)
+Defined in: [doc/edit.ts:80](https://github.com/inokawa/edix/blob/b06573dd54507ba85c0ad274b18c999023c6a52b/src/doc/edit.ts#L80)
 
 #### Parameters
 
@@ -66,7 +66,7 @@ Defined in: [doc/edit.ts:68](https://github.com/lofcz/edix/blob/c3e2464dd9fb3308
 
 > **insertFragment**(`start`, `fragment`): `this`
 
-Defined in: [doc/edit.ts:77](https://github.com/lofcz/edix/blob/c3e2464dd9fb3308ead13fab4a3705fded785408/src/doc/edit.ts#L77)
+Defined in: [doc/edit.ts:89](https://github.com/inokawa/edix/blob/b06573dd54507ba85c0ad274b18c999023c6a52b/src/doc/edit.ts#L89)
 
 #### Parameters
 
@@ -76,7 +76,7 @@ Defined in: [doc/edit.ts:77](https://github.com/lofcz/edix/blob/c3e2464dd9fb3308
 
 ##### fragment
 
-readonly readonly `InlineNode`[][]
+readonly `BlockNode`[]
 
 #### Returns
 
@@ -88,7 +88,7 @@ readonly readonly `InlineNode`[][]
 
 > **delete**(`start`, `end`): `this`
 
-Defined in: [doc/edit.ts:86](https://github.com/lofcz/edix/blob/c3e2464dd9fb3308ead13fab4a3705fded785408/src/doc/edit.ts#L86)
+Defined in: [doc/edit.ts:98](https://github.com/inokawa/edix/blob/b06573dd54507ba85c0ad274b18c999023c6a52b/src/doc/edit.ts#L98)
 
 #### Parameters
 
@@ -106,11 +106,11 @@ Defined in: [doc/edit.ts:86](https://github.com/lofcz/edix/blob/c3e2464dd9fb3308
 
 ***
 
-### attr()
+### format()
 
-> **attr**(`start`, `end`, `key`, `value`): `this`
+> **format**(`start`, `end`, `key`, `value`): `this`
 
-Defined in: [doc/edit.ts:95](https://github.com/lofcz/edix/blob/c3e2464dd9fb3308ead13fab4a3705fded785408/src/doc/edit.ts#L95)
+Defined in: [doc/edit.ts:107](https://github.com/inokawa/edix/blob/b06573dd54507ba85c0ad274b18c999023c6a52b/src/doc/edit.ts#L107)
 
 #### Parameters
 
@@ -136,11 +136,37 @@ Defined in: [doc/edit.ts:95](https://github.com/lofcz/edix/blob/c3e2464dd9fb3308
 
 ***
 
+### attr()
+
+> **attr**(`at`, `key`, `value`): `this`
+
+Defined in: [doc/edit.ts:118](https://github.com/inokawa/edix/blob/b06573dd54507ba85c0ad274b18c999023c6a52b/src/doc/edit.ts#L118)
+
+#### Parameters
+
+##### at
+
+`Path`
+
+##### key
+
+`string`
+
+##### value
+
+`unknown`
+
+#### Returns
+
+`this`
+
+***
+
 ### transform()
 
 > **transform**(`position`): `Position`
 
-Defined in: [doc/edit.ts:106](https://github.com/lofcz/edix/blob/c3e2464dd9fb3308ead13fab4a3705fded785408/src/doc/edit.ts#L106)
+Defined in: [doc/edit.ts:128](https://github.com/inokawa/edix/blob/b06573dd54507ba85c0ad274b18c999023c6a52b/src/doc/edit.ts#L128)
 
 #### Parameters
 
@@ -151,11 +177,3 @@ Defined in: [doc/edit.ts:106](https://github.com/lofcz/edix/blob/c3e2464dd9fb330
 #### Returns
 
 `Position`
-
-## Properties
-
-### selection?
-
-> `optional` **selection**: `SelectionSnapshot`
-
-Defined in: [doc/edit.ts:58](https://github.com/lofcz/edix/blob/c3e2464dd9fb3308ead13fab4a3705fded785408/src/doc/edit.ts#L58)

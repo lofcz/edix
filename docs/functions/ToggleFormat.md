@@ -4,9 +4,9 @@
 
 # Function: ToggleFormat()
 
-> **ToggleFormat**\<`T`\>(`this`, `key`, `range`): `void`
+> **ToggleFormat**\<`T`\>(`this`, `key`, `range?`): `void`
 
-Defined in: [commands.ts:118](https://github.com/lofcz/edix/blob/c3e2464dd9fb3308ead13fab4a3705fded785408/src/commands.ts#L118)
+Defined in: [commands.ts:110](https://github.com/inokawa/edix/blob/b06573dd54507ba85c0ad274b18c999023c6a52b/src/commands.ts#L110)
 
 Toggle formatting in the selection or specified range.
 
@@ -24,9 +24,9 @@ Toggle formatting in the selection or specified range.
 
 ### key
 
-`Extract`\<`ToggleableKey`\<`Omit`\<`InferNode`\<`T`\>, `"text"`\>\>, `string`\>
+`Extract`\<`ToggleableKey`\<`Omit`\<`InferInlineNode`\<`T`\>, `"text"`\>\>, `string`\>
 
-### range
+### range?
 
 `PositionRange` = `...`
 

@@ -4,9 +4,9 @@
 
 # Function: hotkey()
 
-> **hotkey**(`key`, `cb`, `__namedParameters`): [`KeyboardHandler`](../type-aliases/KeyboardHandler.md)
+> **hotkey**(`key`, `cb`, `__namedParameters?`): [`KeyboardHook`](../type-aliases/KeyboardHook.md)
 
-Defined in: [hotkey.ts:6](https://github.com/lofcz/edix/blob/c3e2464dd9fb3308ead13fab4a3705fded785408/src/hotkey.ts#L6)
+Defined in: [hooks/keyboard.ts:6](https://github.com/inokawa/edix/blob/b06573dd54507ba85c0ad274b18c999023c6a52b/src/hooks/keyboard.ts#L6)
 
 TODO
 
@@ -20,7 +20,7 @@ TODO
 
 (`e`) => `void`
 
-### \_\_namedParameters
+### \_\_namedParameters?
 
 #### mod?
 
@@ -36,4 +36,4 @@ TODO
 
 ## Returns
 
-[`KeyboardHandler`](../type-aliases/KeyboardHandler.md)
+[`KeyboardHook`](../type-aliases/KeyboardHook.md)

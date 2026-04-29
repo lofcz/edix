@@ -4,10 +4,16 @@
 
 # Function: singlelinePlugin()
 
-> **singlelinePlugin**(): [`EditorPlugin`](../interfaces/EditorPlugin.md)
+> **singlelinePlugin**(`this`): `void`
 
-Defined in: [plugins/singleline.ts:4](https://github.com/lofcz/edix/blob/c3e2464dd9fb3308ead13fab4a3705fded785408/src/plugins/singleline.ts#L4)
+Defined in: [plugins/singleline.ts:4](https://github.com/inokawa/edix/blob/b06573dd54507ba85c0ad274b18c999023c6a52b/src/plugins/singleline.ts#L4)
+
+## Parameters
+
+### this
+
+[`Editor`](../interfaces/Editor.md)
 
 ## Returns
 
-[`EditorPlugin`](../interfaces/EditorPlugin.md)
+`void`

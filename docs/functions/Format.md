@@ -4,9 +4,9 @@
 
 # Function: Format()
 
-> **Format**\<`T`, `N`, `K`\>(`this`, `key`, `value`, `range`): `void`
+> **Format**\<`T`, `N`, `K`\>(`this`, `key`, `value`, `range?`): `void`
 
-Defined in: [commands.ts:102](https://github.com/lofcz/edix/blob/c3e2464dd9fb3308ead13fab4a3705fded785408/src/commands.ts#L102)
+Defined in: [commands.ts:94](https://github.com/inokawa/edix/blob/b06573dd54507ba85c0ad274b18c999023c6a52b/src/commands.ts#L94)
 
 Format content in the selection or specified range.
 
@@ -18,7 +18,7 @@ Format content in the selection or specified range.
 
 ### N
 
-`N` *extends* `Omit`\<`InferNode`\<`T`\>, `"text"`\>
+`N` *extends* `Omit`\<`InferInlineNode`\<`T`\>, `"text"`\>
 
 ### K
 
@@ -38,7 +38,7 @@ Format content in the selection or specified range.
 
 `N`\[`K`\]
 
-### range
+### range?
 
 `PositionRange` = `...`
 

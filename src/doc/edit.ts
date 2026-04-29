@@ -1,4 +1,4 @@
-import { is, isString, keys } from "../utils.js";
+import { is, keys } from "../utils.js";
 import { comparePath, comparePosition } from "./position.js";
 import type {
   DocNode,
@@ -8,6 +8,8 @@ import type {
   SelectionSnapshot,
   TextNode,
   Path,
+  BlockNode,
+  Node,
 } from "./types.js";
 import { stringToFragment } from "./utils.js";
 
@@ -19,7 +21,7 @@ type DeleteOperation = Readonly<{
 }>;
 
 const TYPE_INSERT_TEXT = "insert_text";
-type InsertOperation = Readonly<{
+type InsertTextOperation = Readonly<{
   type: typeof TYPE_INSERT_TEXT;
   at: Position;
   text: string;
@@ -41,21 +43,31 @@ type SetAttrOperation = Readonly<{
   value: unknown;
 }>;
 
+const TYPE_SET_NODE_ATTR = "set_node_attr";
+type SetNodeAttrOperation = Readonly<{
+  type: typeof TYPE_SET_NODE_ATTR;
+  path: Path;
+  key: string;
+  value: unknown;
+}>;
+
 export type Operation =
   | DeleteOperation
-  | InsertOperation
+  | InsertTextOperation
   | InsertNodeOperation
-  | SetAttrOperation;
+  | SetAttrOperation
+  | SetNodeAttrOperation;
 
 /**
  * @internal
  */
 export const isUnsafeOperation = ({ type }: Operation): boolean =>
-  type === TYPE_INSERT_NODE || type === TYPE_SET_ATTR;
+  type === TYPE_INSERT_NODE ||
+  type === TYPE_SET_ATTR ||
+  type === TYPE_SET_NODE_ATTR;
 
 export class Transaction {
   private readonly _ops: Operation[];
-  selection?: SelectionSnapshot;
 
   constructor(ops?: readonly Operation[]) {
     this._ops = ops ? ops.slice() : [];
@@ -92,11 +104,21 @@ export class Transaction {
     return this;
   }
 
-  attr(start: Position, end: Position, key: string, value: unknown): this {
+  format(start: Position, end: Position, key: string, value: unknown): this {
     this._ops.push({
       type: TYPE_SET_ATTR,
       start: start,
       end: end,
+      key: key,
+      value: value,
+    });
+    return this;
+  }
+
+  attr(at: Path, key: string, value: unknown): this {
+    this._ops.push({
+      type: TYPE_SET_NODE_ATTR,
+      path: at,
       key: key,
       value: value,
     });
@@ -111,8 +133,13 @@ export class Transaction {
 /**
  * @internal
  */
-export const isTextNode = (node: InlineNode): node is TextNode =>
-  "text" in node;
+export const isTextNode = (node: Node): node is TextNode => "text" in node;
+
+/**
+ * @internal
+ */
+export const isBlockNode = (node: Node): node is BlockNode =>
+  "children" in node;
 
 const isSameNode = (a: InlineNode, b: InlineNode): boolean => {
   const aKeys = keys(a);
@@ -127,14 +154,12 @@ const isSameNode = (a: InlineNode, b: InlineNode): boolean => {
   });
 };
 
-const getNodeSize = (node: InlineNode): number =>
-  isTextNode(node) ? node.text.length : 1;
-
-/**
- * @internal
- */
-export const getLineSize = (line: readonly InlineNode[]): number =>
-  line.reduce((acc: number, n) => acc + getNodeSize(n), 0);
+export const getNodeSize = (node: Node): number =>
+  isBlockNode(node)
+    ? node.children.reduce((acc: number, n) => acc + getNodeSize(n), 0)
+    : isTextNode(node)
+      ? node.text.length
+      : 1;
 
 const normalize = <T extends InlineNode>(
   array: T[],
@@ -181,112 +206,158 @@ const concat = <T extends InlineNode>(a: T[], b: readonly T[]): void => {
 /**
  * @internal
  */
-export const joinBlocks = <T extends InlineNode>(
-  ...blocks: (readonly T[])[]
-): readonly T[] => {
-  return blocks.reduce<T[]>((acc, b) => {
-    concat(acc, b);
-    return acc;
-  }, []);
+export const joinBlocks = <T extends BlockNode>(...blocks: T[]): T => {
+  return {
+    ...blocks[0]!,
+    children: blocks.reduce((acc, b) => {
+      concat(acc, b.children);
+      return acc;
+    }, []),
+  };
 };
 
-const splitBlock = <T extends InlineNode>(
-  nodes: readonly T[],
+const getChildAt = <T extends BlockNode>(
+  { children }: T,
   offset: number,
-): [readonly T[], readonly T[]] => {
-  for (let i = 0; i < nodes.length; i++) {
-    const node = nodes[i]!;
+): { _node: T["children"][number]; _index: number; _offset: number } | null => {
+  for (let i = 0; i < children.length; i++) {
+    const node = children[i]!;
     const size = getNodeSize(node);
     if (size > offset) {
-      const before = nodes.slice(0, i);
-      const after = nodes.slice(i + 1);
-      if (isTextNode(node)) {
-        const beforeText = node.text.slice(0, offset);
-        const afterText = node.text.slice(offset);
-        if (beforeText || !before.length) {
-          before.push({ ...node, text: beforeText });
-        }
-        if (afterText || !after.length) {
-          after.unshift({ ...node, text: afterText });
-        }
-      } else {
-        // node size must be 1
-        after.unshift(node);
-      }
-      return [before, after];
+      return { _node: node, _index: i, _offset: offset };
     }
     offset -= size;
   }
-  return [nodes, []];
+  return null;
 };
 
-const normalizePath = (path: Path): number => {
+const splitBlock = <T extends BlockNode>(block: T, offset: number): [T, T] => {
+  const target = getChildAt(block, offset);
+  if (target) {
+    const { _node: node, _offset: nodeAtOffset, _index: i } = target;
+    const nodes = block.children;
+    const before = nodes.slice(0, i);
+    const after = nodes.slice(i + 1);
+    if (isTextNode(node)) {
+      const beforeText = node.text.slice(0, nodeAtOffset);
+      const afterText = node.text.slice(nodeAtOffset);
+      if (beforeText || !before.length) {
+        before.push({ ...node, text: beforeText });
+      }
+      if (afterText || !after.length) {
+        after.unshift({ ...node, text: afterText });
+      }
+    } else {
+      // node size must be 1
+      after.unshift(node);
+    }
+    return [
+      { ...block, children: before },
+      { ...block, children: after },
+    ];
+  }
+  return [block, { ...block, children: [] }];
+};
+
+/**
+ * @internal
+ */
+export const normalizePath = (path: Path): number => {
   // TODO support nested node
   return path.length ? path[0]! : 0;
 };
 
-const blockAtPath = (doc: DocNode, path: Path): readonly InlineNode[] => {
+/**
+ * @internal
+ */
+export const getBlockAt = (doc: DocNode, path: Path): BlockNode => {
   return doc.children[normalizePath(path)]!;
 };
 
-const movePath = (path: Path, int: number): Path => {
-  // TODO support nested node
-  return [normalizePath(path) + int];
+const getNodeAt = (doc: DocNode, path: Path): BlockNode | DocNode => {
+  return path.length ? doc.children[normalizePath(path)]! : doc;
+};
+
+const move = (
+  position: Position,
+  pathDiff: number,
+  offsetDiff: number,
+  isSamePath: boolean,
+): Position => {
+  return [
+    [
+      // TODO support nested node
+      normalizePath(position[0]) + pathDiff,
+    ],
+    position[1] + (isSamePath ? offsetDiff : 0),
+  ];
+};
+
+const replace = <
+  T extends { readonly children: readonly BlockNode[] | readonly InlineNode[] },
+>(
+  node: T,
+  start: number,
+  end: number,
+  lines: Fragment,
+): T => {
+  const sliced = node.children.slice();
+  sliced.splice(start, end - start + 1, ...lines);
+  return { ...node, children: sliced };
+};
+
+const replaceNodeAt = <
+  T extends { readonly children: readonly BlockNode[] | readonly InlineNode[] },
+>(
+  node: T,
+  path: Path,
+  afterNode: BlockNode,
+  i: number = 0,
+): T => {
+  if (i < path.length) {
+    const index = path[i]!;
+    return replace(node, index, index, [
+      replaceNodeAt(node.children[index]! as T, path, afterNode, i + 1),
+    ]);
+  }
+  // TODO improve type
+  return afterNode as T;
 };
 
 const replaceRange = <T extends DocNode>(
   doc: T,
   start: Position,
   end: Position,
-  inserted: Fragment | string,
+  inserted: Fragment,
 ): T => {
   const [startPath, startOffset] = start;
   const [endPath, endOffset] = end;
 
   const [before, maybeAfter] = splitBlock(
-    blockAtPath(doc, startPath),
+    getBlockAt(doc, startPath),
     startOffset,
   );
   const after =
     comparePosition(start, end) === -1
-      ? splitBlock(blockAtPath(doc, endPath), endOffset)[1]
+      ? splitBlock(getBlockAt(doc, endPath), endOffset)[1]
       : maybeAfter;
 
-  if (isString(inserted)) {
-    // inherit style from previous text node
-    const beforeLength = before.length;
-    let anchorNode: TextNode | undefined;
-    if (beforeLength) {
-      const maybeAnchor = before[beforeLength - 1]!;
-      if (isTextNode(maybeAnchor)) {
-        anchorNode = maybeAnchor;
-      }
-    }
-    inserted = stringToFragment(inserted, anchorNode);
-  }
-
-  let lines: (readonly InlineNode[])[];
+  let lines: BlockNode[];
   if (inserted.length) {
     lines = inserted.slice();
     lines[lines.length - 1] = joinBlocks(lines[lines.length - 1]!, after);
+    lines[0] = joinBlocks(before, lines[0]!);
   } else {
-    lines = [after];
+    lines = [joinBlocks(before, after)];
   }
-  lines[0] = joinBlocks(before, lines[0]!);
 
-  const sliced = doc.children.slice();
-  sliced.splice(
-    normalizePath(startPath),
-    normalizePath(endPath) - normalizePath(startPath) + 1,
-    ...lines,
-  );
-  return { ...doc, children: sliced };
+  return replace(doc, normalizePath(startPath), normalizePath(endPath), lines);
 };
 
 /**
  * @internal
  */
-export const sliceDoc = (
+export const sliceFragment = (
   doc: DocNode,
   start: Position,
   end: Position,
@@ -306,36 +377,31 @@ export const sliceDoc = (
 };
 
 const isValidPosition = (doc: DocNode, [path, offset]: Position): boolean => {
-  // TODO improve
-  if (!path.length || (path[0]! >= 0 && path[0]! < doc.children.length)) {
-    if (offset >= 0 && offset <= getLineSize(blockAtPath(doc, path))) {
-      return true;
-    }
+  const block = getBlockAt(doc, path);
+  if (block && offset >= 0 && offset <= getNodeSize(block)) {
+    return true;
   }
   return false;
 };
 
-export const rebasePosition = (position: Position, op: Operation): Position => {
+const rebasePosition = (position: Position, op: Operation): Position => {
   switch (op.type) {
     case TYPE_DELETE: {
       const { start, end } = op;
 
       if (comparePosition(position, start) !== -1) {
         // start <= position
-        return comparePosition(end, position) === -1
-          ? // start <= end < position
-            [
-              movePath(
-                position[0],
-                normalizePath(start[0]) - normalizePath(end[0]),
-              ),
-              position[1] +
-                (comparePath(end[0], position[0]) === 0
-                  ? start[1] - end[1]
-                  : 0),
-            ]
-          : // start <= position <= end
-            start;
+        if (comparePosition(end, position) !== -1) {
+          // start <= position <= end
+          return start;
+        }
+        // start <= end < position
+        return move(
+          position,
+          normalizePath(start[0]) - normalizePath(end[0]),
+          start[1] - end[1],
+          comparePath(end[0], position[0]) === 0,
+        );
       }
       break;
     }
@@ -349,19 +415,18 @@ export const rebasePosition = (position: Position, op: Operation): Position => {
       const lineDiff = lineLength - 1;
 
       if (comparePosition(position, at) !== -1) {
-        // pos <= position
-        return [
-          movePath(position[0], lineDiff),
-          position[1] +
-            (comparePath(position[0], at[0]) === 0
-              ? getLineSize(lines[lineLength - 1]!) -
-                (lineDiff === 0 ? 0 : at[1])
-              : 0),
-        ];
+        // at <= position
+        return move(
+          position,
+          lineDiff,
+          getNodeSize(lines[lineLength - 1]!) - (lineDiff === 0 ? 0 : at[1]),
+          comparePath(at[0], position[0]) === 0,
+        );
       }
       break;
     }
-    case TYPE_SET_ATTR: {
+    case TYPE_SET_ATTR:
+    case TYPE_SET_NODE_ATTR: {
       break;
     }
     default: {
@@ -371,7 +436,10 @@ export const rebasePosition = (position: Position, op: Operation): Position => {
   return position;
 };
 
-const rebaseSelection = (
+/**
+ * @internal
+ */
+export const rebaseSelection = (
   selection: SelectionSnapshot,
   op: Operation,
 ): SelectionSnapshot => {
@@ -412,7 +480,23 @@ export const applyOperation = <T extends DocNode>(
     case TYPE_INSERT_TEXT: {
       const { at, text } = op;
       if (isValidPosition(doc, at) && text) {
-        doc = replaceRange(doc, at, at, text);
+        // inherit style from previous block/text node
+        const block = getBlockAt(doc, at[0]);
+        const res = getChildAt(block, at[1] - 1);
+        let anchorNode: TextNode | undefined;
+        if (res) {
+          const node = res._node;
+          if (isTextNode(node)) {
+            anchorNode = node;
+          }
+        }
+
+        doc = replaceRange(
+          doc,
+          at,
+          at,
+          stringToFragment(text, anchorNode, block),
+        );
         selection = rebaseSelection(selection, op);
       }
       break;
@@ -436,12 +520,21 @@ export const applyOperation = <T extends DocNode>(
           doc,
           start,
           end,
-          sliceDoc(doc, start, end).map((line) =>
-            line.map((node) =>
+          sliceFragment(doc, start, end).map((block) => ({
+            ...block,
+            children: block.children.map((node) =>
               isTextNode(node) ? { ...node, [key]: value } : node,
             ),
-          ),
+          })),
         );
+      }
+      break;
+    }
+    case TYPE_SET_NODE_ATTR: {
+      const { path, key, value } = op;
+      const node = getNodeAt(doc, path);
+      if (node) {
+        doc = replaceNodeAt(doc, path, { ...node, [key]: value });
       }
       break;
     }

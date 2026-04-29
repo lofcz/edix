@@ -1,18 +1,18 @@
-import type { DocNode, InferNode, TextNode } from "../../doc/types.js";
+import type { DocNode, InferInlineNode, TextNode } from "../../doc/types.js";
 import { domToFragment } from "../../dom/index.js";
 import { isCommentNode } from "../../dom/parser.js";
-import type { PasteExtension } from "./types.js";
+import type { PasteHook } from "./types.js";
 
 /**
  * An extension to handle pasting / dropping from HTML.
  */
 export const htmlPaste = <T extends DocNode>(
-  serializeText: (t: string) => Extract<InferNode<T>, TextNode>,
+  serializeText: (t: string) => Extract<InferInlineNode<T>, TextNode>,
   serializers: ((
     node: HTMLElement,
-  ) => Exclude<InferNode<T>, TextNode> | void)[] = [],
-): PasteExtension => {
-  return (dataTransfer, config) => {
+  ) => Exclude<InferInlineNode<T>, TextNode> | void)[] = [],
+): PasteHook => {
+  return (dataTransfer, parse) => {
     const html = dataTransfer.getData("text/html");
     if (html) {
       let dom: Node = new DOMParser().parseFromString(html, "text/html").body;
@@ -32,7 +32,7 @@ export const htmlPaste = <T extends DocNode>(
       }
 
       // TODO customizable dom to standard schema and validate
-      return domToFragment(dom, config, serializeText, (n) => {
+      return domToFragment(dom, parse, serializeText, (n) => {
         for (const s of serializers) {
           const node = s(n as HTMLElement);
           if (node) {

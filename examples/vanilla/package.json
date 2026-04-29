@@ -9,7 +9,7 @@
     "preview": "vite preview"
   },
   "dependencies": {
-    "edix": "npm:@lofcz/edix@0.3.0",
+    "edix": "file:../..",
     "morphdom": "^2.7.4"
   },
   "devDependencies": {

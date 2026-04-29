@@ -38,18 +38,18 @@ export const getText = async (
       return window.edix
         .domToFragment(
           element,
-          {
+          window.edix.createParser({
             _document: document,
             _isBlock: blockTag
               ? (n) => n.tagName === blockTag.toUpperCase()
               : window.edix.defaultIsBlockNode,
             _isVoid: window.edix.defaultIsVoidNode,
-          },
+          }),
           (text) => ({ text }),
           () => ({}),
         )
         .map((r) => {
-          return r.reduce<string>((acc, n) => {
+          return r.children.reduce<string>((acc, n) => {
             return acc + ("text" in n ? n.text : NON_EDITABLE_PLACEHOLDER);
           }, "");
         });
@@ -70,18 +70,18 @@ export const getSeletedText = (
       return window.edix
         .domToFragment(
           range,
-          {
+          window.edix.createParser({
             _document: document,
             _isBlock: blockTag
               ? (n) => n.tagName === blockTag.toUpperCase()
               : window.edix.defaultIsBlockNode,
             _isVoid: window.edix.defaultIsVoidNode,
-          },
+          }),
           (text) => ({ text }),
           () => ({}),
         )
         .map((r) => {
-          return r.reduce<string>((acc, n) => {
+          return r.children.reduce<string>((acc, n) => {
             return acc + ("text" in n ? n.text : NON_EDITABLE_PLACEHOLDER);
           }, "");
         });
@@ -90,18 +90,72 @@ export const getSeletedText = (
   );
 };
 
+export const waitForStyleSet = (
+  editable: Locator,
+  key: keyof CSSStyleDeclaration,
+  value: string,
+  unset?: boolean,
+): Promise<boolean> => {
+  return editable.evaluate(
+    (element, [key, value, unset]) => {
+      return new Promise<boolean>((resolve) => {
+        const stringToStyle = (s: string): CSSStyleDeclaration => {
+          const e = document.createElement("div");
+          e.style.cssText = s;
+          return e.style;
+        };
+        const mo = new MutationObserver((records) => {
+          for (const r of records) {
+            if (r.type === "attributes") {
+              if (
+                r.attributeName === "style" &&
+                (unset
+                  ? stringToStyle(r.oldValue!)
+                  : (r.target as HTMLElement).style)[key] === value
+              ) {
+                mo.disconnect();
+                resolve(true);
+              }
+            } else if (r.type === "childList") {
+              if (
+                (unset ? [...r.removedNodes] : [...r.addedNodes]).some(
+                  (e) => (e as HTMLElement).style[key] === value,
+                )
+              ) {
+                mo.disconnect();
+                resolve(true);
+              }
+            }
+          }
+        });
+        mo.observe(element, {
+          subtree: true,
+          attributes: true,
+          attributeFilter: ["style"],
+          attributeOldValue: true,
+          childList: true,
+        });
+      });
+    },
+    [key, value, unset] as const,
+  );
+};
+
 export const getSelection = (
   editable: Locator,
   config: { blockTag?: string } = {},
 ): Promise<SelectionSnapshot> => {
   return editable.evaluate((element, { blockTag }) => {
-    return window.edix.takeSelectionSnapshot(element, {
-      _document: element.ownerDocument,
-      _isBlock: blockTag
-        ? (n) => n.tagName === blockTag.toUpperCase()
-        : window.edix.defaultIsBlockNode,
-      _isVoid: window.edix.defaultIsVoidNode,
-    });
+    return window.edix.takeSelectionSnapshot(
+      element,
+      window.edix.createParser({
+        _document: element.ownerDocument,
+        _isBlock: blockTag
+          ? (n) => n.tagName === blockTag.toUpperCase()
+          : window.edix.defaultIsBlockNode,
+        _isVoid: window.edix.defaultIsVoidNode,
+      }),
+    );
   }, config);
 };
 

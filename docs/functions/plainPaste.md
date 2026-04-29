@@ -4,12 +4,12 @@
 
 # Function: plainPaste()
 
-> **plainPaste**(): [`PasteExtension`](../type-aliases/PasteExtension.md)
+> **plainPaste**(): [`PasteHook`](../type-aliases/PasteHook.md)
 
-Defined in: [extensions/paste/plain.ts:6](https://github.com/lofcz/edix/blob/c3e2464dd9fb3308ead13fab4a3705fded785408/src/extensions/paste/plain.ts#L6)
+Defined in: [hooks/paste/plain.ts:6](https://github.com/inokawa/edix/blob/b06573dd54507ba85c0ad274b18c999023c6a52b/src/hooks/paste/plain.ts#L6)
 
 An extension to handle pasting / dropping from plain text.
 
 ## Returns
 
-[`PasteExtension`](../type-aliases/PasteExtension.md)
+[`PasteHook`](../type-aliases/PasteHook.md)

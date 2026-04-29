@@ -4,9 +4,9 @@
 
 # Function: Delete()
 
-> **Delete**(`this`, `range`): `void`
+> **Delete**(`this`, `range?`): `void`
 
-Defined in: [commands.ts:20](https://github.com/lofcz/edix/blob/c3e2464dd9fb3308ead13fab4a3705fded785408/src/commands.ts#L20)
+Defined in: [commands.ts:29](https://github.com/inokawa/edix/blob/b06573dd54507ba85c0ad274b18c999023c6a52b/src/commands.ts#L29)
 
 Delete content in the selection or specified range.
 
@@ -16,7 +16,7 @@ Delete content in the selection or specified range.
 
 [`Editor`](../interfaces/Editor.md)
 
-### range
+### range?
 
 `PositionRange` = `...`
 

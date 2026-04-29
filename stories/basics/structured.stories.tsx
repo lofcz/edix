@@ -19,6 +19,7 @@ import {
   filePaste,
   hotkey,
   InsertNode,
+  ToggleBlockAttr,
 } from "../../src";
 import * as v from "valibot";
 
@@ -28,11 +29,13 @@ export default {
 
 const basicSchema = v.strictObject({
   children: v.array(
-    v.array(
-      v.strictObject({
-        text: v.string(),
-      }),
-    ),
+    v.strictObject({
+      children: v.array(
+        v.strictObject({
+          text: v.string(),
+        }),
+      ),
+    }),
   ),
 });
 
@@ -43,9 +46,9 @@ export const Basic: StoryObj = {
     type Doc = v.InferOutput<typeof basicSchema>;
     const [doc, setDoc] = useState<Doc>({
       children: [
-        [{ text: "Hello world." }],
-        [{ text: "こんにちは。" }],
-        [{ text: "👍❤️🧑‍🧑‍🧒" }],
+        { children: [{ text: "Hello world." }] },
+        { children: [{ text: "こんにちは。" }] },
+        { children: [{ text: "👍❤️🧑‍🧑‍🧒" }] },
       ],
     });
 
@@ -73,9 +76,9 @@ export const Basic: StoryObj = {
           padding: 8,
         }}
       >
-        {doc.children.map((r, i) => (
+        {doc.children.map((b, i) => (
           <div key={i}>
-            {r.map((n, j) => (
+            {b.children.map((n, j) => (
               <span key={j}>{n.text || <br />}</span>
             ))}
           </div>
@@ -94,7 +97,12 @@ const richTextSchema = v.strictObject({
 });
 
 const richSchema = v.strictObject({
-  children: v.array(v.array(richTextSchema)),
+  children: v.array(
+    v.strictObject({
+      align: v.optional(v.picklist(["left", "right"])),
+      children: v.array(richTextSchema),
+    }),
+  ),
 });
 
 const Text = ({ node }: { node: v.InferOutput<typeof richTextSchema> }) => {
@@ -121,14 +129,16 @@ export const RichText: StoryObj = {
     type Doc = v.InferOutput<typeof richSchema>;
     const [doc, setDoc] = useState<Doc>({
       children: [
-        [
-          { text: "Hello", bold: true },
-          { text: " " },
-          { text: "World", italic: true },
-          { text: "." },
-        ],
-        [{ text: "こんにちは。" }],
-        [{ text: "👍❤️🧑‍🧑‍🧒" }],
+        {
+          children: [
+            { text: "Hello", bold: true },
+            { text: " " },
+            { text: "World", italic: true },
+            { text: "." },
+          ],
+        },
+        { children: [{ text: "こんにちは。" }] },
+        { children: [{ text: "👍❤️🧑‍🧑‍🧒" }] },
       ],
     });
 
@@ -143,6 +153,9 @@ export const RichText: StoryObj = {
     };
     const toggleStrike = () => {
       editor.apply(ToggleFormat, "strike");
+    };
+    const toggleAlign = () => {
+      editor.apply(ToggleBlockAttr, "align", "right", undefined);
     };
 
     const editor = useMemo(
@@ -175,6 +188,7 @@ export const RichText: StoryObj = {
           <button onClick={toggleItalic}>italic</button>
           <button onClick={toggleUnderline}>underline</button>
           <button onClick={toggleStrike}>strike</button>
+          <button onClick={toggleAlign}>align</button>
         </div>
         <div
           ref={ref}
@@ -184,9 +198,9 @@ export const RichText: StoryObj = {
             padding: 8,
           }}
         >
-          {doc.children.map((r, i) => (
-            <div key={i}>
-              {r.map((n, j) => (
+          {doc.children.map((b, i) => (
+            <div key={i} style={{ textAlign: b.align }}>
+              {b.children.map((n, j) => (
                 <Text key={j} node={n} />
               ))}
             </div>
@@ -199,19 +213,20 @@ export const RichText: StoryObj = {
 
 const tagSchema = v.strictObject({
   children: v.array(
-    v.array(
-      v.union([
-        v.strictObject({
-          type: v.literal("text"),
-          text: v.string(),
-        }),
-        v.strictObject({
-          type: v.literal("tag"),
-          label: v.string(),
-          value: v.string(),
-        }),
-      ]),
-    ),
+    v.strictObject({
+      children: v.array(
+        v.union([
+          v.strictObject({
+            text: v.string(),
+          }),
+          v.strictObject({
+            type: v.literal("tag"),
+            label: v.string(),
+            value: v.string(),
+          }),
+        ]),
+      ),
+    }),
   ),
 });
 
@@ -222,12 +237,14 @@ export const Tag: StoryObj = {
     type Doc = v.InferOutput<typeof tagSchema>;
     const [doc, setDoc] = useState<Doc>({
       children: [
-        [
-          { type: "text", text: "Hello " },
-          { type: "tag", label: "Apple", value: "1" },
-          { type: "text", text: " world " },
-          { type: "tag", label: "Orange", value: "2" },
-        ],
+        {
+          children: [
+            { text: "Hello " },
+            { type: "tag", label: "Apple", value: "1" },
+            { text: " world " },
+            { type: "tag", label: "Orange", value: "2" },
+          ],
+        },
       ],
     });
 
@@ -236,14 +253,13 @@ export const Tag: StoryObj = {
         createEditor({
           doc: doc,
           schema: tagSchema,
-          plugins: [singlelinePlugin()],
           copy: [
             internalCopy(),
             plainCopy<Doc>((node) => ("text" in node ? node.text : node.label)),
           ],
           paste: [internalPaste(), plainPaste()],
           onChange: setDoc,
-        }),
+        }).use(singlelinePlugin),
       [],
     );
 
@@ -284,8 +300,10 @@ export const Tag: StoryObj = {
             padding: 8,
           }}
         >
-          {doc.children[0].map((t, j) =>
-            t.type === "tag" ? (
+          {doc.children[0].children.map((t, j) =>
+            "text" in t ? (
+              <span key={j}>{t.text || <br />}</span>
+            ) : (
               <span
                 key={j}
                 contentEditable={false}
@@ -300,8 +318,6 @@ export const Tag: StoryObj = {
               >
                 {t.label}
               </span>
-            ) : (
-              <span key={j}>{t.text || <br />}</span>
             ),
           )}
         </div>
@@ -312,18 +328,19 @@ export const Tag: StoryObj = {
 
 const imageSchema = v.strictObject({
   children: v.array(
-    v.array(
-      v.union([
-        v.strictObject({
-          type: v.literal("text"),
-          text: v.string(),
-        }),
-        v.strictObject({
-          type: v.literal("image"),
-          src: v.string(),
-        }),
-      ]),
-    ),
+    v.strictObject({
+      children: v.array(
+        v.union([
+          v.strictObject({
+            text: v.string(),
+          }),
+          v.strictObject({
+            type: v.literal("image"),
+            src: v.string(),
+          }),
+        ]),
+      ),
+    }),
   ),
 });
 
@@ -334,24 +351,24 @@ export const Image: StoryObj = {
     type Doc = v.InferOutput<typeof imageSchema>;
     const [doc, setDoc] = useState<Doc>({
       children: [
-        [
-          {
-            type: "text",
-            text: "Hello ",
-          },
-          {
-            type: "image",
-            src: "https://loremflickr.com/320/240/cats?lock=1",
-          },
-          {
-            type: "text",
-            text: " world ",
-          },
-          {
-            type: "image",
-            src: "https://loremflickr.com/320/240/cats?lock=2",
-          },
-        ],
+        {
+          children: [
+            {
+              text: "Hello ",
+            },
+            {
+              type: "image",
+              src: "https://loremflickr.com/320/240/cats?lock=1",
+            },
+            {
+              text: " world ",
+            },
+            {
+              type: "image",
+              src: "https://loremflickr.com/320/240/cats?lock=2",
+            },
+          ],
+        },
       ],
     });
 
@@ -370,7 +387,7 @@ export const Image: StoryObj = {
             }),
           }),
           htmlPaste<Doc>(
-            (text) => ({ type: "text", text }),
+            (text) => ({ text }),
             [
               (e) => {
                 if (e.tagName === "IMG") {
@@ -396,13 +413,13 @@ export const Image: StoryObj = {
           padding: 8,
         }}
       >
-        {doc.children.map((r, i) => (
+        {doc.children.map((b, i) => (
           <div key={i}>
-            {r.map((t, j) =>
-              t.type === "image" ? (
-                <img key={j} src={t.src} style={{ maxWidth: 200 }} />
-              ) : (
+            {b.children.map((t, j) =>
+              "text" in t ? (
                 <span key={j}>{t.text || <br />}</span>
+              ) : (
+                <img key={j} src={t.src} style={{ maxWidth: 200 }} />
               ),
             )}
           </div>
@@ -414,18 +431,19 @@ export const Image: StoryObj = {
 
 const videoSchema = v.strictObject({
   children: v.array(
-    v.array(
-      v.union([
-        v.strictObject({
-          type: v.literal("text"),
-          text: v.string(),
-        }),
-        v.strictObject({
-          type: v.literal("video"),
-          src: v.string(),
-        }),
-      ]),
-    ),
+    v.strictObject({
+      children: v.array(
+        v.union([
+          v.strictObject({
+            text: v.string(),
+          }),
+          v.strictObject({
+            type: v.literal("video"),
+            src: v.string(),
+          }),
+        ]),
+      ),
+    }),
   ),
 });
 
@@ -436,20 +454,20 @@ export const Video: StoryObj = {
     type Doc = v.InferOutput<typeof videoSchema>;
     const [doc, setDoc] = useState<Doc>({
       children: [
-        [
-          {
-            type: "text",
-            text: "Hello ",
-          },
-          {
-            type: "video",
-            src: "https://download.samplelib.com/mp4/sample-5s.mp4",
-          },
-          {
-            type: "text",
-            text: " world ",
-          },
-        ],
+        {
+          children: [
+            {
+              text: "Hello ",
+            },
+            {
+              type: "video",
+              src: "https://download.samplelib.com/mp4/sample-5s.mp4",
+            },
+            {
+              text: " world ",
+            },
+          ],
+        },
       ],
     });
 
@@ -462,7 +480,7 @@ export const Video: StoryObj = {
         paste: [
           internalPaste(),
           htmlPaste<Doc>(
-            (text) => ({ type: "text", text }),
+            (text) => ({ text }),
             [
               (e) => {
                 if (e.tagName === "VIDEO") {
@@ -488,10 +506,12 @@ export const Video: StoryObj = {
           padding: 8,
         }}
       >
-        {doc.children.map((r, i) => (
+        {doc.children.map((b, i) => (
           <div key={i}>
-            {r.map((t, j) =>
-              t.type === "video" ? (
+            {b.children.map((t, j) =>
+              "text" in t ? (
+                <span key={j}>{t.text || <br />}</span>
+              ) : (
                 // safari needs contentEditable="false"
                 <video
                   key={j}
@@ -502,8 +522,6 @@ export const Video: StoryObj = {
                 >
                   <source src={t.src} />
                 </video>
-              ) : (
-                <span key={j}>{t.text || <br />}</span>
               ),
             )}
           </div>
@@ -515,18 +533,19 @@ export const Video: StoryObj = {
 
 const youtubeSchema = v.strictObject({
   children: v.array(
-    v.array(
-      v.union([
-        v.strictObject({
-          type: v.literal("text"),
-          text: v.string(),
-        }),
-        v.strictObject({
-          type: v.literal("youtube"),
-          id: v.string(),
-        }),
-      ]),
-    ),
+    v.strictObject({
+      children: v.array(
+        v.union([
+          v.strictObject({
+            text: v.string(),
+          }),
+          v.strictObject({
+            type: v.literal("youtube"),
+            id: v.string(),
+          }),
+        ]),
+      ),
+    }),
   ),
 });
 
@@ -551,20 +570,20 @@ export const Iframe: StoryObj = {
     type Doc = v.InferOutput<typeof youtubeSchema>;
     const [doc, setDoc] = useState<Doc>({
       children: [
-        [
-          {
-            type: "text",
-            text: "Hello ",
-          },
-          {
-            type: "youtube",
-            id: "IqKz0SfHaqI",
-          },
-          {
-            type: "text",
-            text: " Youtube",
-          },
-        ],
+        {
+          children: [
+            {
+              text: "Hello ",
+            },
+            {
+              type: "youtube",
+              id: "IqKz0SfHaqI",
+            },
+            {
+              text: " Youtube",
+            },
+          ],
+        },
       ],
     });
 
@@ -577,7 +596,7 @@ export const Iframe: StoryObj = {
         paste: [
           internalPaste(),
           htmlPaste<Doc>(
-            (text) => ({ type: "text", text }),
+            (text) => ({ text }),
             [
               (e) => {
                 if (!!e.dataset.youtubeNode) {
@@ -597,16 +616,6 @@ export const Iframe: StoryObj = {
 
     return (
       <div>
-        {/* <div>
-          <button
-            onClick={() => {
-              // TODO
-              editorRef.current?.insert(" [IqKz0SfHaqI]");
-            }}
-          >
-            insert
-          </button>
-        </div> */}
         <div
           ref={ref}
           style={{
@@ -614,13 +623,13 @@ export const Iframe: StoryObj = {
             padding: 8,
           }}
         >
-          {doc.children.map((r, i) => (
+          {doc.children.map((b, i) => (
             <div key={i}>
-              {r.map((t, j) =>
-                t.type === "youtube" ? (
-                  <Youtube key={j} id={t.id} />
-                ) : (
+              {b.children.map((t, j) =>
+                "text" in t ? (
                   <span key={j}>{t.text || <br />}</span>
+                ) : (
+                  <Youtube key={j} id={t.id} />
                 ),
               )}
             </div>

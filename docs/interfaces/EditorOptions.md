@@ -4,7 +4,7 @@
 
 # Interface: EditorOptions\<T, S\>
 
-Defined in: [editor.ts:98](https://github.com/lofcz/edix/blob/c3e2464dd9fb3308ead13fab4a3705fded785408/src/editor.ts#L98)
+Defined in: [editor.ts:100](https://github.com/inokawa/edix/blob/b06573dd54507ba85c0ad274b18c999023c6a52b/src/editor.ts#L100)
 
 Options of [createEditor](../functions/createEditor.md).
 
@@ -22,9 +22,9 @@ Options of [createEditor](../functions/createEditor.md).
 
 ### schema?
 
-> `optional` **schema**: `S`
+> `optional` **schema?**: `S`
 
-Defined in: [editor.ts:105](https://github.com/lofcz/edix/blob/c3e2464dd9fb3308ead13fab4a3705fded785408/src/editor.ts#L105)
+Defined in: [editor.ts:107](https://github.com/inokawa/edix/blob/b06573dd54507ba85c0ad274b18c999023c6a52b/src/editor.ts#L107)
 
 Optional [Standard Schema](https://github.com/standard-schema/standard-schema) to validate unsafe edits.
 
@@ -34,7 +34,7 @@ Optional [Standard Schema](https://github.com/standard-schema/standard-schema) t
 
 > **doc**: `T`
 
-Defined in: [editor.ts:109](https://github.com/lofcz/edix/blob/c3e2464dd9fb3308ead13fab4a3705fded785408/src/editor.ts#L109)
+Defined in: [editor.ts:111](https://github.com/inokawa/edix/blob/b06573dd54507ba85c0ad274b18c999023c6a52b/src/editor.ts#L111)
 
 Initial document.
 
@@ -42,29 +42,19 @@ Initial document.
 
 ### readonly?
 
-> `optional` **readonly**: `boolean`
+> `optional` **readonly?**: `boolean`
 
-Defined in: [editor.ts:113](https://github.com/lofcz/edix/blob/c3e2464dd9fb3308ead13fab4a3705fded785408/src/editor.ts#L113)
+Defined in: [editor.ts:115](https://github.com/inokawa/edix/blob/b06573dd54507ba85c0ad274b18c999023c6a52b/src/editor.ts#L115)
 
 The state editable or not.
 
 ***
 
-### plugins?
-
-> `optional` **plugins**: [`EditorPlugin`](EditorPlugin.md)[]
-
-Defined in: [editor.ts:117](https://github.com/lofcz/edix/blob/c3e2464dd9fb3308ead13fab4a3705fded785408/src/editor.ts#L117)
-
-TODO
-
-***
-
 ### keyboard?
 
-> `optional` **keyboard**: [`KeyboardHandler`](../type-aliases/KeyboardHandler.md)[]
+> `optional` **keyboard?**: [`KeyboardHook`](../type-aliases/KeyboardHook.md)[]
 
-Defined in: [editor.ts:123](https://github.com/lofcz/edix/blob/c3e2464dd9fb3308ead13fab4a3705fded785408/src/editor.ts#L123)
+Defined in: [editor.ts:121](https://github.com/inokawa/edix/blob/b06573dd54507ba85c0ad274b18c999023c6a52b/src/editor.ts#L121)
 
 Functions to handle keyboard events.
 
@@ -74,9 +64,9 @@ Return `true` if you want to stop propagation.
 
 ### copy?
 
-> `optional` **copy**: \[[`CopyExtension`](../type-aliases/CopyExtension.md), `...rest: CopyExtension[]`\]
+> `optional` **copy?**: \[[`CopyHook`](../type-aliases/CopyHook.md), `...rest: CopyHook[]`\]
 
-Defined in: [editor.ts:128](https://github.com/lofcz/edix/blob/c3e2464dd9fb3308ead13fab4a3705fded785408/src/editor.ts#L128)
+Defined in: [editor.ts:126](https://github.com/inokawa/edix/blob/b06573dd54507ba85c0ad274b18c999023c6a52b/src/editor.ts#L126)
 
 Functions to handle copy events
 
@@ -90,9 +80,9 @@ Functions to handle copy events
 
 ### paste?
 
-> `optional` **paste**: \[[`PasteExtension`](../type-aliases/PasteExtension.md), `...rest: PasteExtension[]`\]
+> `optional` **paste?**: \[[`PasteHook`](../type-aliases/PasteHook.md), `...rest: PasteHook[]`\]
 
-Defined in: [editor.ts:133](https://github.com/lofcz/edix/blob/c3e2464dd9fb3308ead13fab4a3705fded785408/src/editor.ts#L133)
+Defined in: [editor.ts:131](https://github.com/inokawa/edix/blob/b06573dd54507ba85c0ad274b18c999023c6a52b/src/editor.ts#L131)
 
 Functions to handle paste / drop events
 
@@ -104,11 +94,11 @@ Functions to handle paste / drop events
 
 ***
 
-### isBlock()?
+### isBlock?
 
-> `optional` **isBlock**: (`node`) => `boolean`
+> `optional` **isBlock?**: (`node`) => `boolean`
 
-Defined in: [editor.ts:137](https://github.com/lofcz/edix/blob/c3e2464dd9fb3308ead13fab4a3705fded785408/src/editor.ts#L137)
+Defined in: [editor.ts:135](https://github.com/inokawa/edix/blob/b06573dd54507ba85c0ad274b18c999023c6a52b/src/editor.ts#L135)
 
 TODO
 
@@ -124,23 +114,11 @@ TODO
 
 ***
 
-### autoScroll?
-
-> `optional` **autoScroll**: `boolean`
-
-Defined in: [editor.ts:143](https://github.com/lofcz/edix/blob/c3e2464dd9fb3308ead13fab4a3705fded785408/src/editor.ts#L143)
-
-Automatically scroll the mounted element to keep the caret visible
-after document changes. Scroll is coalesced via rAF for zero
-synchronous layout cost during input handling.
-
-***
-
-### onChange()
+### onChange
 
 > **onChange**: (`doc`) => `void`
 
-Defined in: [editor.ts:147](https://github.com/lofcz/edix/blob/c3e2464dd9fb3308ead13fab4a3705fded785408/src/editor.ts#L147)
+Defined in: [editor.ts:139](https://github.com/inokawa/edix/blob/b06573dd54507ba85c0ad274b18c999023c6a52b/src/editor.ts#L139)
 
 Callback invoked when document changes.
 
@@ -156,11 +134,11 @@ Callback invoked when document changes.
 
 ***
 
-### onError()?
+### onError?
 
-> `optional` **onError**: (`message`) => `void`
+> `optional` **onError?**: (`message`) => `void`
 
-Defined in: [editor.ts:153](https://github.com/lofcz/edix/blob/c3e2464dd9fb3308ead13fab4a3705fded785408/src/editor.ts#L153)
+Defined in: [editor.ts:145](https://github.com/inokawa/edix/blob/b06573dd54507ba85c0ad274b18c999023c6a52b/src/editor.ts#L145)
 
 Callback invoked when errors happen.
 

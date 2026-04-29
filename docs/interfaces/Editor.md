@@ -4,7 +4,7 @@
 
 # Interface: Editor\<T\>
 
-Defined in: [editor.ts:159](https://github.com/lofcz/edix/blob/c3e2464dd9fb3308ead13fab4a3705fded785408/src/editor.ts#L159)
+Defined in: [editor.ts:162](https://github.com/inokawa/edix/blob/b06573dd54507ba85c0ad274b18c999023c6a52b/src/editor.ts#L162)
 
 The editor instance.
 
@@ -20,9 +20,9 @@ The editor instance.
 
 #### Call Signature
 
-> **apply**(`tr`, `immediate?`): `this`
+> **apply**(`tr`): `this`
 
-Defined in: [editor.ts:182](https://github.com/lofcz/edix/blob/c3e2464dd9fb3308ead13fab4a3705fded785408/src/editor.ts#L182)
+Defined in: [editor.ts:175](https://github.com/inokawa/edix/blob/b06573dd54507ba85c0ad274b18c999023c6a52b/src/editor.ts#L175)
 
 Dispatches editing operations.
 
@@ -34,12 +34,6 @@ Dispatches editing operations.
 
 [Transaction](../classes/Transaction.md) or EditorCommand
 
-###### immediate?
-
-`boolean`
-
-If true, flushes queued operations immediately.
-
 ##### Returns
 
 `this`
@@ -48,7 +42,7 @@ If true, flushes queued operations immediately.
 
 > **apply**\<`A`\>(`fn`, ...`args`): `this`
 
-Defined in: [editor.ts:183](https://github.com/lofcz/edix/blob/c3e2464dd9fb3308ead13fab4a3705fded785408/src/editor.ts#L183)
+Defined in: [editor.ts:176](https://github.com/inokawa/edix/blob/b06573dd54507ba85c0ad274b18c999023c6a52b/src/editor.ts#L176)
 
 ##### Type Parameters
 
@@ -70,32 +64,115 @@ Defined in: [editor.ts:183](https://github.com/lofcz/edix/blob/c3e2464dd9fb3308e
 
 `this`
 
+***
+
+### on()
+
+> **on**\<`K`\>(`key`, `callback`): () => `void`
+
+Defined in: [editor.ts:181](https://github.com/inokawa/edix/blob/b06573dd54507ba85c0ad274b18c999023c6a52b/src/editor.ts#L181)
+
+A function to subscribe editor events.
+
+#### Type Parameters
+
+##### K
+
+`K` *extends* keyof `EditorEventMap`
+
+#### Parameters
+
+##### key
+
+`K`
+
+##### callback
+
+`EditorEventMap`\[`K`\]
+
+#### Returns
+
+cleanup function
+
+() => `void`
+
+***
+
+### hook()
+
+> **hook**\<`K`\>(`key`, `callback`): () => `void`
+
+Defined in: [editor.ts:189](https://github.com/inokawa/edix/blob/b06573dd54507ba85c0ad274b18c999023c6a52b/src/editor.ts#L189)
+
+A function to register editor hooks.
+
+#### Type Parameters
+
+##### K
+
+`K` *extends* keyof `EditorHookMap`
+
+#### Parameters
+
+##### key
+
+`K`
+
+##### callback
+
+`EditorHookMap`\[`K`\]
+
+#### Returns
+
+cleanup function
+
+() => `void`
+
+***
+
+### use()
+
+> **use**\<`A`\>(`fn`, ...`args`): `this`
+
+Defined in: [editor.ts:201](https://github.com/inokawa/edix/blob/b06573dd54507ba85c0ad274b18c999023c6a52b/src/editor.ts#L201)
+
+A function to use editor plugins.
+
+#### Type Parameters
+
+##### A
+
+`A` *extends* `unknown`[]
+
+#### Parameters
+
+##### fn
+
+[`EditorPlugin`](../type-aliases/EditorPlugin.md)\<`A`, `T`\>
+
+##### args
+
+...`A`
+
+#### Returns
+
+`this`
+
 ## Properties
 
 ### doc
 
 > `readonly` **doc**: `T`
 
-Defined in: [editor.ts:160](https://github.com/lofcz/edix/blob/c3e2464dd9fb3308ead13fab4a3705fded785408/src/editor.ts#L160)
-
-***
-
-### isEmpty
-
-> `readonly` **isEmpty**: `boolean`
-
-Defined in: [editor.ts:165](https://github.com/lofcz/edix/blob/c3e2464dd9fb3308ead13fab4a3705fded785408/src/editor.ts#L165)
-
-Whether the document is empty (no text content, no void nodes).
-Recomputed once per commit — O(1) read.
+Defined in: [editor.ts:163](https://github.com/inokawa/edix/blob/b06573dd54507ba85c0ad274b18c999023c6a52b/src/editor.ts#L163)
 
 ***
 
 ### selection
 
-> **selection**: `SelectionSnapshot`
+> `readonly` **selection**: `SelectionSnapshot`
 
-Defined in: [editor.ts:166](https://github.com/lofcz/edix/blob/c3e2464dd9fb3308ead13fab4a3705fded785408/src/editor.ts#L166)
+Defined in: [editor.ts:164](https://github.com/inokawa/edix/blob/b06573dd54507ba85c0ad274b18c999023c6a52b/src/editor.ts#L164)
 
 ***
 
@@ -103,28 +180,18 @@ Defined in: [editor.ts:166](https://github.com/lofcz/edix/blob/c3e2464dd9fb3308e
 
 > **readonly**: `boolean`
 
-Defined in: [editor.ts:171](https://github.com/lofcz/edix/blob/c3e2464dd9fb3308ead13fab4a3705fded785408/src/editor.ts#L171)
+Defined in: [editor.ts:169](https://github.com/inokawa/edix/blob/b06573dd54507ba85c0ad274b18c999023c6a52b/src/editor.ts#L169)
 
 The getter/setter for the editor's read-only state.
 `true` to read-only. `false` to editable.
 
 ***
 
-### autoScroll
-
-> **autoScroll**: `boolean`
-
-Defined in: [editor.ts:175](https://github.com/lofcz/edix/blob/c3e2464dd9fb3308ead13fab4a3705fded785408/src/editor.ts#L175)
-
-Enable/disable auto-scroll after document changes.
-
-***
-
-### input()
+### input
 
 > **input**: (`element`) => () => `void`
 
-Defined in: [editor.ts:188](https://github.com/lofcz/edix/blob/c3e2464dd9fb3308ead13fab4a3705fded785408/src/editor.ts#L188)
+Defined in: [editor.ts:197](https://github.com/inokawa/edix/blob/b06573dd54507ba85c0ad274b18c999023c6a52b/src/editor.ts#L197)
 
 A function to make DOM editable.
 
@@ -138,8 +205,4 @@ A function to make DOM editable.
 
 A function to stop subscribing DOM changes and restores previous DOM state.
 
-> (): `void`
-
-##### Returns
-
-`void`
+() => `void`

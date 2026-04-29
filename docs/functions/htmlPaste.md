@@ -4,9 +4,9 @@
 
 # Function: htmlPaste()
 
-> **htmlPaste**\<`T`\>(`serializeText`, `serializers`): [`PasteExtension`](../type-aliases/PasteExtension.md)
+> **htmlPaste**\<`T`\>(`serializeText`, `serializers?`): [`PasteHook`](../type-aliases/PasteHook.md)
 
-Defined in: [extensions/paste/html.ts:9](https://github.com/lofcz/edix/blob/c3e2464dd9fb3308ead13fab4a3705fded785408/src/extensions/paste/html.ts#L9)
+Defined in: [hooks/paste/html.ts:9](https://github.com/inokawa/edix/blob/b06573dd54507ba85c0ad274b18c999023c6a52b/src/hooks/paste/html.ts#L9)
 
 An extension to handle pasting / dropping from HTML.
 
@@ -20,12 +20,12 @@ An extension to handle pasting / dropping from HTML.
 
 ### serializeText
 
-(`t`) => `Extract`\<`InferNode`\<`T`\>, `TextNode`\>
+(`t`) => `Extract`\<`InferInlineNode`\<`T`\>, `TextNode`\>
 
-### serializers
+### serializers?
 
-(`node`) => `void` \| `Exclude`\<`InferNode`\<`T`\>, `TextNode`\>[] = `[]`
+(`node`) => `void` \| `Exclude`\<`InferInlineNode`\<`T`\>, `TextNode`\>[] = `[]`
 
 ## Returns
 
-[`PasteExtension`](../type-aliases/PasteExtension.md)
+[`PasteHook`](../type-aliases/PasteHook.md)

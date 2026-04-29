@@ -10,7 +10,7 @@
     "check": "svelte-check --tsconfig ./tsconfig.json && tsc -p tsconfig.node.json"
   },
   "dependencies": {
-    "edix": "npm:@lofcz/edix@0.3.0"
+    "edix": "file:../.."
   },
   "devDependencies": {
     "@sveltejs/vite-plugin-svelte": "^7.0.0",
