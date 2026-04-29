@@ -64,16 +64,12 @@ export function InsertNode<T extends DocNode>(
  */
 export function InsertNodes<T extends DocNode>(
   this: Editor<T>,
-  nodes: InferNode<T>[],
+  nodes: InferInlineNode<T>[],
   position: Position = this.selection[0],
   moveCaret: boolean = true,
 ) {
-  const tr = new Transaction().insertFragment(position, [nodes]);
-  if (moveCaret) {
-    const end = tr.transform(position);
-    tr.selection = [end, end];
-  }
-  this.apply(tr);
+  void moveCaret;
+  this.apply(new Transaction().insertFragment(position, [{ children: nodes }]));
 }
 
 /**
