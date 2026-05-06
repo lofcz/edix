@@ -306,7 +306,10 @@ const flatPath = (path: Path): number => {
   return path.length ? path[0]! : 0;
 };
 
-const getNodeAt = (
+/**
+ * @internal
+ */
+export const getNodeAt = (
   node: DocNode | BlockNode,
   path: Path,
 ): BlockNode | DocNode => {
@@ -315,11 +318,6 @@ const getNodeAt = (
   }
   return node;
 };
-
-/**
- * @internal
- */
-export const getBlockAt: (doc: DocNode, path: Path) => BlockNode = getNodeAt;
 
 const move = (
   position: Position,
@@ -400,7 +398,7 @@ export const sliceFragment = <T extends DocNode>(
 };
 
 const isValidPosition = (doc: DocNode, [path, offset]: Position): boolean => {
-  const block = getBlockAt(doc, path);
+  const block = getNodeAt(doc, path);
   if (block && offset >= 0 && offset <= getNodeSize(block)) {
     return true;
   }
@@ -507,7 +505,7 @@ export const applyOperation = <T extends DocNode>(
       const { at, text } = op;
       if (isValidPosition(doc, at) && text) {
         // inherit style from previous block/text node
-        const block = getBlockAt(doc, at[0]);
+        const block = getNodeAt(doc, at[0]);
         const res = getChildAt(block, at[1] - 1);
         let anchorNode: TextNode | undefined;
         if (res) {
