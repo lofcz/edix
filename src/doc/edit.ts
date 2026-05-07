@@ -77,19 +77,19 @@ export class Transaction {
     return this._ops;
   }
 
-  insertText(start: Position, text: string): this {
+  insertText(at: Position, text: string): this {
     this._ops.push({
       type: TYPE_INSERT_TEXT,
-      at: start,
+      at: at,
       text: text,
     });
     return this;
   }
 
-  insertFragment(start: Position, fragment: Fragment): this {
+  insertFragment(at: Position, fragment: Fragment): this {
     this._ops.push({
       type: TYPE_INSERT_NODE,
-      at: start,
+      at: at,
       fragment: fragment,
     });
     return this;
