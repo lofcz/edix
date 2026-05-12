@@ -13,39 +13,39 @@ import type {
 } from "./types.js";
 import { stringToFragment } from "./utils.js";
 
-const TYPE_DELETE = "delete";
+const OP_DELETE = "delete";
 type DeleteOperation = Readonly<{
-  type: typeof TYPE_DELETE;
+  type: typeof OP_DELETE;
   start: Position;
   end: Position;
 }>;
 
-const TYPE_INSERT_TEXT = "insert_text";
+const OP_INSERT_TEXT = "insert_text";
 type InsertTextOperation = Readonly<{
-  type: typeof TYPE_INSERT_TEXT;
+  type: typeof OP_INSERT_TEXT;
   at: Position;
   text: string;
 }>;
 
-const TYPE_INSERT_NODE = "insert_node";
+const OP_INSERT_NODE = "insert_node";
 type InsertNodeOperation = Readonly<{
-  type: typeof TYPE_INSERT_NODE;
+  type: typeof OP_INSERT_NODE;
   at: Position;
   fragment: Fragment;
 }>;
 
-const TYPE_SET_ATTR = "set_attr";
+const OP_SET_ATTR = "set_attr";
 type SetAttrOperation = Readonly<{
-  type: typeof TYPE_SET_ATTR;
+  type: typeof OP_SET_ATTR;
   start: Position;
   end: Position;
   key: string;
   value: unknown;
 }>;
 
-const TYPE_SET_NODE_ATTR = "set_node_attr";
+const OP_SET_NODE_ATTR = "set_node_attr";
 type SetNodeAttrOperation = Readonly<{
-  type: typeof TYPE_SET_NODE_ATTR;
+  type: typeof OP_SET_NODE_ATTR;
   path: Path;
   key: string;
   value: unknown;
@@ -62,9 +62,7 @@ export type Operation =
  * @internal
  */
 export const isUnsafeOperation = ({ type }: Operation): boolean =>
-  type === TYPE_INSERT_NODE ||
-  type === TYPE_SET_ATTR ||
-  type === TYPE_SET_NODE_ATTR;
+  type === OP_INSERT_NODE || type === OP_SET_ATTR || type === OP_SET_NODE_ATTR;
 
 export class Transaction {
   private readonly _ops: Operation[];
@@ -79,7 +77,7 @@ export class Transaction {
 
   insertText(at: Position, text: string): this {
     this._ops.push({
-      type: TYPE_INSERT_TEXT,
+      type: OP_INSERT_TEXT,
       at: at,
       text: text,
     });
@@ -88,7 +86,7 @@ export class Transaction {
 
   insertFragment(at: Position, fragment: Fragment): this {
     this._ops.push({
-      type: TYPE_INSERT_NODE,
+      type: OP_INSERT_NODE,
       at: at,
       fragment: fragment,
     });
@@ -97,7 +95,7 @@ export class Transaction {
 
   delete(start: Position, end: Position): this {
     this._ops.push({
-      type: TYPE_DELETE,
+      type: OP_DELETE,
       start: start,
       end: end,
     });
@@ -106,7 +104,7 @@ export class Transaction {
 
   format(start: Position, end: Position, key: string, value: unknown): this {
     this._ops.push({
-      type: TYPE_SET_ATTR,
+      type: OP_SET_ATTR,
       start: start,
       end: end,
       key: key,
@@ -117,7 +115,7 @@ export class Transaction {
 
   attr(at: Path, key: string, value: unknown): this {
     this._ops.push({
-      type: TYPE_SET_NODE_ATTR,
+      type: OP_SET_NODE_ATTR,
       path: at,
       key: key,
       value: value,
@@ -407,7 +405,7 @@ const isValidPosition = (doc: DocNode, [path, offset]: Position): boolean => {
 
 const rebasePosition = (position: Position, op: Operation): Position => {
   switch (op.type) {
-    case TYPE_DELETE: {
+    case OP_DELETE: {
       const { start, end } = op;
 
       if (comparePosition(position, start) !== -1) {
@@ -426,15 +424,13 @@ const rebasePosition = (position: Position, op: Operation): Position => {
       }
       break;
     }
-    case TYPE_INSERT_TEXT:
-    case TYPE_INSERT_NODE: {
+    case OP_INSERT_TEXT:
+    case OP_INSERT_NODE: {
       const at = op.at;
 
       if (comparePosition(position, at) !== -1) {
         const lines =
-          op.type === TYPE_INSERT_TEXT
-            ? stringToFragment(op.text)
-            : op.fragment;
+          op.type === OP_INSERT_TEXT ? stringToFragment(op.text) : op.fragment;
 
         const lineLength = lines.length;
         const lineDiff = lineLength - 1;
@@ -449,8 +445,8 @@ const rebasePosition = (position: Position, op: Operation): Position => {
       }
       break;
     }
-    case TYPE_SET_ATTR:
-    case TYPE_SET_NODE_ATTR: {
+    case OP_SET_ATTR:
+    case OP_SET_NODE_ATTR: {
       break;
     }
     default: {
@@ -489,7 +485,7 @@ export const applyOperation = <T extends DocNode>(
   op: Operation,
 ): [T, SelectionSnapshot] => {
   switch (op.type) {
-    case TYPE_DELETE: {
+    case OP_DELETE: {
       const { start, end } = op;
       if (
         isValidPosition(doc, start) &&
@@ -501,7 +497,7 @@ export const applyOperation = <T extends DocNode>(
       }
       break;
     }
-    case TYPE_INSERT_TEXT: {
+    case OP_INSERT_TEXT: {
       const { at, text } = op;
       if (isValidPosition(doc, at) && text) {
         // inherit style from previous block/text node
@@ -525,7 +521,7 @@ export const applyOperation = <T extends DocNode>(
       }
       break;
     }
-    case TYPE_INSERT_NODE: {
+    case OP_INSERT_NODE: {
       const { at, fragment } = op;
       if (isValidPosition(doc, at) && fragment.length) {
         doc = replaceRange(doc, at, at, fragment);
@@ -533,7 +529,7 @@ export const applyOperation = <T extends DocNode>(
       }
       break;
     }
-    case TYPE_SET_ATTR: {
+    case OP_SET_ATTR: {
       const { start, end, key, value } = op;
       if (
         isValidPosition(doc, start) &&
@@ -554,7 +550,7 @@ export const applyOperation = <T extends DocNode>(
       }
       break;
     }
-    case TYPE_SET_NODE_ATTR: {
+    case OP_SET_NODE_ATTR: {
       const { path, key, value } = op;
       const node = getNodeAt(doc, path);
       if (node) {
