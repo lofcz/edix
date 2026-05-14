@@ -6,7 +6,7 @@
 
 > **CopyHook** = (`dataTransfer`, `doc`, `element`) => `void`
 
-Defined in: [hooks/copy/types.ts:3](https://github.com/inokawa/edix/blob/b06573dd54507ba85c0ad274b18c999023c6a52b/src/hooks/copy/types.ts#L3)
+Defined in: [hooks/copy/types.ts:3](https://github.com/inokawa/edix/blob/03e089ec444bb6424c9c4249ab777528fe0d4bde/src/hooks/copy/types.ts#L3)
 
 ## Parameters
 

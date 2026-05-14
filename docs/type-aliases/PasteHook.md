@@ -4,9 +4,9 @@
 
 # Type Alias: PasteHook
 
-> **PasteHook** = (`dataTransfer`, `config`) => `string` \| `Fragment` \| `null`
+> **PasteHook** = (`dataTransfer`, `parser`) => `string` \| `Fragment` \| `null`
 
-Defined in: [hooks/paste/types.ts:4](https://github.com/inokawa/edix/blob/b06573dd54507ba85c0ad274b18c999023c6a52b/src/hooks/paste/types.ts#L4)
+Defined in: [hooks/paste/types.ts:4](https://github.com/inokawa/edix/blob/03e089ec444bb6424c9c4249ab777528fe0d4bde/src/hooks/paste/types.ts#L4)
 
 ## Parameters
 
@@ -14,9 +14,9 @@ Defined in: [hooks/paste/types.ts:4](https://github.com/inokawa/edix/blob/b06573
 
 `DataTransfer`
 
-### config
+### parser
 
-`ParserConfig`
+`Parser`
 
 ## Returns
 

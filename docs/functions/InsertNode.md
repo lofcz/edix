@@ -6,7 +6,7 @@
 
 > **InsertNode**\<`T`\>(`this`, `node`, `position?`): `void`
 
-Defined in: [commands.ts:50](https://github.com/inokawa/edix/blob/b06573dd54507ba85c0ad274b18c999023c6a52b/src/commands.ts#L50)
+Defined in: [commands.ts:46](https://github.com/inokawa/edix/blob/03e089ec444bb6424c9c4249ab777528fe0d4bde/src/commands.ts#L46)
 
 Insert node at the caret or specified position.
 

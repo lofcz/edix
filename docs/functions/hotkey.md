@@ -6,7 +6,7 @@
 
 > **hotkey**(`key`, `cb`, `__namedParameters?`): [`KeyboardHook`](../type-aliases/KeyboardHook.md)
 
-Defined in: [hooks/keyboard.ts:6](https://github.com/inokawa/edix/blob/b06573dd54507ba85c0ad274b18c999023c6a52b/src/hooks/keyboard.ts#L6)
+Defined in: [hooks/keyboard.ts:11](https://github.com/inokawa/edix/blob/03e089ec444bb6424c9c4249ab777528fe0d4bde/src/hooks/keyboard.ts#L11)
 
 TODO
 

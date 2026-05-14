@@ -6,7 +6,7 @@
 
 > **Delete**(`this`, `range?`): `void`
 
-Defined in: [commands.ts:29](https://github.com/inokawa/edix/blob/b06573dd54507ba85c0ad274b18c999023c6a52b/src/commands.ts#L29)
+Defined in: [commands.ts:28](https://github.com/inokawa/edix/blob/03e089ec444bb6424c9c4249ab777528fe0d4bde/src/commands.ts#L28)
 
 Delete content in the selection or specified range.
 
@@ -18,7 +18,7 @@ Delete content in the selection or specified range.
 
 ### range?
 
-`PositionRange` = `...`
+`Range` = `...`
 
 ## Returns
 
