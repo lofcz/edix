@@ -34,11 +34,11 @@ export function historyPlugin<T extends DocNode>(this: Editor<T>) {
     if (isUndoable()) {
       const sel = get()[1];
       index--;
-      const doc = get()[0];
+      const currentDoc = editor.doc;
       undoOrRedoing = true;
-      editor.apply(ReplaceDoc, doc.children);
+      editor.apply(ReplaceDoc, get()[0].children);
       undoOrRedoing = false;
-      if (!is(doc, editor.doc)) {
+      if (!is(currentDoc, editor.doc)) {
         editor.selection = sel;
       }
     }
@@ -46,13 +46,12 @@ export function historyPlugin<T extends DocNode>(this: Editor<T>) {
   const redo = () => {
     if (isRedoable()) {
       index++;
-      const doc = get()[0];
-      const sel = get()[1];
-      const ops = get()[2];
+      const [doc, sel, ops] = get();
+      const currentDoc = editor.doc;
       undoOrRedoing = true;
       editor.apply(ReplaceDoc, doc.children);
       undoOrRedoing = false;
-      if (!is(doc, editor.doc)) {
+      if (!is(currentDoc, editor.doc)) {
         editor.selection = ops.reduce(
           (acc, op) => rebaseSelection(acc, op),
           sel,
