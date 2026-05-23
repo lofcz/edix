@@ -11,7 +11,6 @@ import {
 import { createMutationObserver } from "./dom/mutation.js";
 import type { DocNode, Fragment, Selection } from "./doc/types.js";
 import { is, isFunction, isString, microtask } from "./utils.js";
-import type { EditorCommand } from "./commands.js";
 import {
   applyOperation,
   Transaction,
@@ -25,7 +24,6 @@ import {
 } from "./doc/edit.js";
 import { createParser } from "./dom/index.js";
 import { isCollapsed, toRange } from "./doc/position.js";
-import type { EditorPlugin } from "./plugins/types.js";
 import {
   type CopyHook,
   type PasteHook,
@@ -94,6 +92,16 @@ type InputType =
   | "deleteCompositionText"
   | "deleteByComposition"
   | "insertFromComposition";
+
+type EditorCommand<A extends unknown[], T extends DocNode = DocNode> = (
+  editor: Editor<T>,
+  ...args: A
+) => void | undefined;
+
+type EditorQuery<A extends unknown[], V, T extends DocNode = DocNode> = (
+  editor: Editor<T>,
+  ...args: A
+) => V;
 
 /**
  * Options of {@link createEditor}.
@@ -171,11 +179,16 @@ export interface Editor<T extends DocNode = DocNode> {
   readonly: boolean;
   /**
    * Dispatches editing operations.
-   * @param tr {@link Transaction} or {@link EditorCommand}
-   * @param args arguments of {@link EditorCommand}
+   * @param tr {@link Transaction}
    */
   apply(tr: Transaction): this;
-  apply<A extends unknown[]>(fn: EditorCommand<A, T>, ...args: A): this;
+  /**
+   * Executes a function with editor bound as context.
+   * @param fn {@link EditorCommand} or {@link EditorQuery}
+   * @param args arguments of the function
+   */
+  exec<A extends unknown[]>(fn: EditorCommand<A, T>, ...args: A): this;
+  exec<A extends unknown[], V>(fn: EditorQuery<A, V, T>, ...args: A): V;
   /**
    * A function to subscribe editor events.
    * @returns cleanup function
@@ -197,10 +210,6 @@ export interface Editor<T extends DocNode = DocNode> {
    * @returns A function to stop subscribing DOM changes and restores previous DOM state.
    */
   input: (element: HTMLElement) => () => void;
-  /**
-   * A function to use editor plugins.
-   */
-  use<A extends unknown[]>(fn: EditorPlugin<A, T>, ...args: A): this;
 }
 
 /**
@@ -359,12 +368,8 @@ export const createEditor = <
       readonly = value;
       publish("readonly");
     },
-    apply: (tr: Transaction | EditorCommand<any, T>, ...args: unknown[]) => {
-      if (isFunction(tr)) {
-        tr(editor, ...args);
-      } else {
-        apply(tr);
-      }
+    apply: (tr: Transaction) => {
+      apply(tr);
       return editor;
     },
     on: (type, callback) => {
@@ -391,9 +396,15 @@ export const createEditor = <
         }
       };
     },
-    use: (plugin, ...args) => {
-      plugin(editor, ...args);
-      return editor;
+    exec: (
+      fn: EditorCommand<any, T> | EditorQuery<any, unknown, T>,
+      ...args: unknown[]
+    ): any => {
+      const result = fn(editor, ...args);
+      if (typeof result === "undefined") {
+        return editor;
+      }
+      return result;
     },
     input: (element) => {
       if (
@@ -756,7 +767,7 @@ export const createEditor = <
     },
   };
 
-  editor.use(historyPlugin);
+  editor.exec(historyPlugin);
 
   editor.on("change", () => {
     onChange(doc);
