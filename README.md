@@ -92,7 +92,7 @@ export const App = () => {
 
 ### Rich text
 
-[Standard Schema](https://github.com/standard-schema/standard-schema) is supported.
+You can define document schema with [Standard Schema](https://github.com/standard-schema/standard-schema) for type-safe editing.
 
 ```tsx
 import { useState, useEffect, useRef, useMemo } from "react";
