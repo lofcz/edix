@@ -1,4 +1,4 @@
-import { afterEach, beforeEach, describe, expect, it } from "vitest";
+import { afterEach, describe, expect, it } from "vitest";
 import { createPlainEditor } from "./presets/plain.js";
 import { Transaction } from "./doc/edit.js";
 import type { Editor } from "./editor.js";
