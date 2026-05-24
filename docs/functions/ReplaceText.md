@@ -4,15 +4,15 @@
 
 # Function: ReplaceText()
 
-> **ReplaceText**(`this`, `text`): `void`
+> **ReplaceText**(`editor`, `text`): `void`
 
-Defined in: [commands.ts:63](https://github.com/inokawa/edix/blob/b06573dd54507ba85c0ad274b18c999023c6a52b/src/commands.ts#L63)
+Defined in: [commands.ts:57](https://github.com/inokawa/editate/blob/d46349a29ec95cd9d8330041874bdfb327a4ebb9/src/commands.ts#L57)
 
 Replace text in the selection or specified range.
 
 ## Parameters
 
-### this
+### editor
 
 [`Editor`](../interfaces/Editor.md)
 

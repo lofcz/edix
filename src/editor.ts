@@ -1,19 +1,16 @@
 import type { StandardSchemaV1 } from "@standard-schema/spec";
-import { createHistory } from "./history.js";
 import {
   getCurrentDocument,
   takeSelectionSnapshot,
   setSelectionToDOM,
-  getEmptySelectionSnapshot,
   getPointedCaretPosition,
   defaultIsBlockNode,
   defaultIsVoidNode,
   serializeRange,
 } from "./dom/index.js";
 import { createMutationObserver } from "./dom/mutation.js";
-import type { DocNode, Fragment, SelectionSnapshot } from "./doc/types.js";
+import type { DocNode, Fragment, Selection } from "./doc/types.js";
 import { is, isFunction, isString, microtask } from "./utils.js";
-import type { EditorCommand } from "./commands.js";
 import {
   applyOperation,
   Transaction,
@@ -22,18 +19,20 @@ import {
   type Operation,
   isUnsafeOperation,
   isValidSelection,
+  domSelectionToSelection,
+  selectionToDomSelection,
+  positionToOffset,
 } from "./doc/edit.js";
 import { createParser } from "./dom/index.js";
-import { comparePosition, toRange } from "./doc/position.js";
-import type { EditorPlugin } from "./plugins/types.js";
+import { isCollapsed, toRange } from "./doc/position.js";
 import {
   type CopyHook,
   type PasteHook,
   plainCopy,
   plainPaste,
-  hotkey,
   type KeyboardHook,
 } from "./hooks/index.js";
+import { historyPlugin } from "./plugins/history.js";
 
 const empty: unknown[] = [];
 
@@ -95,6 +94,16 @@ type InputType =
   | "deleteByComposition"
   | "insertFromComposition";
 
+type EditorCommand<A extends unknown[], T extends DocNode = DocNode> = (
+  editor: Editor<T>,
+  ...args: A
+) => void | undefined;
+
+type EditorQuery<A extends unknown[], V, T extends DocNode = DocNode> = (
+  editor: Editor<T>,
+  ...args: A
+) => V;
+
 /**
  * Options of {@link createEditor}.
  */
@@ -138,6 +147,8 @@ export interface EditorOptions<
    * Automatically scroll the mounted element to keep the caret visible
    * after document changes. Scroll is coalesced via rAF for zero
    * synchronous layout cost during input handling.
+   *
+   * @default false
    */
   autoScroll?: boolean;
   /**
@@ -161,6 +172,7 @@ type EditorEventMap = {
 type EditorHookMap = {
   apply: (op: Operation, next: (op?: Operation) => void) => void;
   mount: (element: HTMLElement) => void | (() => void);
+  keyboard: KeyboardHook;
 };
 
 /**
@@ -173,7 +185,7 @@ export interface Editor<T extends DocNode = DocNode> {
    * Recomputed once per commit so reads stay O(1).
    */
   readonly isEmpty: boolean;
-  readonly selection: SelectionSnapshot;
+  selection: Selection;
   /**
    * The getter/setter for the editor's read-only state.
    * `true` to read-only. `false` to editable.
@@ -185,11 +197,16 @@ export interface Editor<T extends DocNode = DocNode> {
   autoScroll: boolean;
   /**
    * Dispatches editing operations.
-   * @param tr {@link Transaction} or {@link EditorCommand}
-   * @param args arguments of {@link EditorCommand}
+   * @param tr {@link Transaction}
    */
   apply(tr: Transaction): this;
-  apply<A extends unknown[]>(fn: EditorCommand<A, T>, ...args: A): this;
+  /**
+   * Executes a function with editor bound as context.
+   * @param fn {@link EditorCommand} or {@link EditorQuery}
+   * @param args arguments of the function
+   */
+  exec<A extends unknown[]>(fn: EditorCommand<A, T>, ...args: A): this;
+  exec<A extends unknown[], V>(fn: EditorQuery<A, V, T>, ...args: A): V;
   /**
    * A function to subscribe editor events.
    * @returns cleanup function
@@ -211,10 +228,6 @@ export interface Editor<T extends DocNode = DocNode> {
    * @returns A function to stop subscribing DOM changes and restores previous DOM state.
    */
   input: (element: HTMLElement) => () => void;
-  /**
-   * A function to use editor plugins.
-   */
-  use<A extends unknown[]>(fn: EditorPlugin<A, T>, ...args: A): this;
 }
 
 /**
@@ -235,7 +248,7 @@ export const createEditor = <
   onChange,
   onError = console.error,
 }: EditorOptions<T, S>): Editor<T> => {
-  let selection: SelectionSnapshot = getEmptySelectionSnapshot();
+  let selection: Selection = [0, 0];
   let mountedElement: HTMLElement | null = null;
   let scrollRAF = 0;
 
@@ -249,6 +262,8 @@ export const createEditor = <
     }
   };
 
+  // O(n) walk over the doc; cached after each commit so `editor.isEmpty`
+  // remains O(1) for callers.
   const computeEmpty = (value: DocNode): boolean => {
     for (const block of value.children) {
       for (const node of block.children) {
@@ -287,42 +302,6 @@ export const createEditor = <
     initialError
   ) {
     throw new Error(initialError);
-  }
-
-  const keydownHooks: KeyboardHook[] = [
-    hotkey(
-      "z",
-      () => {
-        if (!readonly) {
-          const nextHistory = history.undo();
-          if (nextHistory) {
-            doc = nextHistory[0];
-            emptyDoc = computeEmpty(doc);
-            updateSelection(nextHistory[1]);
-            publish("change");
-          }
-        }
-      },
-      { mod: true },
-    ),
-    hotkey(
-      "z",
-      () => {
-        if (!readonly) {
-          const nextHistory = history.redo();
-          if (nextHistory) {
-            doc = nextHistory[0];
-            emptyDoc = computeEmpty(doc);
-            updateSelection(nextHistory[1]);
-            publish("change");
-          }
-        }
-      },
-      { mod: true, shift: true },
-    ),
-  ];
-  if (keyboard) {
-    keydownHooks.push(...keyboard);
   }
 
   const hooks = new Map<
@@ -408,11 +387,10 @@ export const createEditor = <
     }
   };
 
-  const updateSelection = (s: SelectionSnapshot) => {
+  const updateSelection = (s: Selection) => {
     if (
       isValidSelection(doc, s) &&
-      (comparePosition(selection[0], s[0]) ||
-        comparePosition(selection[1], s[1]))
+      (selection[0] !== s[0] || selection[1] !== s[1])
     ) {
       selection = s;
       publish("selectionchange");
@@ -429,9 +407,9 @@ export const createEditor = <
     get selection() {
       return selection;
     },
-    // set selection(value) {
-    //   updateSelection(value);
-    // },
+    set selection(value) {
+      updateSelection(value);
+    },
     get readonly() {
       return readonly;
     },
@@ -445,12 +423,8 @@ export const createEditor = <
     set autoScroll(value) {
       _autoScroll = value;
     },
-    apply: (tr: Transaction | EditorCommand<any, T>, ...args: unknown[]) => {
-      if (isFunction(tr)) {
-        tr.call(editor, ...args);
-      } else {
-        apply(tr);
-      }
+    apply: (tr: Transaction) => {
+      apply(tr);
       return editor;
     },
     on: (type, callback) => {
@@ -477,9 +451,15 @@ export const createEditor = <
         }
       };
     },
-    use: (plugin, ...args) => {
-      plugin.call(editor, ...args);
-      return editor;
+    exec: (
+      fn: EditorCommand<any, T> | EditorQuery<any, unknown, T>,
+      ...args: unknown[]
+    ): any => {
+      const result = fn(editor, ...args);
+      if (typeof result === "undefined") {
+        return editor;
+      }
+      return result;
     },
     input: (element) => {
       if (
@@ -507,7 +487,7 @@ export const createEditor = <
       element.ariaMultiLine = "true";
 
       let disposed = false;
-      let inputTransaction: [Transaction, SelectionSnapshot] | null = null;
+      let inputTransaction: [Transaction, Selection] | null = null;
       let isComposing = false;
       let hasFocus = false;
       let isDragging = false;
@@ -553,11 +533,19 @@ export const createEditor = <
       const observer = createMutationObserver(element, () => {
         // TODO optimize
         // Mutation to selected DOM may change selection, so restore it.
-        setSelectionToDOM(document, element, selection, parser);
+        setSelectionToDOM(
+          document,
+          element,
+          selectionToDomSelection(doc, selection),
+          selection[0] - selection[1],
+          parser,
+        );
       });
 
       const syncSelection = () => {
-        updateSelection(takeSelectionSnapshot(element, parser));
+        updateSelection(
+          domSelectionToSelection(doc, takeSelectionSnapshot(element, parser)),
+        );
       };
 
       const flushInput = () => {
@@ -572,7 +560,14 @@ export const createEditor = <
           // Updating selection may schedule the next selectionchange event
           // It should be ignored especially in firefox not to confuse editor state
           document.removeEventListener("selectionchange", onSelectionChange);
-          setSelectionToDOM(document, element, selection, parser, true);
+          setSelectionToDOM(
+            document,
+            element,
+            selectionToDomSelection(doc, selection),
+            selection[0] - selection[1],
+            parser,
+            true,
+          );
           document.addEventListener("selectionchange", onSelectionChange);
         }
 
@@ -591,7 +586,7 @@ export const createEditor = <
       const onKeyDown = (e: KeyboardEvent) => {
         if (isComposing) return;
 
-        for (const handler of keydownHooks) {
+        for (const handler of getHook("keyboard")) {
           if (handler(e)) {
             e.preventDefault();
             observer._record(false);
@@ -630,7 +625,10 @@ export const createEditor = <
         const domRange = e.getTargetRanges()[0];
         if (domRange) {
           // Read input
-          const range = serializeRange(element, parser, domRange);
+          const range = domSelectionToSelection(
+            doc,
+            serializeRange(element, parser, domRange),
+          );
           let data =
             inputType === "insertParagraph" || inputType === "insertLineBreak"
               ? "\n"
@@ -648,7 +646,7 @@ export const createEditor = <
             inputTransaction = [new Transaction(), selection];
           }
           tr = inputTransaction[0];
-          if (comparePosition(...range) !== 0) {
+          if (!isCollapsed(range)) {
             // replace or delete
             tr.delete(...range);
           }
@@ -689,7 +687,7 @@ export const createEditor = <
 
       const copy = (dataTransfer: DataTransfer) => {
         syncSelection();
-        if (comparePosition(...selection) !== 0) {
+        if (!isCollapsed(selection)) {
           const fragment = sliceFragment(doc, ...toRange(selection));
           for (const ex of copyHooks) {
             ex(dataTransfer, fragment, element);
@@ -734,20 +732,21 @@ export const createEditor = <
           parser,
         );
         if (dataTransfer && droppedPosition) {
-          let afterSelection: SelectionSnapshot | undefined;
+          let afterSelection: Selection | undefined;
           const tr = new Transaction();
           if (isDragging) {
             tr.delete(...toRange(selection));
           }
           const pasted = paste(dataTransfer);
           if (pasted) {
-            const pos = tr.transform(droppedPosition);
+            const offset = positionToOffset(doc, droppedPosition);
+            const pos = tr.transform(offset);
             if (isString(pasted)) {
               tr.insertText(pos, pasted);
             } else {
               tr.insertFragment(pos, pasted);
             }
-            afterSelection = [pos, tr.transform(droppedPosition)];
+            afterSelection = [pos, tr.transform(offset)];
           }
           apply(tr);
           if (afterSelection) {
@@ -832,7 +831,7 @@ export const createEditor = <
     },
   };
 
-  const history = createHistory(editor);
+  editor.exec(historyPlugin);
 
   editor.on("change", () => {
     onChange(doc);
@@ -840,6 +839,12 @@ export const createEditor = <
       scheduleScroll();
     }
   });
+
+  if (keyboard) {
+    keyboard.forEach((h) => {
+      editor.hook("keyboard", h);
+    });
+  }
 
   return editor;
 };

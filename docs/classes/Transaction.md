@@ -4,7 +4,7 @@
 
 # Class: Transaction
 
-Defined in: [doc/edit.ts:69](https://github.com/inokawa/edix/blob/b06573dd54507ba85c0ad274b18c999023c6a52b/src/doc/edit.ts#L69)
+Defined in: [doc/edit.ts:67](https://github.com/inokawa/editate/blob/d46349a29ec95cd9d8330041874bdfb327a4ebb9/src/doc/edit.ts#L67)
 
 ## Accessors
 
@@ -14,7 +14,7 @@ Defined in: [doc/edit.ts:69](https://github.com/inokawa/edix/blob/b06573dd54507b
 
 > **get** **ops**(): readonly `Operation`[]
 
-Defined in: [doc/edit.ts:76](https://github.com/inokawa/edix/blob/b06573dd54507ba85c0ad274b18c999023c6a52b/src/doc/edit.ts#L76)
+Defined in: [doc/edit.ts:74](https://github.com/inokawa/editate/blob/d46349a29ec95cd9d8330041874bdfb327a4ebb9/src/doc/edit.ts#L74)
 
 ##### Returns
 
@@ -26,7 +26,7 @@ readonly `Operation`[]
 
 > **new Transaction**(`ops?`): `Transaction`
 
-Defined in: [doc/edit.ts:72](https://github.com/inokawa/edix/blob/b06573dd54507ba85c0ad274b18c999023c6a52b/src/doc/edit.ts#L72)
+Defined in: [doc/edit.ts:70](https://github.com/inokawa/editate/blob/d46349a29ec95cd9d8330041874bdfb327a4ebb9/src/doc/edit.ts#L70)
 
 #### Parameters
 
@@ -42,15 +42,15 @@ readonly `Operation`[]
 
 ### insertText()
 
-> **insertText**(`start`, `text`): `this`
+> **insertText**(`at`, `text`): `this`
 
-Defined in: [doc/edit.ts:80](https://github.com/inokawa/edix/blob/b06573dd54507ba85c0ad274b18c999023c6a52b/src/doc/edit.ts#L80)
+Defined in: [doc/edit.ts:78](https://github.com/inokawa/editate/blob/d46349a29ec95cd9d8330041874bdfb327a4ebb9/src/doc/edit.ts#L78)
 
 #### Parameters
 
-##### start
+##### at
 
-`Position`
+`number`
 
 ##### text
 
@@ -64,15 +64,15 @@ Defined in: [doc/edit.ts:80](https://github.com/inokawa/edix/blob/b06573dd54507b
 
 ### insertFragment()
 
-> **insertFragment**(`start`, `fragment`): `this`
+> **insertFragment**(`at`, `fragment`): `this`
 
-Defined in: [doc/edit.ts:89](https://github.com/inokawa/edix/blob/b06573dd54507ba85c0ad274b18c999023c6a52b/src/doc/edit.ts#L89)
+Defined in: [doc/edit.ts:87](https://github.com/inokawa/editate/blob/d46349a29ec95cd9d8330041874bdfb327a4ebb9/src/doc/edit.ts#L87)
 
 #### Parameters
 
-##### start
+##### at
 
-`Position`
+`number`
 
 ##### fragment
 
@@ -88,17 +88,17 @@ readonly `BlockNode`[]
 
 > **delete**(`start`, `end`): `this`
 
-Defined in: [doc/edit.ts:98](https://github.com/inokawa/edix/blob/b06573dd54507ba85c0ad274b18c999023c6a52b/src/doc/edit.ts#L98)
+Defined in: [doc/edit.ts:96](https://github.com/inokawa/editate/blob/d46349a29ec95cd9d8330041874bdfb327a4ebb9/src/doc/edit.ts#L96)
 
 #### Parameters
 
 ##### start
 
-`Position`
+`number`
 
 ##### end
 
-`Position`
+`number`
 
 #### Returns
 
@@ -110,17 +110,17 @@ Defined in: [doc/edit.ts:98](https://github.com/inokawa/edix/blob/b06573dd54507b
 
 > **format**(`start`, `end`, `key`, `value`): `this`
 
-Defined in: [doc/edit.ts:107](https://github.com/inokawa/edix/blob/b06573dd54507ba85c0ad274b18c999023c6a52b/src/doc/edit.ts#L107)
+Defined in: [doc/edit.ts:105](https://github.com/inokawa/editate/blob/d46349a29ec95cd9d8330041874bdfb327a4ebb9/src/doc/edit.ts#L105)
 
 #### Parameters
 
 ##### start
 
-`Position`
+`number`
 
 ##### end
 
-`Position`
+`number`
 
 ##### key
 
@@ -140,7 +140,7 @@ Defined in: [doc/edit.ts:107](https://github.com/inokawa/edix/blob/b06573dd54507
 
 > **attr**(`at`, `key`, `value`): `this`
 
-Defined in: [doc/edit.ts:118](https://github.com/inokawa/edix/blob/b06573dd54507ba85c0ad274b18c999023c6a52b/src/doc/edit.ts#L118)
+Defined in: [doc/edit.ts:116](https://github.com/inokawa/editate/blob/d46349a29ec95cd9d8330041874bdfb327a4ebb9/src/doc/edit.ts#L116)
 
 #### Parameters
 
@@ -164,16 +164,16 @@ Defined in: [doc/edit.ts:118](https://github.com/inokawa/edix/blob/b06573dd54507
 
 ### transform()
 
-> **transform**(`position`): `Position`
+> **transform**(`position`): `number`
 
-Defined in: [doc/edit.ts:128](https://github.com/inokawa/edix/blob/b06573dd54507ba85c0ad274b18c999023c6a52b/src/doc/edit.ts#L128)
+Defined in: [doc/edit.ts:126](https://github.com/inokawa/editate/blob/d46349a29ec95cd9d8330041874bdfb327a4ebb9/src/doc/edit.ts#L126)
 
 #### Parameters
 
 ##### position
 
-`Position`
+`number`
 
 #### Returns
 
-`Position`
+`number`

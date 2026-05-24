@@ -5,6 +5,7 @@ export {
   InsertNode,
   InsertNodes,
   ReplaceText,
+  ReplaceDoc,
   ReplaceAll,
   Format,
   ToggleFormat,

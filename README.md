@@ -2,6 +2,8 @@
 
 ![npm](https://img.shields.io/npm/v/@lofcz/edix) ![npm bundle size](https://img.shields.io/bundlephobia/minzip/@lofcz/edix) ![npm](https://img.shields.io/npm/dw/@lofcz/edix) [![check](https://github.com/lofcz/edix/actions/workflows/check.yml/badge.svg)](https://github.com/lofcz/edix/actions/workflows/check.yml) [![demo](https://github.com/lofcz/edix/actions/workflows/demo.yml/badge.svg)](https://github.com/lofcz/edix/actions/workflows/demo.yml)
 
+> Fork of [inokawa/editate](https://github.com/inokawa/editate) that keeps the original `edix` name. Tracks upstream and adds a few small features (`editor.isEmpty`, `autoScroll`, `ReplaceAll`, `InsertNodes`).
+
 > An experimental, type-safe, framework agnostic and small (5kB+) [contenteditable](https://developer.mozilla.org/en-US/docs/Web/HTML/Global_attributes/contenteditable) state manager.
 
 ## Motivation
@@ -39,17 +41,16 @@ Mobile browsers are also supported, but with some issues (https://github.com/lof
 
 ## Getting started
 
-1. Define your contents declaratively. There are rules you have to follow:
-   - You must render `<br/>` in empty row (limitation of contenteditable).
-   - If `singleline` option is
-     - `false` or undefined, direct children of the root are treated as rows. They must be elements, not text.
-     - `true`, direct children of the root are treated as inline nodes.
-   - (TODO)
-
-2. Initialize `Editor` with `createPlainEditor`/`createEditor`.
-3. Call `Editor.input` on mount, with `HTMLElement` which is the root of editable contents.
-4. Update your state with `onChange`, which will be called on edit.
-5. Call returned function from `Editor.input` on unmount for cleanup.
+1. Define your document as a state.
+2. Define your editor view declaratively. There are rules you have to follow:
+   - You must render all texts in the document as Text nodes in DOM.
+   - You must render `<br/>` in empty blocks (limitation of contenteditable).
+   - You must render hard breaks in the document as [block element](https://github.com/inokawa/editate/blob/ecd70f084f2fbb54d36bfd3b682f2dd8bbc3f547/src/dom/default.ts#L25).
+   - You must render void nodes in the document as [void element](https://github.com/inokawa/editate/blob/ecd70f084f2fbb54d36bfd3b682f2dd8bbc3f547/src/dom/default.ts#L47).
+3. Use `createPlainEditor`/`createEditor` to initialize `Editor` with the document.
+4. Call `Editor.input` on mount, with `HTMLElement` which is the root of editor view.
+5. Update your state with `onChange`, which will be called on edit.
+6. Call returned function from `Editor.input` on unmount for cleanup.
 
 Here is an example for React.
 
@@ -61,26 +62,27 @@ import { createPlainEditor } from "edix";
 
 export const App = () => {
   const ref = useRef<HTMLDivElement>(null);
+  // 1. Define state
   const [text, setText] = useState("Hello world.");
 
   useEffect(() => {
-    // 2. init
+    // 3. init
     const editor = createPlainEditor({
       text: text,
       onChange: (v) => {
-        // 4. update state
+        // 5. update state
         setText(v);
       },
     });
-    // 3. bind to DOM
+    // 4. bind to DOM
     const cleanup = editor.input(ref.current);
     return () => {
-      // 5. cleanup DOM
+      // 6. cleanup DOM
       cleanup();
     };
   }, []);
 
-  // 1. render contents from state
+  // 2. render from state
   return (
     <div
       ref={ref}
@@ -100,7 +102,7 @@ export const App = () => {
 
 ### Rich text
 
-[Standard Schema](https://github.com/standard-schema/standard-schema) is supported.
+You can define document schema with [Standard Schema](https://github.com/standard-schema/standard-schema) for type-safe editing.
 
 ```tsx
 import { useState, useEffect, useRef, useMemo } from "react";
@@ -158,21 +160,21 @@ export const App = () => {
       <div>
         <button
           onClick={() => {
-            editor.apply(ToggleFormat, "bold");
+            editor.exec(ToggleFormat, "bold");
           }}
         >
           bold
         </button>
         <button
           onClick={() => {
-            editor.apply(ToggleFormat, "italic");
+            editor.exec(ToggleFormat, "italic");
           }}
         >
           italic
         </button>
         <button
           onClick={() => {
-            editor.apply(ToggleBlockAttr, "align", "right", undefined);
+            editor.exec(ToggleBlockAttr, "align", "right", undefined);
           }}
         >
           align
@@ -223,7 +225,7 @@ export const App = () => {
 
 - [API reference](./docs/API.md)
 - [Storybook examples](./stories) for more usages
-- [DeepWiki](https://deepwiki.com/inokawa/edix)
+- [DeepWiki](https://deepwiki.com/inokawa/editate)
 
 ## Contribute
 

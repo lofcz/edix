@@ -4,7 +4,7 @@
 
 # Interface: PlainEditorOptions
 
-Defined in: [presets/plain.ts:7](https://github.com/inokawa/edix/blob/b06573dd54507ba85c0ad274b18c999023c6a52b/src/presets/plain.ts#L7)
+Defined in: [presets/plain.ts:7](https://github.com/inokawa/editate/blob/d46349a29ec95cd9d8330041874bdfb327a4ebb9/src/presets/plain.ts#L7)
 
 ## Extends
 
@@ -16,7 +16,7 @@ Defined in: [presets/plain.ts:7](https://github.com/inokawa/edix/blob/b06573dd54
 
 > **text**: `string`
 
-Defined in: [presets/plain.ts:14](https://github.com/inokawa/edix/blob/b06573dd54507ba85c0ad274b18c999023c6a52b/src/presets/plain.ts#L14)
+Defined in: [presets/plain.ts:14](https://github.com/inokawa/editate/blob/d46349a29ec95cd9d8330041874bdfb327a4ebb9/src/presets/plain.ts#L14)
 
 Initial document text.
 
@@ -26,7 +26,7 @@ Initial document text.
 
 > `optional` **singleline?**: `boolean`
 
-Defined in: [presets/plain.ts:18](https://github.com/inokawa/edix/blob/b06573dd54507ba85c0ad274b18c999023c6a52b/src/presets/plain.ts#L18)
+Defined in: [presets/plain.ts:18](https://github.com/inokawa/editate/blob/d46349a29ec95cd9d8330041874bdfb327a4ebb9/src/presets/plain.ts#L18)
 
 TODO
 
@@ -36,7 +36,7 @@ TODO
 
 > **onChange**: (`text`) => `void`
 
-Defined in: [presets/plain.ts:22](https://github.com/inokawa/edix/blob/b06573dd54507ba85c0ad274b18c999023c6a52b/src/presets/plain.ts#L22)
+Defined in: [presets/plain.ts:22](https://github.com/inokawa/editate/blob/d46349a29ec95cd9d8330041874bdfb327a4ebb9/src/presets/plain.ts#L22)
 
 Callback invoked when document changes.
 
@@ -52,25 +52,11 @@ Callback invoked when document changes.
 
 ***
 
-### readonly?
-
-> `optional` **readonly?**: `boolean`
-
-Defined in: [editor.ts:115](https://github.com/inokawa/edix/blob/b06573dd54507ba85c0ad274b18c999023c6a52b/src/editor.ts#L115)
-
-The state editable or not.
-
-#### Inherited from
-
-`Omit.readonly`
-
-***
-
 ### keyboard?
 
 > `optional` **keyboard?**: [`KeyboardHook`](../type-aliases/KeyboardHook.md)[]
 
-Defined in: [editor.ts:121](https://github.com/inokawa/edix/blob/b06573dd54507ba85c0ad274b18c999023c6a52b/src/editor.ts#L121)
+Defined in: [editor.ts:130](https://github.com/inokawa/editate/blob/d46349a29ec95cd9d8330041874bdfb327a4ebb9/src/editor.ts#L130)
 
 Functions to handle keyboard events.
 
@@ -82,11 +68,25 @@ Return `true` if you want to stop propagation.
 
 ***
 
+### readonly?
+
+> `optional` **readonly?**: `boolean`
+
+Defined in: [editor.ts:124](https://github.com/inokawa/editate/blob/d46349a29ec95cd9d8330041874bdfb327a4ebb9/src/editor.ts#L124)
+
+The state editable or not.
+
+#### Inherited from
+
+`Omit.readonly`
+
+***
+
 ### copy?
 
 > `optional` **copy?**: \[[`CopyHook`](../type-aliases/CopyHook.md), `...rest: CopyHook[]`\]
 
-Defined in: [editor.ts:126](https://github.com/inokawa/edix/blob/b06573dd54507ba85c0ad274b18c999023c6a52b/src/editor.ts#L126)
+Defined in: [editor.ts:135](https://github.com/inokawa/editate/blob/d46349a29ec95cd9d8330041874bdfb327a4ebb9/src/editor.ts#L135)
 
 Functions to handle copy events
 
@@ -106,7 +106,7 @@ Functions to handle copy events
 
 > `optional` **paste?**: \[[`PasteHook`](../type-aliases/PasteHook.md), `...rest: PasteHook[]`\]
 
-Defined in: [editor.ts:131](https://github.com/inokawa/edix/blob/b06573dd54507ba85c0ad274b18c999023c6a52b/src/editor.ts#L131)
+Defined in: [editor.ts:140](https://github.com/inokawa/editate/blob/d46349a29ec95cd9d8330041874bdfb327a4ebb9/src/editor.ts#L140)
 
 Functions to handle paste / drop events
 
@@ -126,7 +126,7 @@ Functions to handle paste / drop events
 
 > `optional` **isBlock?**: (`node`) => `boolean`
 
-Defined in: [editor.ts:135](https://github.com/inokawa/edix/blob/b06573dd54507ba85c0ad274b18c999023c6a52b/src/editor.ts#L135)
+Defined in: [editor.ts:144](https://github.com/inokawa/editate/blob/d46349a29ec95cd9d8330041874bdfb327a4ebb9/src/editor.ts#L144)
 
 TODO
 
@@ -150,7 +150,7 @@ TODO
 
 > `optional` **onError?**: (`message`) => `void`
 
-Defined in: [editor.ts:145](https://github.com/inokawa/edix/blob/b06573dd54507ba85c0ad274b18c999023c6a52b/src/editor.ts#L145)
+Defined in: [editor.ts:154](https://github.com/inokawa/editate/blob/d46349a29ec95cd9d8330041874bdfb327a4ebb9/src/editor.ts#L154)
 
 Callback invoked when errors happen.
 

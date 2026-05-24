@@ -4,13 +4,13 @@
 
 # Function: debugPlugin()
 
-> **debugPlugin**(`this`): `void`
+> **debugPlugin**(`editor`): `void`
 
-Defined in: [plugins/debug.ts:3](https://github.com/inokawa/edix/blob/b06573dd54507ba85c0ad274b18c999023c6a52b/src/plugins/debug.ts#L3)
+Defined in: [plugins/debug.ts:3](https://github.com/inokawa/editate/blob/d46349a29ec95cd9d8330041874bdfb327a4ebb9/src/plugins/debug.ts#L3)
 
 ## Parameters
 
-### this
+### editor
 
 [`Editor`](../interfaces/Editor.md)
 

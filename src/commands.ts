@@ -3,6 +3,7 @@ import {
   getNodeAt,
   getNodeSize,
   isTextNode,
+  offsetToPosition,
   sliceFragment,
   Transaction,
 } from "./doc/edit.js";
@@ -12,89 +13,98 @@ import type {
   InferBlockNode,
   InferInlineNode,
   Path,
-  Position,
-  PositionRange,
+  Range,
   TextNode,
 } from "./doc/types.js";
-
-export type EditorCommand<A extends unknown[], T extends DocNode> = (
-  this: Editor<T>,
-  ...args: A
-) => void;
 
 /**
  * Delete content in the selection or specified range.
  */
 export function Delete(
-  this: Editor,
-  range: PositionRange = toRange(this.selection),
+  editor: Editor,
+  range: Range = toRange(editor.selection),
 ) {
-  this.apply(new Transaction().delete(...range));
+  editor.apply(new Transaction().delete(...range));
 }
 
 /**
  * Insert text at the caret or specified position.
  */
 export function InsertText(
-  this: Editor,
+  editor: Editor,
   text: string,
-  position: Position = this.selection[0],
+  position: number = editor.selection[0],
 ) {
-  this.apply(new Transaction().insertText(position, text));
+  editor.apply(new Transaction().insertText(position, text));
 }
 
 /**
  * Insert node at the caret or specified position.
  */
 export function InsertNode<T extends DocNode>(
-  this: Editor<T>,
+  editor: Editor<T>,
   node: Exclude<InferInlineNode<T>, TextNode>,
-  position: Position = this.selection[0],
+  position: number = editor.selection[0],
 ) {
-  this.apply(
+  editor.apply(
     new Transaction().insertFragment(position, [{ children: [node] }]),
   );
 }
 
 /**
  * Insert multiple inline nodes as a single line fragment in one transaction.
- * When `moveCaret` is true (default), the caret moves to the end of the
- * inserted content.
+ *
+ * Fork-only command. Useful when a single insert needs to interleave text and
+ * void nodes (e.g. mention chips) without splitting blocks.
  */
 export function InsertNodes<T extends DocNode>(
-  this: Editor<T>,
+  editor: Editor<T>,
   nodes: InferInlineNode<T>[],
-  position: Position = this.selection[0],
-  moveCaret: boolean = true,
+  position: number = editor.selection[0],
 ) {
-  void moveCaret;
-  this.apply(new Transaction().insertFragment(position, [{ children: nodes }]));
+  editor.apply(
+    new Transaction().insertFragment(position, [{ children: nodes }]),
+  );
 }
 
 /**
  * Replace text in the selection or specified range.
  */
-export function ReplaceText(this: Editor, text: string) {
-  const [start, end] = toRange(this.selection);
-  this.apply(new Transaction().delete(start, end).insertText(start, text));
+export function ReplaceText(editor: Editor, text: string) {
+  const [start, end] = toRange(editor.selection);
+  editor.apply(new Transaction().delete(start, end).insertText(start, text));
 }
 
 /**
- * Replace all content in the editor.
+ * Replace document in the editor.
  */
-export function ReplaceAll(this: Editor, text: string) {
-  const doc = this.doc;
-  this.apply(
+export function ReplaceDoc<T extends DocNode>(
+  editor: Editor<T>,
+  fragment: T["children"],
+) {
+  // TODO revisit
+  editor.apply(
     new Transaction()
-      // TODO improve
-      .delete(
-        [[], 0],
-        [
-          [doc.children.length - 1],
-          getNodeSize(doc.children[doc.children.length - 1]!),
-        ],
-      )
-      .insertText([[], 0], text),
+      .delete(0, getNodeSize(editor.doc))
+      .insertFragment(0, fragment),
+  );
+}
+
+/**
+ * Replace the whole document content with a plain text string.
+ *
+ * Fork-only convenience command — splits on `\n` into one block per line
+ * (matching how plain editors render). Equivalent to:
+ *
+ * ```ts
+ * editor.exec(ReplaceDoc, text.split("\n").map((t) => ({ children: [{ text: t }] })));
+ * ```
+ */
+export function ReplaceAll(editor: Editor, text: string) {
+  editor.apply(
+    new Transaction()
+      .delete(0, getNodeSize(editor.doc))
+      .insertText(0, text),
   );
 }
 
@@ -110,27 +120,27 @@ export function Format<
   N extends Omit<InferInlineNode<T>, "text">,
   K extends Extract<keyof N, string>,
 >(
-  this: Editor<T>,
+  editor: Editor<T>,
   key: K,
   value: N[K],
-  range: PositionRange = toRange(this.selection),
+  range: Range = toRange(editor.selection),
 ) {
-  this.apply(new Transaction().format(...range, key, value));
+  editor.apply(new Transaction().format(...range, key, value));
 }
 
 /**
  * Toggle formatting in the selection or specified range.
  */
 export function ToggleFormat<T extends DocNode>(
-  this: Editor<T>,
+  editor: Editor<T>,
   key: Extract<ToggleableKey<Omit<InferInlineNode<T>, "text">>, string>,
-  range: PositionRange = toRange(this.selection),
+  range: Range = toRange(editor.selection),
 ) {
-  const texts = sliceFragment(this.doc, ...range).flatMap((n) =>
+  const texts = sliceFragment(editor.doc, ...range).flatMap((n) =>
     n.children.filter(isTextNode),
   );
   if (texts.length) {
-    this.apply(
+    editor.apply(
       new Transaction().format(
         ...range,
         key,
@@ -147,8 +157,13 @@ export function SetBlockAttr<
   T extends DocNode,
   N extends InferBlockNode<T>,
   K extends Extract<keyof N, string>,
->(this: Editor<T>, key: K, value: N[K], path: Path = this.selection[0][0]) {
-  this.apply(new Transaction().attr(path, key, value));
+>(
+  editor: Editor<T>,
+  key: K,
+  value: N[K],
+  path: Path = offsetToPosition(editor.doc, editor.selection[0])[0],
+) {
+  editor.apply(new Transaction().attr(path, key, value));
 }
 
 /**
@@ -159,14 +174,14 @@ export function ToggleBlockAttr<
   N extends InferBlockNode<T>,
   K extends Extract<keyof N, string>,
 >(
-  this: Editor<T>,
+  editor: Editor<T>,
   key: K,
   onValue: N[K],
   offValue: N[K],
-  path: Path = this.selection[0][0],
+  path: Path = offsetToPosition(editor.doc, editor.selection[0])[0],
 ) {
-  const block = getNodeAt(this.doc, path) as N;
-  this.apply(
+  const block = getNodeAt(editor.doc, path) as N;
+  editor.apply(
     new Transaction().attr(
       path,
       key,

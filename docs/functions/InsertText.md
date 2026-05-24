@@ -4,15 +4,15 @@
 
 # Function: InsertText()
 
-> **InsertText**(`this`, `text`, `position?`): `void`
+> **InsertText**(`editor`, `text`, `position?`): `void`
 
-Defined in: [commands.ts:39](https://github.com/inokawa/edix/blob/b06573dd54507ba85c0ad274b18c999023c6a52b/src/commands.ts#L39)
+Defined in: [commands.ts:33](https://github.com/inokawa/editate/blob/d46349a29ec95cd9d8330041874bdfb327a4ebb9/src/commands.ts#L33)
 
 Insert text at the caret or specified position.
 
 ## Parameters
 
-### this
+### editor
 
 [`Editor`](../interfaces/Editor.md)
 
@@ -22,7 +22,7 @@ Insert text at the caret or specified position.
 
 ### position?
 
-`Position` = `...`
+`number` = `...`
 
 ## Returns
 

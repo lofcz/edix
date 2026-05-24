@@ -101,7 +101,7 @@ export const createPlainEditor = ({
     },
   });
   if (singleline) {
-    editor.use(singlelinePlugin);
+    editor.exec(singlelinePlugin);
   }
   return editor;
 };

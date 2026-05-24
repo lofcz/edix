@@ -1,51 +1,51 @@
 import { is, keys } from "../utils.js";
-import { comparePath, comparePosition } from "./position.js";
 import type {
   DocNode,
   Fragment,
   InlineNode,
-  Position,
-  SelectionSnapshot,
+  Selection,
   TextNode,
   Path,
   BlockNode,
   Node,
+  DomPosition,
+  SelectionSnapshot,
 } from "./types.js";
 import { stringToFragment } from "./utils.js";
 
-const TYPE_DELETE = "delete";
+const OP_DELETE = "delete";
 type DeleteOperation = Readonly<{
-  type: typeof TYPE_DELETE;
-  start: Position;
-  end: Position;
+  type: typeof OP_DELETE;
+  start: number;
+  end: number;
 }>;
 
-const TYPE_INSERT_TEXT = "insert_text";
+const OP_INSERT_TEXT = "insert_text";
 type InsertTextOperation = Readonly<{
-  type: typeof TYPE_INSERT_TEXT;
-  at: Position;
+  type: typeof OP_INSERT_TEXT;
+  at: number;
   text: string;
 }>;
 
-const TYPE_INSERT_NODE = "insert_node";
+const OP_INSERT_NODE = "insert_node";
 type InsertNodeOperation = Readonly<{
-  type: typeof TYPE_INSERT_NODE;
-  at: Position;
+  type: typeof OP_INSERT_NODE;
+  at: number;
   fragment: Fragment;
 }>;
 
-const TYPE_SET_ATTR = "set_attr";
+const OP_SET_ATTR = "set_attr";
 type SetAttrOperation = Readonly<{
-  type: typeof TYPE_SET_ATTR;
-  start: Position;
-  end: Position;
+  type: typeof OP_SET_ATTR;
+  start: number;
+  end: number;
   key: string;
   value: unknown;
 }>;
 
-const TYPE_SET_NODE_ATTR = "set_node_attr";
+const OP_SET_NODE_ATTR = "set_node_attr";
 type SetNodeAttrOperation = Readonly<{
-  type: typeof TYPE_SET_NODE_ATTR;
+  type: typeof OP_SET_NODE_ATTR;
   path: Path;
   key: string;
   value: unknown;
@@ -62,9 +62,7 @@ export type Operation =
  * @internal
  */
 export const isUnsafeOperation = ({ type }: Operation): boolean =>
-  type === TYPE_INSERT_NODE ||
-  type === TYPE_SET_ATTR ||
-  type === TYPE_SET_NODE_ATTR;
+  type === OP_INSERT_NODE || type === OP_SET_ATTR || type === OP_SET_NODE_ATTR;
 
 export class Transaction {
   private readonly _ops: Operation[];
@@ -77,36 +75,36 @@ export class Transaction {
     return this._ops;
   }
 
-  insertText(at: Position, text: string): this {
+  insertText(at: number, text: string): this {
     this._ops.push({
-      type: TYPE_INSERT_TEXT,
+      type: OP_INSERT_TEXT,
       at: at,
       text: text,
     });
     return this;
   }
 
-  insertFragment(at: Position, fragment: Fragment): this {
+  insertFragment(at: number, fragment: Fragment): this {
     this._ops.push({
-      type: TYPE_INSERT_NODE,
+      type: OP_INSERT_NODE,
       at: at,
       fragment: fragment,
     });
     return this;
   }
 
-  delete(start: Position, end: Position): this {
+  delete(start: number, end: number): this {
     this._ops.push({
-      type: TYPE_DELETE,
+      type: OP_DELETE,
       start: start,
       end: end,
     });
     return this;
   }
 
-  format(start: Position, end: Position, key: string, value: unknown): this {
+  format(start: number, end: number, key: string, value: unknown): this {
     this._ops.push({
-      type: TYPE_SET_ATTR,
+      type: OP_SET_ATTR,
       start: start,
       end: end,
       key: key,
@@ -117,7 +115,7 @@ export class Transaction {
 
   attr(at: Path, key: string, value: unknown): this {
     this._ops.push({
-      type: TYPE_SET_NODE_ATTR,
+      type: OP_SET_NODE_ATTR,
       path: at,
       key: key,
       value: value,
@@ -125,7 +123,7 @@ export class Transaction {
     return this;
   }
 
-  transform(position: Position): Position {
+  transform(position: number): number {
     return this._ops.reduce((acc, op) => rebasePosition(acc, op), position);
   }
 }
@@ -154,12 +152,96 @@ const isSameNode = (a: InlineNode, b: InlineNode): boolean => {
   });
 };
 
-export const getNodeSize = (node: Node): number =>
-  isBlockNode(node)
-    ? node.children.reduce((acc: number, n) => acc + getNodeSize(n), 0)
-    : isTextNode(node)
-      ? node.text.length
-      : 1;
+const sizeCache = new WeakMap<BlockNode, number>();
+
+const calcBlockSize = (
+  { children }: BlockNode,
+  start: number = 0,
+  end: number = children.length,
+): number => {
+  let size = 0;
+  let count = 0;
+  for (let i = start; i < end; i++) {
+    const n = children[i]!;
+    size += getNodeSize(n);
+    if (count !== 0 && isBlockNode(n)) {
+      size++;
+    }
+    count++;
+  }
+  return size;
+};
+
+export const getNodeSize = (node: Node): number => {
+  if (isBlockNode(node)) {
+    let size = sizeCache.get(node);
+    if (size == null) {
+      sizeCache.set(node, (size = calcBlockSize(node)));
+    }
+    return size;
+  }
+  return isTextNode(node) ? node.text.length : 1;
+};
+
+/**
+ * @internal
+ */
+export const positionToOffset = (
+  node: DocNode | BlockNode,
+  [path, offset]: DomPosition,
+): number => {
+  let size = 0;
+  for (const p of path) {
+    size += calcBlockSize(node, 0, p);
+    if (p !== 0) {
+      size++;
+    }
+    node = node.children[p]! as BlockNode;
+  }
+  return size + offset;
+};
+
+export const offsetToPosition = (
+  node: DocNode | BlockNode,
+  offset: number,
+): DomPosition => {
+  const path: number[] = [];
+  while (node) {
+    const found = getChildAt(node, offset);
+    if (!found) {
+      break;
+    }
+    const index = found._index;
+    const nextNode = found._node;
+    if (!isBlockNode(nextNode)) {
+      break;
+    }
+    offset = found._offset;
+    path.push(index);
+    node = nextNode;
+  }
+  return [path, offset];
+};
+
+/**
+ * @internal
+ */
+export const domSelectionToSelection = (
+  doc: DocNode,
+  [anchor, focus]: SelectionSnapshot,
+): Selection => {
+  return [positionToOffset(doc, anchor), positionToOffset(doc, focus)];
+};
+
+/**
+ * @internal
+ */
+export const selectionToDomSelection = (
+  doc: DocNode,
+  [anchor, focus]: Selection,
+): SelectionSnapshot => {
+  return [offsetToPosition(doc, anchor), offsetToPosition(doc, focus)];
+};
 
 const normalizeInline = (
   array: InlineNode[],
@@ -242,7 +324,10 @@ const getChildAt = <T extends BlockNode>(
 ): { _node: T["children"][number]; _index: number; _offset: number } | null => {
   for (let i = 0; i < children.length; i++) {
     const node = children[i]!;
-    const size = getNodeSize(node);
+    let size = getNodeSize(node);
+    if (isBlockNode(node)) {
+      size++;
+    }
     if (size > offset) {
       return { _node: node, _index: i, _offset: offset };
     }
@@ -253,57 +338,45 @@ const getChildAt = <T extends BlockNode>(
 
 const splitBlock = <T extends DocNode | BlockNode>(
   block: T,
-  pos: Position,
-  i: number = 0,
+  pos: number,
 ): [T, T] => {
   const children = block.children;
-  const path = pos[0];
-  if (i < path.length) {
-    const p = path[i]!;
-    const [childBefore, childAfter] = splitBlock(
-      children[p]! as BlockNode, // TODO imporove
-      pos,
-      i + 1,
-    );
-    const before = children.slice(0, p);
-    const after = children.slice(p + 1);
-    before.push(childBefore);
-    after.unshift(childAfter);
-    return [
-      { ...block, children: before },
-      { ...block, children: after },
-    ];
-  } else {
-    const target = getChildAt(block, pos[1]);
-    if (target) {
-      const { _node: inline, _offset: nodeAtOffset, _index: i } = target;
+  const target = getChildAt(block, pos);
+  if (target) {
+    const { _node: node, _offset: offsetAtNode, _index: i } = target;
+    if (isBlockNode(node)) {
+      const [childBefore, childAfter] = splitBlock(node, offsetAtNode);
       const before = children.slice(0, i);
       const after = children.slice(i + 1);
-      if (isTextNode(inline)) {
-        const beforeText = inline.text.slice(0, nodeAtOffset);
-        const afterText = inline.text.slice(nodeAtOffset);
+      before.push(childBefore);
+      after.unshift(childAfter);
+      return [
+        { ...block, children: before },
+        { ...block, children: after },
+      ];
+    } else {
+      const before = children.slice(0, i);
+      const after = children.slice(i + 1);
+      if (isTextNode(node)) {
+        const beforeText = node.text.slice(0, offsetAtNode);
+        const afterText = node.text.slice(offsetAtNode);
         if (beforeText || !before.length) {
-          before.push({ ...inline, text: beforeText });
+          before.push({ ...node, text: beforeText });
         }
         if (afterText || !after.length) {
-          after.unshift({ ...inline, text: afterText });
+          after.unshift({ ...node, text: afterText });
         }
       } else {
         // node size must be 1
-        after.unshift(inline);
+        after.unshift(node);
       }
       return [
         { ...block, children: before },
         { ...block, children: after },
       ];
     }
-    return [block, { ...block, children: [] }];
   }
-};
-
-const flatPath = (path: Path): number => {
-  // TODO support nested node
-  return path.length ? path[0]! : 0;
+  return [block, { ...block, children: [] }];
 };
 
 /**
@@ -317,21 +390,6 @@ export const getNodeAt = (
     node = node.children[path[i]!]! as BlockNode; // TODO improve
   }
   return node;
-};
-
-const move = (
-  position: Position,
-  pathDiff: number,
-  offsetDiff: number,
-  isSamePath: boolean,
-): Position => {
-  return [
-    [
-      // TODO support nested node
-      flatPath(position[0]) + pathDiff,
-    ],
-    position[1] + (isSamePath ? offsetDiff : 0),
-  ];
 };
 
 const replace = <
@@ -367,13 +425,12 @@ const replaceNodeAt = <
 
 const replaceRange = <T extends DocNode>(
   doc: T,
-  start: Position,
-  end: Position,
+  start: number,
+  end: number,
   inserted: Fragment,
 ): T => {
   const [before, maybeAfter] = splitBlock(doc, start);
-  const after =
-    comparePosition(start, end) === -1 ? splitBlock(doc, end)[1] : maybeAfter;
+  const after = start < end ? splitBlock(doc, end)[1] : maybeAfter;
 
   const array = before.children.slice();
   concat(array, inserted, normalizeBlock);
@@ -387,74 +444,53 @@ const replaceRange = <T extends DocNode>(
  */
 export const sliceFragment = <T extends DocNode>(
   doc: T,
-  start: Position,
-  end: Position,
+  start: number,
+  end: number,
 ): T["children"] => {
-  if (comparePosition(start, end) !== -1) {
+  if (start >= end) {
     return [];
   }
 
   return splitBlock(splitBlock(doc, end)[0], start)[1].children;
 };
 
-const isValidPosition = (doc: DocNode, [path, offset]: Position): boolean => {
-  const block = getNodeAt(doc, path);
-  if (block && offset >= 0 && offset <= getNodeSize(block)) {
-    return true;
-  }
-  return false;
+const isValidPosition = (doc: DocNode, offset: number): boolean => {
+  return offset >= 0 && offset <= getNodeSize(doc);
 };
 
-const rebasePosition = (position: Position, op: Operation): Position => {
+const rebasePosition = (position: number, op: Operation): number => {
   switch (op.type) {
-    case TYPE_DELETE: {
+    case OP_DELETE: {
       const { start, end } = op;
 
-      if (comparePosition(position, start) !== -1) {
+      if (position >= start) {
         // start <= position
-        if (comparePosition(end, position) !== -1) {
+        if (end >= position) {
           // start <= position <= end
           return start;
         }
         // start <= end < position
-        return move(
-          position,
-          flatPath(start[0]) - flatPath(end[0]),
-          start[1] - end[1],
-          comparePath(end[0], position[0]) === 0,
-        );
+        return position + start - end;
       }
       break;
     }
-    case TYPE_INSERT_TEXT:
-    case TYPE_INSERT_NODE: {
-      const at = op.at;
+    case OP_INSERT_TEXT: {
+      const { at, text } = op;
 
-      if (comparePosition(position, at) !== -1) {
-        const lines =
-          op.type === TYPE_INSERT_TEXT
-            ? stringToFragment(op.text)
-            : op.fragment;
-
-        const lineLength = lines.length;
-        const lineDiff = lineLength - 1;
-
+      if (position >= at) {
         // at <= position
-        return move(
-          position,
-          lineDiff,
-          getNodeSize(lines[lineLength - 1]!) - (lineDiff === 0 ? 0 : at[1]),
-          comparePath(at[0], position[0]) === 0,
-        );
+        return position + text.length;
       }
       break;
     }
-    case TYPE_SET_ATTR:
-    case TYPE_SET_NODE_ATTR: {
+    case OP_INSERT_NODE: {
+      const { at, fragment } = op;
+
+      if (position >= at) {
+        // at <= position
+        return position + getNodeSize({ children: fragment });
+      }
       break;
-    }
-    default: {
-      op satisfies never;
     }
   }
   return position;
@@ -464,10 +500,10 @@ const rebasePosition = (position: Position, op: Operation): Position => {
  * @internal
  */
 export const rebaseSelection = (
-  selection: SelectionSnapshot,
+  [anchor, focus]: Selection,
   op: Operation,
-): SelectionSnapshot => {
-  return [rebasePosition(selection[0], op), rebasePosition(selection[1], op)];
+): Selection => {
+  return [rebasePosition(anchor, op), rebasePosition(focus, op)];
 };
 
 /**
@@ -475,7 +511,7 @@ export const rebaseSelection = (
  */
 export const isValidSelection = (
   doc: DocNode,
-  [anchor, focus]: SelectionSnapshot,
+  [anchor, focus]: Selection,
 ): boolean => {
   return isValidPosition(doc, anchor) && isValidPosition(doc, focus);
 };
@@ -485,28 +521,29 @@ export const isValidSelection = (
  */
 export const applyOperation = <T extends DocNode>(
   doc: T,
-  selection: SelectionSnapshot,
+  selection: Selection,
   op: Operation,
-): [T, SelectionSnapshot] => {
+): [T, Selection] => {
   switch (op.type) {
-    case TYPE_DELETE: {
+    case OP_DELETE: {
       const { start, end } = op;
       if (
         isValidPosition(doc, start) &&
         isValidPosition(doc, end) &&
-        comparePosition(start, end) === -1
+        start < end
       ) {
         doc = replaceRange(doc, start, end, []);
         selection = rebaseSelection(selection, op);
       }
       break;
     }
-    case TYPE_INSERT_TEXT: {
+    case OP_INSERT_TEXT: {
       const { at, text } = op;
       if (isValidPosition(doc, at) && text) {
         // inherit style from previous block/text node
-        const block = getNodeAt(doc, at[0]);
-        const res = getChildAt(block, at[1] - 1);
+        const [path, offset] = offsetToPosition(doc, at);
+        const block = getNodeAt(doc, path);
+        const res = getChildAt(block, offset - 1);
         let anchorNode: TextNode | undefined;
         if (res) {
           const node = res._node;
@@ -525,7 +562,7 @@ export const applyOperation = <T extends DocNode>(
       }
       break;
     }
-    case TYPE_INSERT_NODE: {
+    case OP_INSERT_NODE: {
       const { at, fragment } = op;
       if (isValidPosition(doc, at) && fragment.length) {
         doc = replaceRange(doc, at, at, fragment);
@@ -533,12 +570,12 @@ export const applyOperation = <T extends DocNode>(
       }
       break;
     }
-    case TYPE_SET_ATTR: {
+    case OP_SET_ATTR: {
       const { start, end, key, value } = op;
       if (
         isValidPosition(doc, start) &&
         isValidPosition(doc, end) &&
-        comparePosition(start, end) === -1
+        start < end
       ) {
         doc = replaceRange(
           doc,
@@ -554,7 +591,7 @@ export const applyOperation = <T extends DocNode>(
       }
       break;
     }
-    case TYPE_SET_NODE_ATTR: {
+    case OP_SET_NODE_ATTR: {
       const { path, key, value } = op;
       const node = getNodeAt(doc, path);
       if (node) {
