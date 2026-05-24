@@ -144,9 +144,19 @@ export interface EditorOptions<
    */
   isBlock?: (node: HTMLElement) => boolean;
   /**
-   * Automatically scroll the mounted element to keep the caret visible
-   * after document changes. Scroll is coalesced via rAF for zero
-   * synchronous layout cost during input handling.
+   * Keep the caret visible inside the mounted element after document
+   * changes, behaving like a native `<textarea>`:
+   *
+   * - If the caret is already visible (e.g. typing in the middle of a
+   *   long doc), nothing scrolls.
+   * - If the caret falls below the viewport, the element scrolls down
+   *   just enough to reveal it.
+   * - If the caret falls above the viewport, the element scrolls up
+   *   just enough to reveal it.
+   *
+   * Scroll work is coalesced via `requestAnimationFrame` and only reads
+   * the caret's bounding rect, never `scrollHeight`, so it does not
+   * force a full overflow-layout pass on each input.
    *
    * @default false
    */
@@ -192,7 +202,10 @@ export interface Editor<T extends DocNode = DocNode> {
    */
   readonly: boolean;
   /**
-   * Enable/disable auto-scroll after document changes.
+   * Enable/disable native-textarea-like auto-scroll: scroll the mounted
+   * element only when needed to keep the caret visible.
+   *
+   * @see {@link EditorOptions.autoScroll}
    */
   autoScroll: boolean;
   /**
@@ -257,7 +270,37 @@ export const createEditor = <
       const element = mountedElement;
       scrollRAF = requestAnimationFrame(() => {
         scrollRAF = 0;
-        element.scrollTop = element.scrollHeight;
+        // Keep the caret visible inside the scroll container without jumping to
+        // the bottom on every change. We avoid reading `scrollHeight` here
+        // because it forces a full overflow layout pass; instead we measure the
+        // caret rect (cheap, incremental) and scroll only when it falls
+        // outside the visible viewport of the mounted element.
+        const win = element.ownerDocument.defaultView;
+        const domSel = win?.getSelection();
+        if (!domSel || domSel.rangeCount === 0) return;
+        const range = domSel.getRangeAt(0);
+        if (!element.contains(range.startContainer)) return;
+
+        let rect = range.getBoundingClientRect();
+        // Collapsed ranges next to void/inline-block siblings can report a
+        // zero rect in some browsers — fall back to the focus node's rect.
+        if (rect.top === 0 && rect.bottom === 0 && rect.height === 0) {
+          const node = range.startContainer;
+          const probe =
+            node.nodeType === 1
+              ? (node as Element)
+              : node.parentElement;
+          if (!probe) return;
+          rect = probe.getBoundingClientRect();
+        }
+
+        const host = element.getBoundingClientRect();
+        const margin = 4;
+        if (rect.top < host.top + margin) {
+          element.scrollTop -= host.top + margin - rect.top;
+        } else if (rect.bottom > host.bottom - margin) {
+          element.scrollTop += rect.bottom - (host.bottom - margin);
+        }
       });
     }
   };
