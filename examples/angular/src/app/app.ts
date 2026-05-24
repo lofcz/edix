@@ -1,5 +1,5 @@
 import { Component, ElementRef, signal, viewChild } from '@angular/core';
-import { createPlainEditor } from 'edix';
+import { createPlainEditor } from 'editate';
 
 @Component({
   selector: 'app-root',

@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from "preact/hooks";
-import { createPlainEditor } from "edix";
+import { createPlainEditor } from "editate";
 
 export function App() {
   const ref = useRef<HTMLDivElement>(null);

@@ -1,5 +1,5 @@
 import { createMemo, createSignal, For, onCleanup, onMount } from "solid-js";
-import { createPlainEditor } from "edix";
+import { createPlainEditor } from "editate";
 
 function App() {
   let ref: HTMLDivElement | undefined;

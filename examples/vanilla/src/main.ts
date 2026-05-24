@@ -1,4 +1,4 @@
-import { createPlainEditor } from "edix";
+import { createPlainEditor } from "editate";
 import morphdom from "morphdom";
 
 const root = document.getElementById("root")!;

@@ -1,6 +1,6 @@
 <script lang="ts">
   import { onDestroy, onMount } from "svelte";
-  import { createPlainEditor } from "edix";
+  import { createPlainEditor } from "editate";
 
   let text = $state("Hello world.\nこんにちは。\n👍❤️🧑‍🧑‍🧒");
   let ref: HTMLElement | undefined = $state();

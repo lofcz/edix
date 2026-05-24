@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from "react";
-import { createPlainEditor } from "edix";
+import { createPlainEditor } from "editate";
 
 function App() {
   const ref = useRef<HTMLDivElement>(null);
