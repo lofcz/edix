@@ -6,7 +6,7 @@
 
 > **KeyboardHook** = (`keyboard`) => `boolean` \| `void`
 
-Defined in: [hooks/keyboard.ts:6](https://github.com/inokawa/edix/blob/03e089ec444bb6424c9c4249ab777528fe0d4bde/src/hooks/keyboard.ts#L6)
+Defined in: [hooks/keyboard.ts:6](https://github.com/inokawa/editate/blob/d46349a29ec95cd9d8330041874bdfb327a4ebb9/src/hooks/keyboard.ts#L6)
 
 Functions to handle keyboard events.
 

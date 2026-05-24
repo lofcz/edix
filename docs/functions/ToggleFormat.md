@@ -4,9 +4,9 @@
 
 # Function: ToggleFormat()
 
-> **ToggleFormat**\<`T`\>(`this`, `key`, `range?`): `void`
+> **ToggleFormat**\<`T`\>(`editor`, `key`, `range?`): `void`
 
-Defined in: [commands.ts:106](https://github.com/inokawa/edix/blob/03e089ec444bb6424c9c4249ab777528fe0d4bde/src/commands.ts#L106)
+Defined in: [commands.ts:100](https://github.com/inokawa/editate/blob/d46349a29ec95cd9d8330041874bdfb327a4ebb9/src/commands.ts#L100)
 
 Toggle formatting in the selection or specified range.
 
@@ -18,7 +18,7 @@ Toggle formatting in the selection or specified range.
 
 ## Parameters
 
-### this
+### editor
 
 [`Editor`](../interfaces/Editor.md)\<`T`\>
 

@@ -4,9 +4,9 @@
 
 # Function: Format()
 
-> **Format**\<`T`, `N`, `K`\>(`this`, `key`, `value`, `range?`): `void`
+> **Format**\<`T`, `N`, `K`\>(`editor`, `key`, `value`, `range?`): `void`
 
-Defined in: [commands.ts:90](https://github.com/inokawa/edix/blob/03e089ec444bb6424c9c4249ab777528fe0d4bde/src/commands.ts#L90)
+Defined in: [commands.ts:84](https://github.com/inokawa/editate/blob/d46349a29ec95cd9d8330041874bdfb327a4ebb9/src/commands.ts#L84)
 
 Format content in the selection or specified range.
 
@@ -26,7 +26,7 @@ Format content in the selection or specified range.
 
 ## Parameters
 
-### this
+### editor
 
 [`Editor`](../interfaces/Editor.md)\<`T`\>
 

@@ -15,7 +15,7 @@
 - [InsertText](functions/InsertText.md)
 - [InsertNode](functions/InsertNode.md)
 - [ReplaceText](functions/ReplaceText.md)
-- [ReplaceAll](functions/ReplaceAll.md)
+- [ReplaceDoc](functions/ReplaceDoc.md)
 - [Format](functions/Format.md)
 - [ToggleFormat](functions/ToggleFormat.md)
 - [SetBlockAttr](functions/SetBlockAttr.md)
@@ -43,4 +43,3 @@
 - [KeyboardHook](type-aliases/KeyboardHook.md)
 - [CopyHook](type-aliases/CopyHook.md)
 - [PasteHook](type-aliases/PasteHook.md)
-- [EditorPlugin](type-aliases/EditorPlugin.md)

@@ -6,9 +6,9 @@
 
 > **internalPaste**(`__namedParameters?`): [`PasteHook`](../type-aliases/PasteHook.md)
 
-Defined in: [hooks/paste/internal.ts:7](https://github.com/inokawa/edix/blob/03e089ec444bb6424c9c4249ab777528fe0d4bde/src/hooks/paste/internal.ts#L7)
+Defined in: [hooks/paste/internal.ts:7](https://github.com/inokawa/editate/blob/d46349a29ec95cd9d8330041874bdfb327a4ebb9/src/hooks/paste/internal.ts#L7)
 
-An extension to handle pasting / dropping from edix editor instance.
+An extension to handle pasting / dropping from editor instance.
 
 ## Parameters
 

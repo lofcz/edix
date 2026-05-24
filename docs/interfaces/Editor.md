@@ -4,7 +4,7 @@
 
 # Interface: Editor\<T\>
 
-Defined in: [editor.ts:163](https://github.com/inokawa/edix/blob/03e089ec444bb6424c9c4249ab777528fe0d4bde/src/editor.ts#L163)
+Defined in: [editor.ts:172](https://github.com/inokawa/editate/blob/d46349a29ec95cd9d8330041874bdfb327a4ebb9/src/editor.ts#L172)
 
 The editor instance.
 
@@ -18,31 +18,35 @@ The editor instance.
 
 ### apply()
 
-#### Call Signature
-
 > **apply**(`tr`): `this`
 
-Defined in: [editor.ts:176](https://github.com/inokawa/edix/blob/03e089ec444bb6424c9c4249ab777528fe0d4bde/src/editor.ts#L176)
+Defined in: [editor.ts:184](https://github.com/inokawa/editate/blob/d46349a29ec95cd9d8330041874bdfb327a4ebb9/src/editor.ts#L184)
 
 Dispatches editing operations.
 
-##### Parameters
+#### Parameters
 
-###### tr
+##### tr
 
 [`Transaction`](../classes/Transaction.md)
 
-[Transaction](../classes/Transaction.md) or EditorCommand
+[Transaction](../classes/Transaction.md)
 
-##### Returns
+#### Returns
 
 `this`
 
+***
+
+### exec()
+
 #### Call Signature
 
-> **apply**\<`A`\>(`fn`, ...`args`): `this`
+> **exec**\<`A`\>(`fn`, ...`args`): `this`
 
-Defined in: [editor.ts:177](https://github.com/inokawa/edix/blob/03e089ec444bb6424c9c4249ab777528fe0d4bde/src/editor.ts#L177)
+Defined in: [editor.ts:190](https://github.com/inokawa/editate/blob/d46349a29ec95cd9d8330041874bdfb327a4ebb9/src/editor.ts#L190)
+
+Executes a function with editor bound as context.
 
 ##### Type Parameters
 
@@ -56,13 +60,47 @@ Defined in: [editor.ts:177](https://github.com/inokawa/edix/blob/03e089ec444bb64
 
 `EditorCommand`\<`A`, `T`\>
 
+EditorCommand or EditorQuery
+
+###### args
+
+...`A`
+
+arguments of the function
+
+##### Returns
+
+`this`
+
+#### Call Signature
+
+> **exec**\<`A`, `V`\>(`fn`, ...`args`): `V`
+
+Defined in: [editor.ts:191](https://github.com/inokawa/editate/blob/d46349a29ec95cd9d8330041874bdfb327a4ebb9/src/editor.ts#L191)
+
+##### Type Parameters
+
+###### A
+
+`A` *extends* `unknown`[]
+
+###### V
+
+`V`
+
+##### Parameters
+
+###### fn
+
+`EditorQuery`\<`A`, `V`, `T`\>
+
 ###### args
 
 ...`A`
 
 ##### Returns
 
-`this`
+`V`
 
 ***
 
@@ -70,7 +108,7 @@ Defined in: [editor.ts:177](https://github.com/inokawa/edix/blob/03e089ec444bb64
 
 > **on**\<`K`\>(`key`, `callback`): () => `void`
 
-Defined in: [editor.ts:182](https://github.com/inokawa/edix/blob/03e089ec444bb6424c9c4249ab777528fe0d4bde/src/editor.ts#L182)
+Defined in: [editor.ts:196](https://github.com/inokawa/editate/blob/d46349a29ec95cd9d8330041874bdfb327a4ebb9/src/editor.ts#L196)
 
 A function to subscribe editor events.
 
@@ -102,7 +140,7 @@ cleanup function
 
 > **hook**\<`K`\>(`key`, `callback`): () => `void`
 
-Defined in: [editor.ts:190](https://github.com/inokawa/edix/blob/03e089ec444bb6424c9c4249ab777528fe0d4bde/src/editor.ts#L190)
+Defined in: [editor.ts:204](https://github.com/inokawa/editate/blob/d46349a29ec95cd9d8330041874bdfb327a4ebb9/src/editor.ts#L204)
 
 A function to register editor hooks.
 
@@ -128,51 +166,21 @@ cleanup function
 
 () => `void`
 
-***
-
-### use()
-
-> **use**\<`A`\>(`fn`, ...`args`): `this`
-
-Defined in: [editor.ts:202](https://github.com/inokawa/edix/blob/03e089ec444bb6424c9c4249ab777528fe0d4bde/src/editor.ts#L202)
-
-A function to use editor plugins.
-
-#### Type Parameters
-
-##### A
-
-`A` *extends* `unknown`[]
-
-#### Parameters
-
-##### fn
-
-[`EditorPlugin`](../type-aliases/EditorPlugin.md)\<`A`, `T`\>
-
-##### args
-
-...`A`
-
-#### Returns
-
-`this`
-
 ## Properties
 
 ### doc
 
 > `readonly` **doc**: `T`
 
-Defined in: [editor.ts:164](https://github.com/inokawa/edix/blob/03e089ec444bb6424c9c4249ab777528fe0d4bde/src/editor.ts#L164)
+Defined in: [editor.ts:173](https://github.com/inokawa/editate/blob/d46349a29ec95cd9d8330041874bdfb327a4ebb9/src/editor.ts#L173)
 
 ***
 
 ### selection
 
-> `readonly` **selection**: `SelectionSnapshot`
+> **selection**: `Selection`
 
-Defined in: [editor.ts:165](https://github.com/inokawa/edix/blob/03e089ec444bb6424c9c4249ab777528fe0d4bde/src/editor.ts#L165)
+Defined in: [editor.ts:174](https://github.com/inokawa/editate/blob/d46349a29ec95cd9d8330041874bdfb327a4ebb9/src/editor.ts#L174)
 
 ***
 
@@ -180,7 +188,7 @@ Defined in: [editor.ts:165](https://github.com/inokawa/edix/blob/03e089ec444bb64
 
 > **readonly**: `boolean`
 
-Defined in: [editor.ts:170](https://github.com/inokawa/edix/blob/03e089ec444bb6424c9c4249ab777528fe0d4bde/src/editor.ts#L170)
+Defined in: [editor.ts:179](https://github.com/inokawa/editate/blob/d46349a29ec95cd9d8330041874bdfb327a4ebb9/src/editor.ts#L179)
 
 The getter/setter for the editor's read-only state.
 `true` to read-only. `false` to editable.
@@ -191,7 +199,7 @@ The getter/setter for the editor's read-only state.
 
 > **input**: (`element`) => () => `void`
 
-Defined in: [editor.ts:198](https://github.com/inokawa/edix/blob/03e089ec444bb6424c9c4249ab777528fe0d4bde/src/editor.ts#L198)
+Defined in: [editor.ts:212](https://github.com/inokawa/editate/blob/d46349a29ec95cd9d8330041874bdfb327a4ebb9/src/editor.ts#L212)
 
 A function to make DOM editable.
 
