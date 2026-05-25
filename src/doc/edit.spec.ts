@@ -2231,6 +2231,81 @@ describe("delete", () => {
     expect(res[1]).toEqual(sel);
   });
 
+  it("delete void", () => {
+    const docText = "abcde";
+    const docText2 = "fghij";
+    const doc = {
+      children: [
+        {
+          attr: 0,
+          children: [
+            { attr: 0, text: docText },
+            { foo: "bar" },
+            { attr: 0, text: docText2 },
+          ],
+        },
+      ],
+    };
+    const sel: Selection = [2, 2];
+
+    const res = applyOperation(doc, sel, {
+      type: "delete",
+      start: docText.length,
+      end: docText.length + 1,
+    });
+
+    expect(res[0]).toEqual({
+      children: [
+        {
+          attr: 0,
+          children: [
+            {
+              attr: 0,
+              text: docText + docText2,
+            },
+          ],
+        },
+      ],
+    });
+    expect(res[1]).toEqual(sel);
+  });
+
+  it("delete text with attr", () => {
+    const docText = "abcde";
+    const docText2 = "fghij";
+    const doc = {
+      children: [
+        {
+          attr: 0,
+          children: [
+            { attr: 0, text: docText },
+            { attr: 1, text: docText2 },
+          ],
+        },
+      ],
+    };
+    const sel: Selection = [2, 2];
+
+    const res = applyOperation(doc, sel, {
+      type: "delete",
+      start: docText.length - 1,
+      end: docText.length + 1,
+    });
+
+    expect(res[0]).toEqual({
+      children: [
+        {
+          attr: 0,
+          children: [
+            { attr: 0, text: docText.slice(0, -1) },
+            { attr: 1, text: docText2.slice(1) },
+          ],
+        },
+      ],
+    });
+    expect(res[1]).toEqual(sel);
+  });
+
   it("delete line break", () => {
     const docText = "abcde";
     const docText2 = "fghij";
