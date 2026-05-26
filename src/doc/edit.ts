@@ -10,14 +10,14 @@ import type {
   Node,
   DomPosition,
   SelectionSnapshot,
+  Range,
 } from "./types.js";
 import { stringToFragment } from "./utils.js";
 
 const OP_DELETE = "delete";
 type DeleteOperation = Readonly<{
   type: typeof OP_DELETE;
-  start: number;
-  end: number;
+  range: Range;
 }>;
 
 const OP_INSERT_TEXT = "insert_text";
@@ -37,8 +37,7 @@ type InsertNodeOperation = Readonly<{
 const OP_SET_ATTR = "set_attr";
 type SetAttrOperation = Readonly<{
   type: typeof OP_SET_ATTR;
-  start: number;
-  end: number;
+  range: Range;
   key: string;
   value: unknown;
 }>;
@@ -63,70 +62,6 @@ export type Operation =
  */
 export const isUnsafeOperation = ({ type }: Operation): boolean =>
   type === OP_INSERT_NODE || type === OP_SET_ATTR || type === OP_SET_NODE_ATTR;
-
-export class Transaction {
-  private readonly _ops: Operation[];
-
-  constructor(ops?: readonly Operation[]) {
-    this._ops = ops ? ops.slice() : [];
-  }
-
-  get ops(): readonly Operation[] {
-    return this._ops;
-  }
-
-  insertText(at: number, text: string): this {
-    this._ops.push({
-      type: OP_INSERT_TEXT,
-      at: at,
-      text: text,
-    });
-    return this;
-  }
-
-  insertFragment(at: number, fragment: Fragment): this {
-    this._ops.push({
-      type: OP_INSERT_NODE,
-      at: at,
-      fragment: fragment,
-    });
-    return this;
-  }
-
-  delete(start: number, end: number): this {
-    this._ops.push({
-      type: OP_DELETE,
-      start: start,
-      end: end,
-    });
-    return this;
-  }
-
-  format(start: number, end: number, key: string, value: unknown): this {
-    this._ops.push({
-      type: OP_SET_ATTR,
-      start: start,
-      end: end,
-      key: key,
-      value: value,
-    });
-    return this;
-  }
-
-  attr(at: Path, key: string, value: unknown): this {
-    this._ops.push({
-      type: OP_SET_NODE_ATTR,
-      path: at,
-      key: key,
-      value: value,
-    });
-    return this;
-  }
-
-  transform(position: number): number {
-    return this._ops.reduce((acc, op) => rebasePosition(acc, op), position);
-  }
-}
 
 /**
  * @internal
@@ -458,10 +393,16 @@ const isValidPosition = (doc: DocNode, offset: number): boolean => {
   return offset >= 0 && offset <= getNodeSize(doc);
 };
 
+export const rebase = (position: number, ops: readonly Operation[]): number => {
+  return ops.reduce((acc, op) => rebasePosition(acc, op), position);
+};
+
 const rebasePosition = (position: number, op: Operation): number => {
   switch (op.type) {
     case OP_DELETE: {
-      const { start, end } = op;
+      const {
+        range: [start, end],
+      } = op;
 
       if (position >= start) {
         // start <= position
@@ -526,7 +467,9 @@ export const applyOperation = <T extends DocNode>(
 ): [T, Selection] => {
   switch (op.type) {
     case OP_DELETE: {
-      const { start, end } = op;
+      const {
+        range: [start, end],
+      } = op;
       if (
         isValidPosition(doc, start) &&
         isValidPosition(doc, end) &&
@@ -571,7 +514,11 @@ export const applyOperation = <T extends DocNode>(
       break;
     }
     case OP_SET_ATTR: {
-      const { start, end, key, value } = op;
+      const {
+        range: [start, end],
+        key,
+        value,
+      } = op;
       if (
         isValidPosition(doc, start) &&
         isValidPosition(doc, end) &&
