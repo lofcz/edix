@@ -400,9 +400,7 @@ export const rebase = (position: number, ops: readonly Operation[]): number => {
 const rebasePosition = (position: number, op: Operation): number => {
   switch (op.type) {
     case OP_DELETE: {
-      const {
-        range: [start, end],
-      } = op;
+      const [start, end] = op.range;
 
       if (position >= start) {
         // start <= position
@@ -467,9 +465,7 @@ export const applyOperation = <T extends DocNode>(
 ): [T, Selection] => {
   switch (op.type) {
     case OP_DELETE: {
-      const {
-        range: [start, end],
-      } = op;
+      const [start, end] = op.range;
       if (
         isValidPosition(doc, start) &&
         isValidPosition(doc, end) &&

@@ -659,11 +659,11 @@ export const createEditor = <
           const range = toRange(selection);
           const start = range[0];
           const tr: Operation[] = [{ type: "delete", range }];
-          if (isString(pasted)) {
-            tr.push({ type: "insert_text", at: start, text: pasted });
-          } else {
-            tr.push({ type: "insert_node", at: start, fragment: pasted });
-          }
+          tr.push(
+            isString(pasted)
+              ? { type: "insert_text", at: start, text: pasted }
+              : { type: "insert_node", at: start, fragment: pasted },
+          );
           apply(tr);
         }
       };
@@ -688,11 +688,11 @@ export const createEditor = <
           if (pasted) {
             const offset = positionToOffset(doc, droppedPosition);
             const pos = rebase(offset, tr);
-            if (isString(pasted)) {
-              tr.push({ type: "insert_text", at: pos, text: pasted });
-            } else {
-              tr.push({ type: "insert_node", at: pos, fragment: pasted });
-            }
+            tr.push(
+              isString(pasted)
+                ? { type: "insert_text", at: pos, text: pasted }
+                : { type: "insert_node", at: pos, fragment: pasted },
+            );
             afterSelection = [pos, rebase(offset, tr)];
           }
           apply(tr);
