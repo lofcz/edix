@@ -587,18 +587,18 @@ export const createEditor = <
             }
           }
 
-          let tr: Operation[];
+          let ops: Operation[];
           if (!inputTransaction) {
             inputTransaction = [[], selection];
           }
-          tr = inputTransaction[0];
+          ops = inputTransaction[0];
           if (!isCollapsed(range)) {
             // replace or delete
-            tr.push({ type: "delete", range });
+            ops.push({ type: "delete", range });
           }
           if (data) {
             // replace or insert
-            tr.push({ type: "insert_text", at: range[0], text: data });
+            ops.push({ type: "insert_text", at: range[0], text: data });
           }
         }
 
@@ -658,13 +658,13 @@ export const createEditor = <
         if (pasted) {
           const range = toRange(selection);
           const start = range[0];
-          const tr: Operation[] = [{ type: "delete", range }];
-          tr.push(
+          const ops: Operation[] = [{ type: "delete", range }];
+          ops.push(
             isString(pasted)
               ? { type: "insert_text", at: start, text: pasted }
               : { type: "insert_node", at: start, fragment: pasted },
           );
-          apply(tr);
+          apply(ops);
         }
       };
 
@@ -680,22 +680,22 @@ export const createEditor = <
         );
         if (dataTransfer && droppedPosition) {
           let afterSelection: Selection | undefined;
-          const tr: Operation[] = [];
+          const ops: Operation[] = [];
           if (isDragging) {
-            tr.push({ type: "delete", range: toRange(selection) });
+            ops.push({ type: "delete", range: toRange(selection) });
           }
           const pasted = paste(dataTransfer);
           if (pasted) {
             const offset = positionToOffset(doc, droppedPosition);
-            const pos = rebase(offset, tr);
-            tr.push(
+            const pos = rebase(offset, ops);
+            ops.push(
               isString(pasted)
                 ? { type: "insert_text", at: pos, text: pasted }
                 : { type: "insert_node", at: pos, fragment: pasted },
             );
-            afterSelection = [pos, rebase(offset, tr)];
+            afterSelection = [pos, rebase(offset, ops)];
           }
-          apply(tr);
+          apply(ops);
           if (afterSelection) {
             updateSelection(afterSelection);
           }
