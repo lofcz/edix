@@ -7,7 +7,9 @@ export function keymapPlugin<K extends KeyString>(
   bindings: Record<K, () => void>,
 ) {
   keys(bindings).forEach((k) => {
-    const fn = keymap(k as KeyString, bindings[k as keyof typeof bindings]!);
-    editor.hook("keyboard", (e) => fn(e));
+    editor.hook(
+      "keyboard",
+      keymap(k as KeyString, () => bindings[k as keyof typeof bindings]!()),
+    );
   });
 }
