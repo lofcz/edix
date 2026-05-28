@@ -10,7 +10,9 @@ export function keymapPlugin<K extends KeyString>(
     const fn = bindings[k as keyof typeof bindings]!;
     editor.hook(
       "keyboard",
-      keymap(k as KeyString, () => fn()),
+      keymap(k as KeyString, () => {
+        fn();
+      }),
     );
   });
 }
