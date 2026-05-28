@@ -4,13 +4,8 @@
 
 # API
 
-## Classes
-
-- [Transaction](classes/Transaction.md)
-
 ## Functions
 
-- [hotkey](functions/hotkey.md)
 - [Delete](functions/Delete.md)
 - [InsertText](functions/InsertText.md)
 - [InsertNode](functions/InsertNode.md)
@@ -21,16 +16,14 @@
 - [SetBlockAttr](functions/SetBlockAttr.md)
 - [ToggleBlockAttr](functions/ToggleBlockAttr.md)
 - [createEditor](functions/createEditor.md)
-- [plainCopy](functions/plainCopy.md)
-- [htmlCopy](functions/htmlCopy.md)
-- [internalCopy](functions/internalCopy.md)
-- [filePaste](functions/filePaste.md)
-- [plainPaste](functions/plainPaste.md)
-- [htmlPaste](functions/htmlPaste.md)
-- [internalPaste](functions/internalPaste.md)
 - [createPlainEditor](functions/createPlainEditor.md)
 - [debugPlugin](functions/debugPlugin.md)
+- [keymapPlugin](functions/keymapPlugin.md)
 - [singlelinePlugin](functions/singlelinePlugin.md)
+- [fileTransferPlugin](functions/fileTransferPlugin.md)
+- [plainTransferPlugin](functions/plainTransferPlugin.md)
+- [htmlTransferPlugin](functions/htmlTransferPlugin.md)
+- [internalTranferPlugin](functions/internalTranferPlugin.md)
 
 ## Interfaces
 
@@ -40,6 +33,4 @@
 
 ## Type Aliases
 
-- [KeyboardHook](type-aliases/KeyboardHook.md)
-- [CopyHook](type-aliases/CopyHook.md)
-- [PasteHook](type-aliases/PasteHook.md)
+- [Operation](type-aliases/Operation.md)

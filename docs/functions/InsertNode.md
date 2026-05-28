@@ -6,7 +6,7 @@
 
 > **InsertNode**\<`T`\>(`editor`, `node`, `position?`): `void`
 
-Defined in: [commands.ts:44](https://github.com/inokawa/editate/blob/d46349a29ec95cd9d8330041874bdfb327a4ebb9/src/commands.ts#L44)
+Defined in: [commands.ts:43](https://github.com/inokawa/editate/blob/8c5e3f110383ab480e353efdaee805b9eda93e1c/src/commands.ts#L43)
 
 Insert node at the caret or specified position.
 

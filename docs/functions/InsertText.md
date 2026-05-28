@@ -6,7 +6,7 @@
 
 > **InsertText**(`editor`, `text`, `position?`): `void`
 
-Defined in: [commands.ts:33](https://github.com/inokawa/editate/blob/d46349a29ec95cd9d8330041874bdfb327a4ebb9/src/commands.ts#L33)
+Defined in: [commands.ts:32](https://github.com/inokawa/editate/blob/8c5e3f110383ab480e353efdaee805b9eda93e1c/src/commands.ts#L32)
 
 Insert text at the caret or specified position.
 
