@@ -246,7 +246,7 @@ export const createEditor = <
     }
     const result = schema["~standard"].validate(value);
     if (result instanceof Promise) {
-      onError("async validate is not supported.");
+      throw new Error("async validate is not supported");
     } else if (result.issues) {
       onError(result.issues.map((i) => i.message).join("\n"));
     } else {
