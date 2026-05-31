@@ -130,13 +130,22 @@ export const readToken = (): TokenType => {
 const nextNode = (): Node | null => {
   const prevToken = readToken();
   _token = null;
-  if (prevToken === TOKEN_HIDDEN) {
+
+  if (prevToken === TOKEN_VOID || prevToken === TOKEN_HIDDEN) {
+    const current = node!;
     node = walker!.nextSibling();
-    if (node) {
-      return node;
+    if (!node) {
+      // to support case like <p><a><img /></a></p><p>hello</p> / <p><span contentEditable="false">nested<span>tag</span></span></p>
+      while ((node = walker!.nextNode())) {
+        if (!current.contains(node)) {
+          break;
+        }
+      }
     }
+    return node;
+  } else {
+    return (node = walker!.nextNode());
   }
-  return (node = walker!.nextNode());
 };
 
 /**
@@ -219,23 +228,7 @@ export const readNext = (): Exclude<
   TokenType,
   typeof TOKEN_NULL | typeof TOKEN_HIDDEN
 > | void => {
-  while (true) {
-    if (readToken() === TOKEN_VOID) {
-      const current = node!;
-      // don't use TreeWalker.nextSibling() to support case like <body><p><a><img /></a></p><p>hello</p></body>
-      while (nextNode()) {
-        if (!current.contains(node)) {
-          break;
-        }
-      }
-    } else {
-      nextNode();
-    }
-
-    if (!node) {
-      break;
-    }
-
+  while (nextNode()) {
     const t = readToken();
     if (t && t !== TOKEN_HIDDEN) {
       return t;
