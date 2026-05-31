@@ -6,7 +6,7 @@
 
 > **Redo**(`editor`): `void`
 
-Defined in: [plugins/history.ts:116](https://github.com/inokawa/editate/blob/ae3dbcbc9a7ecbc7eb637b2477fb1c4d08293cde/src/plugins/history.ts#L116)
+Defined in: [plugins/history.ts:116](https://github.com/inokawa/editate/blob/6f1ab1108948a1847a30d96f16eb6a6cb4dc084b/src/plugins/history.ts#L116)
 
 Redos the last undone edit.
 
