@@ -1,7 +1,7 @@
 import { docToString, stringToFragment } from "../doc/utils.js";
 import { isTextNode } from "../doc/edit.js";
 import { createEditor, type Editor, type EditorOptions } from "../editor.js";
-import { singlelinePlugin } from "../plugins/index.js";
+import { plainTransferPlugin, singlelinePlugin } from "../plugins/index.js";
 import type { BlockNode, InlineNode } from "../doc/types.js";
 
 type PlainDoc = { children: { children: { text: string }[] }[] };
@@ -94,14 +94,15 @@ export const createPlainEditor = ({
   const editor = createEditor({
     ...opts,
     doc: { children: initialChildren },
-    onChange: (doc) => {
-      const dirtyRange = computeDirtyRange(prevChildren, doc.children);
-      prevChildren = doc.children;
-      onChange(docToString(doc), dirtyRange);
-    },
-  });
+  }).exec(plainTransferPlugin);
   if (singleline) {
     editor.exec(singlelinePlugin);
   }
+  editor.on("change", () => {
+    const doc = editor.doc;
+    const dirtyRange = computeDirtyRange(prevChildren, doc.children);
+    prevChildren = doc.children;
+    onChange(docToString(doc), dirtyRange);
+  });
   return editor;
 };

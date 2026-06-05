@@ -1,4 +1,4 @@
-export { Transaction } from "./doc/edit.js";
+export type { Operation } from "./doc/edit.js";
 export {
   Delete,
   InsertText,
@@ -13,7 +13,6 @@ export {
   ToggleBlockAttr,
 } from "./commands.js";
 export { createEditor } from "./editor.js";
-export type { EditorOptions, Editor } from "./editor.js";
-export * from "./hooks/index.js";
+export type { EditorOptions, Editor, EditorContext } from "./editor.js";
 export * from "./presets/index.js";
 export * from "./plugins/index.js";

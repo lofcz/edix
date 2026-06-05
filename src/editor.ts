@@ -13,30 +13,27 @@ import type { DocNode, Fragment, Selection } from "./doc/types.js";
 import { is, isFunction, isString, microtask } from "./utils.js";
 import {
   applyOperation,
-  Transaction,
   isTextNode,
-  sliceFragment,
   type Operation,
   isUnsafeOperation,
   isValidSelection,
   domSelectionToSelection,
   selectionToDomSelection,
   positionToOffset,
+  rebase,
 } from "./doc/edit.js";
 import { createParser } from "./dom/index.js";
 import { isCollapsed, toRange } from "./doc/position.js";
-import {
-  type CopyHook,
-  type PasteHook,
-  plainCopy,
-  plainPaste,
-  type KeyboardHook,
-} from "./hooks/index.js";
 import { historyPlugin } from "./plugins/history.js";
+import type { Parser } from "./dom/parser.js";
 
 const empty: unknown[] = [];
 
 const noop = () => {};
+
+const defaultOnError = (message: string): never => {
+  throw new Error(message);
+};
 
 /**
  * https://www.w3.org/TR/input-events-1/#interface-InputEvent-Attributes
@@ -94,7 +91,7 @@ type InputType =
   | "deleteByComposition"
   | "insertFromComposition";
 
-type EditorCommand<A extends unknown[], T extends DocNode = DocNode> = (
+type EditorCommandOrPlugin<A extends unknown[], T extends DocNode = DocNode> = (
   editor: Editor<T>,
   ...args: A
 ) => void | undefined;
@@ -124,22 +121,6 @@ export interface EditorOptions<
    */
   readonly?: boolean;
   /**
-   * Functions to handle keyboard events.
-   *
-   * Return `true` if you want to stop propagation.
-   */
-  keyboard?: KeyboardHook[];
-  /**
-   * Functions to handle copy events
-   * @default [plainCopy()]
-   */
-  copy?: [CopyHook, ...rest: CopyHook[]];
-  /**
-   * Functions to handle paste / drop events
-   * @default [plainPaste()]
-   */
-  paste?: [PasteHook, ...rest: PasteHook[]];
-  /**
    * TODO
    */
   isBlock?: (node: HTMLElement) => boolean;
@@ -162,16 +143,20 @@ export interface EditorOptions<
    */
   autoScroll?: boolean;
   /**
-   * Callback invoked when document changes.
+   * Callback invoked when errors happen.
+   *
+   * @default console.warn
    */
-  onChange: (doc: T) => void;
+  onWarn?: (message: string) => void;
   /**
    * Callback invoked when errors happen.
    *
-   * @default console.error
+   * @default `throw new Error(message)`
    */
-  onError?: (message: string) => void;
+  onError?: (message: string) => never;
 }
+
+export type EditorContext<_> = {};
 
 type EditorEventMap = {
   change: () => void;
@@ -179,10 +164,32 @@ type EditorEventMap = {
   readonly: () => void;
 };
 
+/**
+ * Functions to handle keyboard events.
+ *
+ * Return `true` if you want to stop propagation.
+ */
+export type KeyboardHook = (keyboard: KeyboardEvent) => boolean | void;
+
+/**
+ * Functions to handle copy events
+ */
+export type CopyHook = (dataTransfer: DataTransfer) => void;
+
+/**
+ * Functions to handle paste / drop events
+ */
+export type PasteHook = (
+  dataTransfer: DataTransfer,
+  parser: Parser,
+) => string | Fragment | null;
+
 type EditorHookMap = {
   apply: (op: Operation, next: (op?: Operation) => void) => void;
   mount: (element: HTMLElement) => void | (() => void);
   keyboard: KeyboardHook;
+  copy: CopyHook;
+  paste: PasteHook;
 };
 
 /**
@@ -210,15 +217,15 @@ export interface Editor<T extends DocNode = DocNode> {
   autoScroll: boolean;
   /**
    * Dispatches editing operations.
-   * @param tr {@link Transaction}
+   * @param op {@link Operation}
    */
-  apply(tr: Transaction): this;
+  apply(op: Operation | Operation[]): this;
   /**
    * Executes a function with editor bound as context.
-   * @param fn {@link EditorCommand} or {@link EditorQuery}
+   * @param fn {@link EditorCommandOrPlugin} or {@link EditorQuery}
    * @param args arguments of the function
    */
-  exec<A extends unknown[]>(fn: EditorCommand<A, T>, ...args: A): this;
+  exec<A extends unknown[]>(fn: EditorCommandOrPlugin<A, T>, ...args: A): this;
   exec<A extends unknown[], V>(fn: EditorQuery<A, V, T>, ...args: A): V;
   /**
    * A function to subscribe editor events.
@@ -237,6 +244,14 @@ export interface Editor<T extends DocNode = DocNode> {
     callback: EditorHookMap[K],
   ): () => void;
   /**
+   * Get a value from the context.
+   */
+  get<V>(key: EditorContext<V>): V;
+  /**
+   * Set a value for the context.
+   */
+  set<V>(key: EditorContext<V>, value: V): this;
+  /**
    * A function to make DOM editable.
    * @returns A function to stop subscribing DOM changes and restores previous DOM state.
    */
@@ -253,13 +268,10 @@ export const createEditor = <
   doc,
   readonly = false,
   schema,
-  keyboard,
-  copy: copyHooks = [plainCopy()],
-  paste: pasteHooks = [plainPaste()],
   isBlock = defaultIsBlockNode,
   autoScroll: _autoScroll = false,
-  onChange,
-  onError = console.error,
+  onWarn = console.warn,
+  onError = defaultOnError,
 }: EditorOptions<T, S>): Editor<T> => {
   let selection: Selection = [0, 0];
   let mountedElement: HTMLElement | null = null;
@@ -287,9 +299,7 @@ export const createEditor = <
         if (rect.top === 0 && rect.bottom === 0 && rect.height === 0) {
           const node = range.startContainer;
           const probe =
-            node.nodeType === 1
-              ? (node as Element)
-              : node.parentElement;
+            node.nodeType === 1 ? (node as Element) : node.parentElement;
           if (!probe) return;
           rect = probe.getBoundingClientRect();
         }
@@ -319,38 +329,34 @@ export const createEditor = <
   };
   let emptyDoc = computeEmpty(doc);
 
-  const validate = (value: T, onError: (m: string) => void): boolean => {
+  const validate = (value: T): boolean => {
     if (!schema) {
-      onError(
+      onWarn(
         "An unsafe operation was detected. We recommend using schema option.",
       );
       return true;
     }
     const result = schema["~standard"].validate(value);
     if (result instanceof Promise) {
-      onError("async validate is not supported.");
+      onError("async validate is not supported");
     } else if (result.issues) {
-      onError(result.issues.map((i) => i.message).join("\n"));
+      onWarn(result.issues.map((i) => i.message).join("\n"));
     } else {
       return true;
     }
     return false;
   };
 
-  let initialError: string | undefined;
-  if (
-    !validate(doc, (m) => {
-      initialError = m;
-    }) &&
-    initialError
-  ) {
-    throw new Error(initialError);
+  if (schema && !validate(doc)) {
+    onError("Invalid document");
   }
 
   const hooks = new Map<
     keyof EditorHookMap,
     EditorHookMap[keyof EditorHookMap][]
   >();
+
+  const contexts = new WeakMap<EditorContext<unknown>, unknown>();
 
   const getHook = <T extends keyof EditorHookMap>(
     key: T,
@@ -360,73 +366,82 @@ export const createEditor = <
 
   const subs = new Map<
     keyof EditorEventMap,
-    [cbs: Set<EditorEventMap[keyof EditorEventMap]>, queued: boolean]
+    Set<EditorEventMap[keyof EditorEventMap]>
   >();
+
+  const publishing: (() => void)[] = [];
 
   const publish = <K extends keyof EditorEventMap>(key: K) => {
     const sub = subs.get(key);
-    if (sub && !sub[1]) {
-      sub[1] = true;
-      microtask(() => {
-        sub[1] = false;
-        sub[0].forEach((cb) => {
-          cb();
+    if (sub) {
+      if (!publishing.length) {
+        microtask(() => {
+          publishing.forEach((cb) => {
+            cb();
+          });
+          publishing.splice(0);
         });
-      });
+      }
+      publishing.push(...sub);
     }
   };
 
-  const apply = (tr: Transaction) => {
+  const apply = (op: Operation | Operation[]) => {
     if (!readonly) {
-      const currentDoc = doc;
-      const applyHooks = getHook("apply");
-      const length = applyHooks.length;
-
-      for (let op of tr.ops) {
-        let index = 0;
-
-        const dispatch = () => {
-          if (index < length) {
-            const i = index;
-            applyHooks[index]!(op, next);
-            if (i === index) {
-              next();
-            }
-          } else if (index === length) {
-            index++;
-
-            try {
-              const [nextDoc, nextSelection] = applyOperation(
-                doc,
-                selection,
-                op,
-              );
-              if (!isUnsafeOperation(op) || validate(nextDoc, onError)) {
-                doc = nextDoc;
-                selection = nextSelection;
-              }
-            } catch (e) {
-              // rollback
-              onError("rollback operation: " + e);
-            }
-          }
-        };
-
-        const next = (o?: Operation): void => {
-          if (o) {
-            op = o;
-          }
-          index++;
-          dispatch();
-        };
-
-        dispatch();
+      if (Array.isArray(op)) {
+        for (const o of op) {
+          applyOp(o);
+        }
+      } else {
+        applyOp(op);
       }
+    }
+    return editor;
+  };
 
-      if (!is(currentDoc, doc)) {
-        emptyDoc = computeEmpty(doc);
-        publish("change");
+  const applyOp = (op: Operation) => {
+    const currentDoc = doc;
+    const applyHooks = getHook("apply");
+    const length = applyHooks.length;
+
+    let index = 0;
+
+    const dispatch = () => {
+      if (index < length) {
+        const i = index;
+        applyHooks[index]!(op, next);
+        if (i === index) {
+          next();
+        }
+      } else if (index === length) {
+        index++;
+
+        try {
+          const [nextDoc, nextSelection] = applyOperation(doc, selection, op);
+          if (!isUnsafeOperation(op) || validate(nextDoc)) {
+            doc = nextDoc;
+            selection = nextSelection;
+          }
+        } catch (e) {
+          // rollback
+          onWarn("rollback operation: " + e);
+        }
       }
+    };
+
+    const next = (o?: Operation): void => {
+      if (o) {
+        op = o;
+      }
+      index++;
+      dispatch();
+    };
+
+    dispatch();
+
+    if (!is(currentDoc, doc)) {
+      emptyDoc = computeEmpty(doc);
+      publish("change");
     }
   };
 
@@ -466,19 +481,15 @@ export const createEditor = <
     set autoScroll(value) {
       _autoScroll = value;
     },
-    apply: (tr: Transaction) => {
-      apply(tr);
-      return editor;
-    },
+    apply,
     on: (type, callback) => {
       let sub = subs.get(type);
       if (!sub) {
-        subs.set(type, (sub = [new Set(), false]));
+        subs.set(type, (sub = new Set()));
       }
-      const cbs = sub[0];
-      cbs.add(callback);
+      sub.add(callback);
       return () => {
-        cbs.delete(callback);
+        sub.delete(callback);
       };
     },
     hook: (type, callback) => {
@@ -495,7 +506,7 @@ export const createEditor = <
       };
     },
     exec: (
-      fn: EditorCommand<any, T> | EditorQuery<any, unknown, T>,
+      fn: EditorCommandOrPlugin<any, T> | EditorQuery<any, unknown, T>,
       ...args: unknown[]
     ): any => {
       const result = fn(editor, ...args);
@@ -504,11 +515,21 @@ export const createEditor = <
       }
       return result;
     },
+    get: (key) => {
+      if (!contexts.has(key)) {
+        onError("No value found for key");
+      }
+      return contexts.get(key) as any;
+    },
+    set: (key, value) => {
+      contexts.set(key, value);
+      return editor;
+    },
     input: (element) => {
       if (
         !(window.InputEvent && isFunction(InputEvent.prototype.getTargetRanges))
       ) {
-        onError("beforeinput event is not supported.");
+        onWarn("beforeinput event is not supported.");
         return noop;
       }
       mountedElement = element;
@@ -530,7 +551,7 @@ export const createEditor = <
       element.ariaMultiLine = "true";
 
       let disposed = false;
-      let inputTransaction: [Transaction, Selection] | null = null;
+      let inputTransaction: [Operation[], Selection] | null = null;
       let isComposing = false;
       let hasFocus = false;
       let isDragging = false;
@@ -564,13 +585,13 @@ export const createEditor = <
       const cleanupOnReadonly = editor.on("readonly", setEditableState);
 
       const paste = (dataTransfer: DataTransfer): string | Fragment | void => {
-        for (const ex of pasteHooks) {
+        for (const ex of getHook("paste")) {
           const pasted = ex(dataTransfer, parser);
           if (pasted) {
             return pasted;
           }
         }
-        onError("failed to serialize pasted data");
+        onWarn("failed to serialize pasted data");
       };
 
       const observer = createMutationObserver(element, () => {
@@ -684,18 +705,18 @@ export const createEditor = <
             }
           }
 
-          let tr: Transaction;
+          let ops: Operation[];
           if (!inputTransaction) {
-            inputTransaction = [new Transaction(), selection];
+            inputTransaction = [[], selection];
           }
-          tr = inputTransaction[0];
+          ops = inputTransaction[0];
           if (!isCollapsed(range)) {
             // replace or delete
-            tr.delete(...range);
+            ops.push({ type: "delete", range });
           }
           if (data) {
             // replace or insert
-            tr.insertText(range[0], data);
+            ops.push({ type: "insert_text", at: range[0], text: data });
           }
         }
 
@@ -731,9 +752,8 @@ export const createEditor = <
       const copy = (dataTransfer: DataTransfer) => {
         syncSelection();
         if (!isCollapsed(selection)) {
-          const fragment = sliceFragment(doc, ...toRange(selection));
-          for (const ex of copyHooks) {
-            ex(dataTransfer, fragment, element);
+          for (const ex of getHook("copy")) {
+            ex(dataTransfer);
           }
         }
       };
@@ -746,21 +766,22 @@ export const createEditor = <
         e.preventDefault();
         if (!readonly) {
           copy(e.clipboardData!);
-          apply(new Transaction().delete(...toRange(selection)));
+          apply({ type: "delete", range: toRange(selection) });
         }
       };
       const onPaste = (e: ClipboardEvent) => {
         e.preventDefault();
         const pasted = paste(e.clipboardData!);
         if (pasted) {
-          const [start, end] = toRange(selection);
-          const tr = new Transaction().delete(start, end);
-          if (isString(pasted)) {
-            tr.insertText(start, pasted);
-          } else {
-            tr.insertFragment(start, pasted);
-          }
-          apply(tr);
+          const range = toRange(selection);
+          const start = range[0];
+          const ops: Operation[] = [{ type: "delete", range }];
+          ops.push(
+            isString(pasted)
+              ? { type: "insert_text", at: start, text: pasted }
+              : { type: "insert_node", at: start, fragment: pasted },
+          );
+          apply(ops);
         }
       };
 
@@ -776,22 +797,22 @@ export const createEditor = <
         );
         if (dataTransfer && droppedPosition) {
           let afterSelection: Selection | undefined;
-          const tr = new Transaction();
+          const ops: Operation[] = [];
           if (isDragging) {
-            tr.delete(...toRange(selection));
+            ops.push({ type: "delete", range: toRange(selection) });
           }
           const pasted = paste(dataTransfer);
           if (pasted) {
             const offset = positionToOffset(doc, droppedPosition);
-            const pos = tr.transform(offset);
-            if (isString(pasted)) {
-              tr.insertText(pos, pasted);
-            } else {
-              tr.insertFragment(pos, pasted);
-            }
-            afterSelection = [pos, tr.transform(offset)];
+            const pos = rebase(offset, ops);
+            ops.push(
+              isString(pasted)
+                ? { type: "insert_text", at: pos, text: pasted }
+                : { type: "insert_node", at: pos, fragment: pasted },
+            );
+            afterSelection = [pos, rebase(offset, ops)];
           }
-          apply(tr);
+          apply(ops);
           if (afterSelection) {
             updateSelection(afterSelection);
           }
@@ -820,9 +841,8 @@ export const createEditor = <
       element.addEventListener("dragstart", onDragStart);
       element.addEventListener("dragend", onDragEnd);
 
-      const mountHooks = getHook("mount");
       const unmountHooks: (() => void)[] = [];
-      mountHooks.forEach((mount) => {
+      getHook("mount").forEach((mount) => {
         const cb = mount(element);
         if (cb) {
           unmountHooks.push(cb);
@@ -877,17 +897,10 @@ export const createEditor = <
   editor.exec(historyPlugin);
 
   editor.on("change", () => {
-    onChange(doc);
     if (_autoScroll) {
       scheduleScroll();
     }
   });
-
-  if (keyboard) {
-    keyboard.forEach((h) => {
-      editor.hook("keyboard", h);
-    });
-  }
 
   return editor;
 };

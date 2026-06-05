@@ -1,6 +1,9 @@
 import { joinBlocks } from "../doc/edit.js";
 import type { Editor } from "../editor.js";
 
+/**
+ * A plugin to restrict input to a single line
+ */
 export function singlelinePlugin(editor: Editor) {
   editor.hook("mount", (element) => {
     element.ariaMultiLine = null;

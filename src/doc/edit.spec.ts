@@ -1736,8 +1736,7 @@ describe("delete", () => {
       const sel: Selection = [2, 2];
       const res = applyOperation(doc, sel, {
         type: "delete",
-        start: -1,
-        end: 1,
+        range: [-1, 1],
       });
 
       expect(is(res[0], doc)).toBe(true);
@@ -1752,8 +1751,7 @@ describe("delete", () => {
       const sel: Selection = [2, 2];
       const res = applyOperation(doc, sel, {
         type: "delete",
-        start: 0,
-        end: 100,
+        range: [0, 100],
       });
 
       expect(is(res[0], doc)).toBe(true);
@@ -1768,8 +1766,7 @@ describe("delete", () => {
       const sel: Selection = [2, 2];
       const res = applyOperation(doc, sel, {
         type: "delete",
-        start: 1,
-        end: 1,
+        range: [1, 1],
       });
 
       expect(is(res[0], doc)).toBe(true);
@@ -1784,8 +1781,7 @@ describe("delete", () => {
       const sel: Selection = [2, 2];
       const res = applyOperation(doc, sel, {
         type: "delete",
-        start: 2,
-        end: 1,
+        range: [2, 1],
       });
 
       expect(is(res[0], doc)).toBe(true);
@@ -1802,8 +1798,7 @@ describe("delete", () => {
       const sel: Selection = [2, 4];
       const res = applyOperation(doc, sel, {
         type: "delete",
-        start: 1,
-        end: 5,
+        range: [1, 5],
       });
 
       expect(res[0]).toEqual({
@@ -1822,8 +1817,7 @@ describe("delete", () => {
       const sel: Selection = [2, 4];
       const res = applyOperation(doc, sel, {
         type: "delete",
-        start: 1,
-        end: 3,
+        range: [1, 3],
       });
 
       expect(res[0]).toEqual({
@@ -1842,8 +1836,7 @@ describe("delete", () => {
       const sel: Selection = [2, 4];
       const res = applyOperation(doc, sel, {
         type: "delete",
-        start: 3,
-        end: 5,
+        range: [3, 5],
       });
 
       expect(res[0]).toEqual({
@@ -1866,8 +1859,7 @@ describe("delete", () => {
       const sel: Selection = [2, docText.length + 1 + 2];
       const res = applyOperation(doc, sel, {
         type: "delete",
-        start: 3,
-        end: docText.length + 1 + 1,
+        range: [3, docText.length + 1 + 1],
       });
 
       expect(res[0]).toEqual({
@@ -1899,8 +1891,7 @@ describe("delete", () => {
     const sel: Selection = [docText.length + 1 + 2, docText.length + 1 + 2];
     const res = applyOperation(doc, sel, {
       type: "delete",
-      start: 1,
-      end: 2,
+      range: [1, 2],
     });
 
     expect(res[0]).toEqual({
@@ -1925,8 +1916,7 @@ describe("delete", () => {
 
     const res = applyOperation(doc, sel, {
       type: "delete",
-      start: 2,
-      end: docText.length + 1 + 1,
+      range: [2, docText.length + 1 + 1],
     });
 
     expect(res[0]).toEqual({
@@ -1965,8 +1955,7 @@ describe("delete", () => {
     const deleteLength = docText.length + 1 + 2;
     const res = applyOperation(doc, sel, {
       type: "delete",
-      start: 0,
-      end: deleteLength,
+      range: [0, deleteLength],
     });
 
     expect(res[0]).toEqual({
@@ -1986,8 +1975,7 @@ describe("delete", () => {
     const sel: Selection = [3, 3];
     const res = applyOperation(doc, sel, {
       type: "delete",
-      start: 1,
-      end: 2,
+      range: [1, 2],
     });
 
     expect(res[0]).toEqual({
@@ -2006,8 +1994,7 @@ describe("delete", () => {
     const sel: Selection = [3, 3];
     const res = applyOperation(doc, sel, {
       type: "delete",
-      start: 2,
-      end: 3,
+      range: [2, 3],
     });
 
     expect(res[0]).toEqual({
@@ -2026,8 +2013,7 @@ describe("delete", () => {
     const sel: Selection = [3, 3];
     const res = applyOperation(doc, sel, {
       type: "delete",
-      start: 2,
-      end: 4,
+      range: [2, 4],
     });
 
     expect(res[0]).toEqual({
@@ -2046,8 +2032,7 @@ describe("delete", () => {
     const sel: Selection = [3, 3];
     const res = applyOperation(doc, sel, {
       type: "delete",
-      start: 3,
-      end: 4,
+      range: [3, 4],
     });
 
     expect(res[0]).toEqual({
@@ -2066,8 +2051,7 @@ describe("delete", () => {
     const sel: Selection = [3, 3];
     const res = applyOperation(doc, sel, {
       type: "delete",
-      start: 4,
-      end: 5,
+      range: [4, 5],
     });
 
     expect(res[0]).toEqual({
@@ -2090,8 +2074,7 @@ describe("delete", () => {
     const sel: Selection = [2, 2];
     const res = applyOperation(doc, sel, {
       type: "delete",
-      start: docText.length + 1 + 1,
-      end: docText.length + 1 + 2,
+      range: [docText.length + 1 + 1, docText.length + 1 + 2],
     });
 
     expect(res[0]).toEqual({
@@ -2117,8 +2100,10 @@ describe("delete", () => {
     const sel: Selection = [2, 2];
     const res = applyOperation(doc, sel, {
       type: "delete",
-      start: docText.length + 1 + 1,
-      end: docText.length + 1 + docText2.length + 1 + 1,
+      range: [
+        docText.length + 1 + 1,
+        docText.length + 1 + docText2.length + 1 + 1,
+      ],
     });
 
     expect(res[0]).toEqual({
@@ -2154,8 +2139,7 @@ describe("delete", () => {
     const sel: Selection = [2, 2];
     const res = applyOperation(doc, sel, {
       type: "delete",
-      start: docText.length + 1,
-      end: docText.length + 1 + docText2.length + 1 + 1,
+      range: [docText.length + 1, docText.length + 1 + docText2.length + 1 + 1],
     });
 
     expect(res[0]).toEqual({
@@ -2189,8 +2173,7 @@ describe("delete", () => {
     const sel: Selection = [docText.length + 1 + 3, docText.length + 1 + 3];
     const res = applyOperation(doc, sel, {
       type: "delete",
-      start: docText.length + 1 + 1,
-      end: docText.length + 1 + 2,
+      range: [docText.length + 1 + 1, docText.length + 1 + 2],
     });
 
     expect(res[0]).toEqual({
@@ -2217,8 +2200,7 @@ describe("delete", () => {
     const sel: Selection = [docText.length + 1 + 2, docText.length + 1 + 2];
     const res = applyOperation(doc, sel, {
       type: "delete",
-      start: docText.length + 1 + 3,
-      end: docText.length + 1 + 4,
+      range: [docText.length + 1 + 3, docText.length + 1 + 4],
     });
 
     expect(res[0]).toEqual({
@@ -2226,6 +2208,79 @@ describe("delete", () => {
         { attr: 0, children: [{ attr: 0, text: docText }] },
         { attr: 1, children: [{ attr: 0, text: deleteAt(docText2, 3, 1) }] },
         { attr: 2, children: [{ attr: 0, text: docText3 }] },
+      ],
+    });
+    expect(res[1]).toEqual(sel);
+  });
+
+  it("delete void", () => {
+    const docText = "abcde";
+    const docText2 = "fghij";
+    const doc = {
+      children: [
+        {
+          attr: 0,
+          children: [
+            { attr: 0, text: docText },
+            { foo: "bar" },
+            { attr: 0, text: docText2 },
+          ],
+        },
+      ],
+    };
+    const sel: Selection = [2, 2];
+
+    const res = applyOperation(doc, sel, {
+      type: "delete",
+      range: [docText.length, docText.length + 1],
+    });
+
+    expect(res[0]).toEqual({
+      children: [
+        {
+          attr: 0,
+          children: [
+            {
+              attr: 0,
+              text: docText + docText2,
+            },
+          ],
+        },
+      ],
+    });
+    expect(res[1]).toEqual(sel);
+  });
+
+  it("delete text with attr", () => {
+    const docText = "abcde";
+    const docText2 = "fghij";
+    const doc = {
+      children: [
+        {
+          attr: 0,
+          children: [
+            { attr: 0, text: docText },
+            { attr: 1, text: docText2 },
+          ],
+        },
+      ],
+    };
+    const sel: Selection = [2, 2];
+
+    const res = applyOperation(doc, sel, {
+      type: "delete",
+      range: [docText.length - 1, docText.length + 1],
+    });
+
+    expect(res[0]).toEqual({
+      children: [
+        {
+          attr: 0,
+          children: [
+            { attr: 0, text: docText.slice(0, -1) },
+            { attr: 1, text: docText2.slice(1) },
+          ],
+        },
       ],
     });
     expect(res[1]).toEqual(sel);
@@ -2244,8 +2299,7 @@ describe("delete", () => {
 
     const res = applyOperation(doc, sel, {
       type: "delete",
-      start: docText.length,
-      end: docText.length + 1,
+      range: [docText.length, docText.length + 1],
     });
 
     expect(res[0]).toEqual({
@@ -2278,8 +2332,7 @@ describe("delete", () => {
 
     const res = applyOperation(doc, sel, {
       type: "delete",
-      start: docText.length,
-      end: docText.length + 1,
+      range: [docText.length, docText.length + 1],
     });
 
     expect(res[0]).toEqual({
@@ -2305,8 +2358,7 @@ describe("delete", () => {
 
     const res = applyOperation(doc, sel, {
       type: "delete",
-      start: docText.length + 1,
-      end: docText.length + 2,
+      range: [docText.length + 1, docText.length + 2],
     });
 
     expect(res[0]).toEqual({
@@ -2336,8 +2388,7 @@ describe("delete", () => {
 
     const res = applyOperation(doc, sel, {
       type: "delete",
-      start: docText.length,
-      end: docText.length + 1,
+      range: [docText.length, docText.length + 1],
     });
 
     expect(res[0]).toEqual({
@@ -2372,8 +2423,7 @@ describe("delete", () => {
 
     const res = applyOperation(doc, sel, {
       type: "delete",
-      start: docText.length - 1,
-      end: docText.length,
+      range: [docText.length - 1, docText.length],
     });
 
     expect(res[0]).toEqual({
@@ -2403,8 +2453,7 @@ describe("delete", () => {
 
     const res = applyOperation(doc, sel, {
       type: "delete",
-      start: docText.length,
-      end: docText.length + 1,
+      range: [docText.length, docText.length + 1],
     });
 
     expect(res[0]).toEqual({
@@ -2438,8 +2487,7 @@ describe("format", () => {
       const sel: Selection = [2, 2];
       const res = applyOperation(doc, sel, {
         type: "set_attr",
-        start: -1,
-        end: 1,
+        range: [-1, 1],
         key: "foo",
         value: "bar",
       });
@@ -2456,8 +2504,7 @@ describe("format", () => {
       const sel: Selection = [2, 2];
       const res = applyOperation(doc, sel, {
         type: "set_attr",
-        start: 0,
-        end: 100,
+        range: [0, 100],
         key: "foo",
         value: "bar",
       });
@@ -2474,8 +2521,7 @@ describe("format", () => {
       const sel: Selection = [2, 2];
       const res = applyOperation(doc, sel, {
         type: "set_attr",
-        start: 1,
-        end: 1,
+        range: [1, 1],
         key: "foo",
         value: "bar",
       });
@@ -2492,8 +2538,7 @@ describe("format", () => {
       const sel: Selection = [2, 2];
       const res = applyOperation(doc, sel, {
         type: "set_attr",
-        start: 2,
-        end: 1,
+        range: [2, 1],
         key: "foo",
         value: "bar",
       });
@@ -2515,8 +2560,7 @@ describe("format", () => {
     const sel: Selection = [docText.length + 1 + 2, docText.length + 1 + 2];
     const res = applyOperation(doc, sel, {
       type: "set_attr",
-      start: 1,
-      end: 2,
+      range: [1, 2],
       key: "foo",
       value: "bar",
     });
@@ -2550,8 +2594,7 @@ describe("format", () => {
 
     const res = applyOperation(doc, sel, {
       type: "set_attr",
-      start: 2,
-      end: docText.length + 1 + 1,
+      range: [2, docText.length + 1 + 1],
       key: "foo",
       value: "bar",
     });
@@ -2585,8 +2628,7 @@ describe("format", () => {
     const sel: Selection = [3, 3];
     const res = applyOperation(doc, sel, {
       type: "set_attr",
-      start: 1,
-      end: 2,
+      range: [1, 2],
       key: "foo",
       value: "bar",
     });
@@ -2614,8 +2656,7 @@ describe("format", () => {
     const sel: Selection = [3, 3];
     const res = applyOperation(doc, sel, {
       type: "set_attr",
-      start: 2,
-      end: 3,
+      range: [2, 3],
       key: "foo",
       value: "bar",
     });
@@ -2647,8 +2688,7 @@ describe("format", () => {
     const sel: Selection = [2, docText.length + 1 + 2];
     const res = applyOperation(doc, sel, {
       type: "set_attr",
-      start: 3,
-      end: docText.length + 1 + 1,
+      range: [3, docText.length + 1 + 1],
       key: "foo",
       value: "bar",
     });
@@ -2682,8 +2722,7 @@ describe("format", () => {
     const sel: Selection = [3, 3];
     const res = applyOperation(doc, sel, {
       type: "set_attr",
-      start: 3,
-      end: 4,
+      range: [3, 4],
       key: "foo",
       value: "bar",
     });
@@ -2711,8 +2750,7 @@ describe("format", () => {
     const sel: Selection = [3, 3];
     const res = applyOperation(doc, sel, {
       type: "set_attr",
-      start: 4,
-      end: 5,
+      range: [4, 5],
       key: "foo",
       value: "bar",
     });
@@ -2743,8 +2781,7 @@ describe("format", () => {
     const sel: Selection = [2, 2];
     const res = applyOperation(doc, sel, {
       type: "set_attr",
-      start: docText.length + 1 + 1,
-      end: docText.length + 1 + 2,
+      range: [docText.length + 1 + 1, docText.length + 1 + 2],
       key: "foo",
       value: "bar",
     });
@@ -2779,8 +2816,10 @@ describe("format", () => {
     const sel: Selection = [2, 2];
     const res = applyOperation(doc, sel, {
       type: "set_attr",
-      start: docText.length + 1 + 1,
-      end: docText.length + 1 + docText2.length + 1 + 1,
+      range: [
+        docText.length + 1 + 1,
+        docText.length + 1 + docText2.length + 1 + 1,
+      ],
       key: "foo",
       value: "bar",
     });
@@ -2802,6 +2841,91 @@ describe("format", () => {
             { attr: 0, text: docText3.slice(1) },
           ],
         },
+      ],
+    });
+    expect(res[1]).toEqual(sel);
+  });
+
+  it("update text with collapsed range", () => {
+    const docText = "abcde";
+    const docText2 = "fghij";
+    const doc: Doc = {
+      children: [
+        { attr: 0, children: [{ attr: 0, text: docText }] },
+        { attr: 1, children: [{ attr: 0, text: docText2 }] },
+      ],
+    };
+    const sel: Selection = [3, 3];
+    const res = applyOperation(doc, sel, {
+      type: "set_attr",
+      range: [1, 1],
+      key: "foo",
+      value: "bar",
+    });
+
+    expect(res[0]).toEqual({
+      children: [
+        {
+          attr: 0,
+          children: [{ attr: 0, text: docText }],
+        },
+        { attr: 1, children: [{ attr: 0, text: docText2 }] },
+      ],
+    });
+    expect(res[1]).toEqual(sel);
+  });
+
+  it("update empty text with collapsed range", () => {
+    const docText = "abcde";
+    const docText2 = "fghij";
+    const doc: Doc = {
+      children: [
+        { attr: 0, children: [{ attr: 0, text: docText }] },
+        { attr: 1, children: [{ attr: 0, text: "" }] },
+        { attr: 2, children: [{ attr: 0, text: docText2 }] },
+      ],
+    };
+    const sel: Selection = [3, 3];
+    const res = applyOperation(doc, sel, {
+      type: "set_attr",
+      range: [docText.length + 1, docText.length + 1],
+      key: "foo",
+      value: "bar",
+    });
+
+    expect(res[0]).toEqual({
+      children: [
+        { attr: 0, children: [{ attr: 0, text: docText }] },
+        { attr: 1, children: [{ attr: 0, text: "", foo: "bar" }] },
+        { attr: 2, children: [{ attr: 0, text: docText2 }] },
+      ],
+    });
+    expect(res[1]).toEqual(sel);
+  });
+
+  it("update empty text with expanded range", () => {
+    const docText = "abcde";
+    const docText2 = "fghij";
+    const doc: Doc = {
+      children: [
+        { attr: 0, children: [{ attr: 0, text: docText }] },
+        { attr: 1, children: [{ attr: 0, text: "" }] },
+        { attr: 2, children: [{ attr: 0, text: docText2 }] },
+      ],
+    };
+    const sel: Selection = [3, 3];
+    const res = applyOperation(doc, sel, {
+      type: "set_attr",
+      range: [docText.length + 1, docText.length + 2],
+      key: "foo",
+      value: "bar",
+    });
+
+    expect(res[0]).toEqual({
+      children: [
+        { attr: 0, children: [{ attr: 0, text: docText }] },
+        { attr: 1, children: [{ attr: 0, text: "", foo: "bar" }] },
+        { attr: 2, children: [{ attr: 0, text: docText2 }] },
       ],
     });
     expect(res[1]).toEqual(sel);

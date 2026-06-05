@@ -4,7 +4,7 @@
 
 # Interface: PlainEditorOptions
 
-Defined in: [presets/plain.ts:7](https://github.com/inokawa/editate/blob/d46349a29ec95cd9d8330041874bdfb327a4ebb9/src/presets/plain.ts#L7)
+Defined in: [presets/plain.ts:7](https://github.com/inokawa/editate/blob/ce6b010f119c8164ca856f84509db1367eebcdde/src/presets/plain.ts#L7)
 
 ## Extends
 
@@ -16,7 +16,7 @@ Defined in: [presets/plain.ts:7](https://github.com/inokawa/editate/blob/d46349a
 
 > **text**: `string`
 
-Defined in: [presets/plain.ts:14](https://github.com/inokawa/editate/blob/d46349a29ec95cd9d8330041874bdfb327a4ebb9/src/presets/plain.ts#L14)
+Defined in: [presets/plain.ts:14](https://github.com/inokawa/editate/blob/ce6b010f119c8164ca856f84509db1367eebcdde/src/presets/plain.ts#L14)
 
 Initial document text.
 
@@ -26,7 +26,7 @@ Initial document text.
 
 > `optional` **singleline?**: `boolean`
 
-Defined in: [presets/plain.ts:18](https://github.com/inokawa/editate/blob/d46349a29ec95cd9d8330041874bdfb327a4ebb9/src/presets/plain.ts#L18)
+Defined in: [presets/plain.ts:18](https://github.com/inokawa/editate/blob/ce6b010f119c8164ca856f84509db1367eebcdde/src/presets/plain.ts#L18)
 
 TODO
 
@@ -36,7 +36,7 @@ TODO
 
 > **onChange**: (`text`) => `void`
 
-Defined in: [presets/plain.ts:22](https://github.com/inokawa/editate/blob/d46349a29ec95cd9d8330041874bdfb327a4ebb9/src/presets/plain.ts#L22)
+Defined in: [presets/plain.ts:22](https://github.com/inokawa/editate/blob/ce6b010f119c8164ca856f84509db1367eebcdde/src/presets/plain.ts#L22)
 
 Callback invoked when document changes.
 
@@ -52,27 +52,11 @@ Callback invoked when document changes.
 
 ***
 
-### keyboard?
-
-> `optional` **keyboard?**: [`KeyboardHook`](../type-aliases/KeyboardHook.md)[]
-
-Defined in: [editor.ts:130](https://github.com/inokawa/editate/blob/d46349a29ec95cd9d8330041874bdfb327a4ebb9/src/editor.ts#L130)
-
-Functions to handle keyboard events.
-
-Return `true` if you want to stop propagation.
-
-#### Inherited from
-
-`Omit.keyboard`
-
-***
-
 ### readonly?
 
 > `optional` **readonly?**: `boolean`
 
-Defined in: [editor.ts:124](https://github.com/inokawa/editate/blob/d46349a29ec95cd9d8330041874bdfb327a4ebb9/src/editor.ts#L124)
+Defined in: [editor.ts:121](https://github.com/inokawa/editate/blob/ce6b010f119c8164ca856f84509db1367eebcdde/src/editor.ts#L121)
 
 The state editable or not.
 
@@ -82,51 +66,11 @@ The state editable or not.
 
 ***
 
-### copy?
-
-> `optional` **copy?**: \[[`CopyHook`](../type-aliases/CopyHook.md), `...rest: CopyHook[]`\]
-
-Defined in: [editor.ts:135](https://github.com/inokawa/editate/blob/d46349a29ec95cd9d8330041874bdfb327a4ebb9/src/editor.ts#L135)
-
-Functions to handle copy events
-
-#### Default
-
-```ts
-[plainCopy()]
-```
-
-#### Inherited from
-
-`Omit.copy`
-
-***
-
-### paste?
-
-> `optional` **paste?**: \[[`PasteHook`](../type-aliases/PasteHook.md), `...rest: PasteHook[]`\]
-
-Defined in: [editor.ts:140](https://github.com/inokawa/editate/blob/d46349a29ec95cd9d8330041874bdfb327a4ebb9/src/editor.ts#L140)
-
-Functions to handle paste / drop events
-
-#### Default
-
-```ts
-[plainPaste()]
-```
-
-#### Inherited from
-
-`Omit.paste`
-
-***
-
 ### isBlock?
 
 > `optional` **isBlock?**: (`node`) => `boolean`
 
-Defined in: [editor.ts:144](https://github.com/inokawa/editate/blob/d46349a29ec95cd9d8330041874bdfb327a4ebb9/src/editor.ts#L144)
+Defined in: [editor.ts:125](https://github.com/inokawa/editate/blob/ce6b010f119c8164ca856f84509db1367eebcdde/src/editor.ts#L125)
 
 TODO
 
@@ -146,11 +90,11 @@ TODO
 
 ***
 
-### onError?
+### onWarn?
 
-> `optional` **onError?**: (`message`) => `void`
+> `optional` **onWarn?**: (`message`) => `void`
 
-Defined in: [editor.ts:154](https://github.com/inokawa/editate/blob/d46349a29ec95cd9d8330041874bdfb327a4ebb9/src/editor.ts#L154)
+Defined in: [editor.ts:131](https://github.com/inokawa/editate/blob/ce6b010f119c8164ca856f84509db1367eebcdde/src/editor.ts#L131)
 
 Callback invoked when errors happen.
 
@@ -167,8 +111,36 @@ Callback invoked when errors happen.
 #### Default
 
 ```ts
-console.error
+console.warn
 ```
+
+#### Inherited from
+
+`Omit.onWarn`
+
+***
+
+### onError?
+
+> `optional` **onError?**: (`message`) => `never`
+
+Defined in: [editor.ts:137](https://github.com/inokawa/editate/blob/ce6b010f119c8164ca856f84509db1367eebcdde/src/editor.ts#L137)
+
+Callback invoked when errors happen.
+
+#### Parameters
+
+##### message
+
+`string`
+
+#### Returns
+
+`never`
+
+#### Default
+
+`throw new Error(message)`
 
 #### Inherited from
 

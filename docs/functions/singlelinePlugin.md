@@ -6,7 +6,9 @@
 
 > **singlelinePlugin**(`editor`): `void`
 
-Defined in: [plugins/singleline.ts:4](https://github.com/inokawa/editate/blob/d46349a29ec95cd9d8330041874bdfb327a4ebb9/src/plugins/singleline.ts#L4)
+Defined in: [plugins/singleline.ts:7](https://github.com/inokawa/editate/blob/ce6b010f119c8164ca856f84509db1367eebcdde/src/plugins/singleline.ts#L7)
+
+A plugin to restrict input to a single line
 
 ## Parameters
 

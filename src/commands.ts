@@ -1,18 +1,17 @@
-import { toRange } from "./doc/position.js";
+import { isCollapsed, toRange } from "./doc/position.js";
 import {
-  getNodeAt,
+  getBlockAt,
+  getInlineAt,
   getNodeSize,
   isTextNode,
-  offsetToPosition,
   sliceFragment,
-  Transaction,
 } from "./doc/edit.js";
 import type { Editor } from "./editor.js";
 import type {
   DocNode,
   InferBlockNode,
   InferInlineNode,
-  Path,
+  InlineNode,
   Range,
   TextNode,
 } from "./doc/types.js";
@@ -24,7 +23,7 @@ export function Delete(
   editor: Editor,
   range: Range = toRange(editor.selection),
 ) {
-  editor.apply(new Transaction().delete(...range));
+  editor.apply({ type: "delete", range });
 }
 
 /**
@@ -35,7 +34,7 @@ export function InsertText(
   text: string,
   position: number = editor.selection[0],
 ) {
-  editor.apply(new Transaction().insertText(position, text));
+  editor.apply({ type: "insert_text", at: position, text });
 }
 
 /**
@@ -46,9 +45,11 @@ export function InsertNode<T extends DocNode>(
   node: Exclude<InferInlineNode<T>, TextNode>,
   position: number = editor.selection[0],
 ) {
-  editor.apply(
-    new Transaction().insertFragment(position, [{ children: [node] }]),
-  );
+  editor.apply({
+    type: "insert_node",
+    at: position,
+    fragment: [{ children: [node] }],
+  });
 }
 
 /**
@@ -62,17 +63,21 @@ export function InsertNodes<T extends DocNode>(
   nodes: InferInlineNode<T>[],
   position: number = editor.selection[0],
 ) {
-  editor.apply(
-    new Transaction().insertFragment(position, [{ children: nodes }]),
-  );
+  editor.apply({
+    type: "insert_node",
+    at: position,
+    fragment: [{ children: nodes }],
+  });
 }
 
 /**
  * Replace text in the selection or specified range.
  */
 export function ReplaceText(editor: Editor, text: string) {
-  const [start, end] = toRange(editor.selection);
-  editor.apply(new Transaction().delete(start, end).insertText(start, text));
+  const range = toRange(editor.selection);
+  editor
+    .apply({ type: "delete", range })
+    .apply({ type: "insert_text", at: range[0], text });
 }
 
 /**
@@ -83,11 +88,9 @@ export function ReplaceDoc<T extends DocNode>(
   fragment: T["children"],
 ) {
   // TODO revisit
-  editor.apply(
-    new Transaction()
-      .delete(0, getNodeSize(editor.doc))
-      .insertFragment(0, fragment),
-  );
+  editor
+    .apply({ type: "delete", range: [0, getNodeSize(editor.doc)] })
+    .apply({ type: "insert_node", at: 0, fragment });
 }
 
 /**
@@ -101,11 +104,9 @@ export function ReplaceDoc<T extends DocNode>(
  * ```
  */
 export function ReplaceAll(editor: Editor, text: string) {
-  editor.apply(
-    new Transaction()
-      .delete(0, getNodeSize(editor.doc))
-      .insertText(0, text),
-  );
+  editor
+    .apply({ type: "delete", range: [0, getNodeSize(editor.doc)] })
+    .apply({ type: "insert_text", at: 0, text });
 }
 
 type ToggleableKey<T> = {
@@ -125,7 +126,7 @@ export function Format<
   value: N[K],
   range: Range = toRange(editor.selection),
 ) {
-  editor.apply(new Transaction().format(...range, key, value));
+  editor.apply({ type: "set_attr", range, key, value });
 }
 
 /**
@@ -136,17 +137,28 @@ export function ToggleFormat<T extends DocNode>(
   key: Extract<ToggleableKey<Omit<InferInlineNode<T>, "text">>, string>,
   range: Range = toRange(editor.selection),
 ) {
-  const texts = sliceFragment(editor.doc, ...range).flatMap((n) =>
-    n.children.filter(isTextNode),
-  );
+  // TODO improve
+  let inlines: InlineNode[];
+  if (isCollapsed(range)) {
+    const inline = getInlineAt(editor.doc, range[0]);
+    if (inline) {
+      inlines = [inline._node];
+    } else {
+      return;
+    }
+  } else {
+    inlines = sliceFragment(editor.doc, ...range).flatMap((n) => n.children);
+  }
+
+  const texts = inlines.filter(isTextNode);
+
   if (texts.length) {
-    editor.apply(
-      new Transaction().format(
-        ...range,
-        key,
-        texts.some((n) => !n[key as keyof typeof n]) ? true : false,
-      ),
-    );
+    editor.apply({
+      type: "set_attr",
+      range,
+      key,
+      value: texts.some((n) => !n[key as keyof typeof n]) ? true : false,
+    });
   }
 }
 
@@ -161,9 +173,10 @@ export function SetBlockAttr<
   editor: Editor<T>,
   key: K,
   value: N[K],
-  path: Path = offsetToPosition(editor.doc, editor.selection[0])[0],
+  offset: number = editor.selection[0],
 ) {
-  editor.apply(new Transaction().attr(path, key, value));
+  const { _path: path } = getBlockAt(editor.doc, offset);
+  editor.apply({ type: "set_node_attr", path, key, value });
 }
 
 /**
@@ -178,14 +191,13 @@ export function ToggleBlockAttr<
   key: K,
   onValue: N[K],
   offValue: N[K],
-  path: Path = offsetToPosition(editor.doc, editor.selection[0])[0],
+  offset: number = editor.selection[0],
 ) {
-  const block = getNodeAt(editor.doc, path) as N;
-  editor.apply(
-    new Transaction().attr(
-      path,
-      key,
-      block[key] === onValue ? offValue : onValue,
-    ),
-  );
+  const { _node: block, _path: path } = getBlockAt(editor.doc, offset);
+  editor.apply({
+    type: "set_node_attr",
+    path,
+    key,
+    value: (block as N)[key] === onValue ? offValue : onValue,
+  });
 }

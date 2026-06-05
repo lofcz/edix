@@ -8,18 +8,15 @@ import React, {
 import type { StoryObj } from "@storybook/react-vite";
 import {
   createEditor,
-  htmlPaste,
-  htmlCopy,
-  plainCopy,
-  plainPaste,
   ToggleFormat,
   singlelinePlugin,
-  internalCopy,
-  internalPaste,
-  filePaste,
-  hotkey,
   InsertNode,
   ToggleBlockAttr,
+  keymapPlugin,
+  internalTranferPlugin,
+  htmlTransferPlugin,
+  plainTransferPlugin,
+  fileTransferPlugin,
 } from "../../src";
 import * as v from "valibot";
 
@@ -52,19 +49,23 @@ export const Basic: StoryObj = {
       ],
     });
 
-    useEffect(() => {
-      if (!ref.current) return;
-      return createEditor({
+    const editor = useMemo(() => {
+      const e = createEditor({
         doc: doc,
         schema: basicSchema,
-        copy: [internalCopy(), htmlCopy(), plainCopy()],
-        paste: [
-          internalPaste(),
-          htmlPaste<Doc>((text) => ({ text })),
-          plainPaste(),
-        ],
-        onChange: setDoc,
-      }).input(ref.current);
+      })
+        .exec(internalTranferPlugin)
+        .exec(htmlTransferPlugin, { serializeText: (text) => ({ text }) })
+        .exec(plainTransferPlugin);
+      e.on("change", () => {
+        setDoc(e.doc);
+      });
+      return e;
+    }, []);
+
+    useEffect(() => {
+      if (!ref.current) return;
+      return editor.input(ref.current);
     }, []);
 
     return (
@@ -158,23 +159,24 @@ export const RichText: StoryObj = {
       editor.exec(ToggleBlockAttr, "align", "right", undefined);
     };
 
-    const editor = useMemo(
-      () =>
-        createEditor({
-          doc: doc,
-          schema: richSchema,
-          keyboard: [
-            hotkey("b", toggleBold, { mod: true }),
-            hotkey("i", toggleItalic, { mod: true }),
-            hotkey("u", toggleUnderline, { mod: true }),
-            hotkey("s", toggleStrike, { mod: true }),
-          ],
-          copy: [internalCopy(), plainCopy()],
-          paste: [internalPaste(), plainPaste()],
-          onChange: setDoc,
-        }),
-      [],
-    );
+    const editor = useMemo(() => {
+      const e = createEditor({
+        doc: doc,
+        schema: richSchema,
+      })
+        .exec(keymapPlugin, {
+          "Mod+B": toggleBold,
+          "Mod+I": toggleItalic,
+          "Mod+U": toggleUnderline,
+          "Mod+S": toggleStrike,
+        })
+        .exec(internalTranferPlugin)
+        .exec(plainTransferPlugin);
+      e.on("change", () => {
+        setDoc(e.doc);
+      });
+      return e;
+    }, []);
 
     useEffect(() => {
       if (!ref.current) return;
@@ -248,20 +250,21 @@ export const Tag: StoryObj = {
       ],
     });
 
-    const editor = useMemo(
-      () =>
-        createEditor({
-          doc: doc,
-          schema: tagSchema,
-          copy: [
-            internalCopy(),
-            plainCopy<Doc>((node) => ("text" in node ? node.text : node.label)),
-          ],
-          paste: [internalPaste(), plainPaste()],
-          onChange: setDoc,
-        }).exec(singlelinePlugin),
-      [],
-    );
+    const editor = useMemo(() => {
+      const e = createEditor({
+        doc: doc,
+        schema: tagSchema,
+      })
+        .exec(internalTranferPlugin)
+        .exec(plainTransferPlugin, {
+          serializer: (node) => ("text" in node ? node.text : node.label),
+        })
+        .exec(singlelinePlugin);
+      e.on("change", () => {
+        setDoc(editor.doc);
+      });
+      return e;
+    }, []);
 
     useEffect(() => {
       if (!ref.current) return;
@@ -372,37 +375,41 @@ export const Image: StoryObj = {
       ],
     });
 
-    useEffect(() => {
-      if (!ref.current) return;
-      return createEditor({
+    const editor = useMemo(() => {
+      const e = createEditor({
         doc: doc,
         schema: imageSchema,
-        copy: [internalCopy(), htmlCopy(), plainCopy()],
-        paste: [
-          internalPaste(),
-          filePaste({
-            "image/png": (file) => ({
-              type: "image",
-              src: URL.createObjectURL(file),
-            }),
+      })
+        .exec(internalTranferPlugin)
+        .exec(fileTransferPlugin, {
+          "image/png": (file) => ({
+            type: "image",
+            src: URL.createObjectURL(file),
           }),
-          htmlPaste<Doc>(
-            (text) => ({ text }),
-            [
-              (e) => {
-                if (e.tagName === "IMG") {
-                  return {
-                    type: "image",
-                    src: (e as HTMLImageElement).src,
-                  };
-                }
-              },
-            ],
-          ),
-          plainPaste(),
-        ],
-        onChange: setDoc,
-      }).input(ref.current);
+        })
+        .exec(htmlTransferPlugin, {
+          serializeText: (text) => ({ text }),
+          serializers: [
+            (e) => {
+              if (e.tagName === "IMG") {
+                return {
+                  type: "image",
+                  src: (e as HTMLImageElement).src,
+                };
+              }
+            },
+          ],
+        })
+        .exec(plainTransferPlugin);
+      e.on("change", () => {
+        setDoc(e.doc);
+      });
+      return e;
+    }, []);
+
+    useEffect(() => {
+      if (!ref.current) return;
+      return editor.input(ref.current);
     }, []);
 
     return (
@@ -471,31 +478,35 @@ export const Video: StoryObj = {
       ],
     });
 
-    useEffect(() => {
-      if (!ref.current) return;
-      return createEditor({
+    const editor = useMemo(() => {
+      const e = createEditor({
         doc: doc,
         schema: videoSchema,
-        copy: [internalCopy(), htmlCopy(), plainCopy()],
-        paste: [
-          internalPaste(),
-          htmlPaste<Doc>(
-            (text) => ({ text }),
-            [
-              (e) => {
-                if (e.tagName === "VIDEO") {
-                  return {
-                    type: "video",
-                    src: (e.childNodes[0] as HTMLSourceElement).src,
-                  };
-                }
-              },
-            ],
-          ),
-          plainPaste(),
-        ],
-        onChange: setDoc,
-      }).input(ref.current);
+      })
+        .exec(internalTranferPlugin)
+        .exec(htmlTransferPlugin, {
+          serializeText: (text) => ({ text }),
+          serializers: [
+            (e) => {
+              if (e.tagName === "VIDEO") {
+                return {
+                  type: "video",
+                  src: (e.childNodes[0] as HTMLSourceElement).src,
+                };
+              }
+            },
+          ],
+        })
+        .exec(plainTransferPlugin);
+      e.on("change", () => {
+        setDoc(e.doc);
+      });
+      return e;
+    }, []);
+
+    useEffect(() => {
+      if (!ref.current) return;
+      return editor.input(ref.current);
     }, []);
 
     return (
@@ -587,31 +598,35 @@ export const Iframe: StoryObj = {
       ],
     });
 
-    useEffect(() => {
-      if (!ref.current) return;
-      return createEditor({
+    const editor = useMemo(() => {
+      const e = createEditor({
         doc: doc,
         schema: youtubeSchema,
-        copy: [internalCopy(), htmlCopy(), plainCopy()],
-        paste: [
-          internalPaste(),
-          htmlPaste<Doc>(
-            (text) => ({ text }),
-            [
-              (e) => {
-                if (!!e.dataset.youtubeNode) {
-                  return {
-                    type: "youtube",
-                    id: e.dataset.youtubeId!,
-                  };
-                }
-              },
-            ],
-          ),
-          plainPaste(),
-        ],
-        onChange: setDoc,
-      }).input(ref.current);
+      })
+        .exec(internalTranferPlugin)
+        .exec(htmlTransferPlugin, {
+          serializeText: (text) => ({ text }),
+          serializers: [
+            (e) => {
+              if (!!e.dataset.youtubeNode) {
+                return {
+                  type: "youtube",
+                  id: e.dataset.youtubeId!,
+                };
+              }
+            },
+          ],
+        })
+        .exec(plainTransferPlugin);
+      e.on("change", () => {
+        setDoc(e.doc);
+      });
+      return e;
+    }, []);
+
+    useEffect(() => {
+      if (!ref.current) return;
+      return editor.input(ref.current);
     }, []);
 
     return (
@@ -630,6 +645,107 @@ export const Iframe: StoryObj = {
                   <span key={j}>{t.text || <br />}</span>
                 ) : (
                   <Youtube key={j} id={t.id} />
+                ),
+              )}
+            </div>
+          ))}
+        </div>
+      </div>
+    );
+  },
+};
+
+const rubySchema = v.strictObject({
+  children: v.array(
+    v.strictObject({
+      children: v.array(
+        v.union([
+          v.strictObject({
+            text: v.string(),
+          }),
+          v.strictObject({
+            type: v.literal("ruby"),
+            ruby: v.string(),
+            value: v.string(),
+          }),
+        ]),
+      ),
+    }),
+  ),
+});
+
+export const Ruby: StoryObj = {
+  render: () => {
+    const ref = useRef<HTMLDivElement>(null);
+
+    type Doc = v.InferOutput<typeof rubySchema>;
+    const [doc, setDoc] = useState<Doc>({
+      children: [
+        {
+          children: [
+            {
+              text: "また",
+            },
+            {
+              type: "ruby",
+              ruby: "あした",
+              value: "明日",
+            },
+            {
+              text: "お",
+            },
+            {
+              type: "ruby",
+              ruby: "あ",
+              value: "会",
+            },
+            {
+              text: "いしましょう。",
+            },
+          ],
+        },
+      ],
+    });
+
+    const editor = useMemo(() => {
+      const e = createEditor({
+        doc: doc,
+        schema: rubySchema,
+      }).exec(plainTransferPlugin, {
+        serializer: (n) => ("text" in n ? n.text : n.value),
+      });
+      e.on("change", () => {
+        setDoc(e.doc);
+      });
+      return e;
+    }, []);
+
+    useEffect(() => {
+      if (!ref.current) return;
+      return editor.input(ref.current);
+    }, []);
+
+    return (
+      <div>
+        <div
+          ref={ref}
+          style={{
+            backgroundColor: "white",
+            padding: 8,
+          }}
+        >
+          {doc.children.map((b, i) => (
+            <div key={i}>
+              {b.children.map((t, j) =>
+                "text" in t ? (
+                  <span key={j}>{t.text || <br />}</span>
+                ) : (
+                  <ruby key={j} contentEditable={false}>
+                    {t.value}
+                    <rp>(</rp>
+                    <rt>{t.ruby}</rt>
+                    <rp>)</rp>
+                  </ruby>
                 ),
               )}
             </div>

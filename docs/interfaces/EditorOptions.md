@@ -4,7 +4,7 @@
 
 # Interface: EditorOptions\<T, S\>
 
-Defined in: [editor.ts:109](https://github.com/inokawa/editate/blob/d46349a29ec95cd9d8330041874bdfb327a4ebb9/src/editor.ts#L109)
+Defined in: [editor.ts:106](https://github.com/inokawa/editate/blob/ce6b010f119c8164ca856f84509db1367eebcdde/src/editor.ts#L106)
 
 Options of [createEditor](../functions/createEditor.md).
 
@@ -24,7 +24,7 @@ Options of [createEditor](../functions/createEditor.md).
 
 > `optional` **schema?**: `S`
 
-Defined in: [editor.ts:116](https://github.com/inokawa/editate/blob/d46349a29ec95cd9d8330041874bdfb327a4ebb9/src/editor.ts#L116)
+Defined in: [editor.ts:113](https://github.com/inokawa/editate/blob/ce6b010f119c8164ca856f84509db1367eebcdde/src/editor.ts#L113)
 
 Optional [Standard Schema](https://github.com/standard-schema/standard-schema) to validate unsafe edits.
 
@@ -34,7 +34,7 @@ Optional [Standard Schema](https://github.com/standard-schema/standard-schema) t
 
 > **doc**: `T`
 
-Defined in: [editor.ts:120](https://github.com/inokawa/editate/blob/d46349a29ec95cd9d8330041874bdfb327a4ebb9/src/editor.ts#L120)
+Defined in: [editor.ts:117](https://github.com/inokawa/editate/blob/ce6b010f119c8164ca856f84509db1367eebcdde/src/editor.ts#L117)
 
 Initial document.
 
@@ -44,53 +44,9 @@ Initial document.
 
 > `optional` **readonly?**: `boolean`
 
-Defined in: [editor.ts:124](https://github.com/inokawa/editate/blob/d46349a29ec95cd9d8330041874bdfb327a4ebb9/src/editor.ts#L124)
+Defined in: [editor.ts:121](https://github.com/inokawa/editate/blob/ce6b010f119c8164ca856f84509db1367eebcdde/src/editor.ts#L121)
 
 The state editable or not.
-
-***
-
-### keyboard?
-
-> `optional` **keyboard?**: [`KeyboardHook`](../type-aliases/KeyboardHook.md)[]
-
-Defined in: [editor.ts:130](https://github.com/inokawa/editate/blob/d46349a29ec95cd9d8330041874bdfb327a4ebb9/src/editor.ts#L130)
-
-Functions to handle keyboard events.
-
-Return `true` if you want to stop propagation.
-
-***
-
-### copy?
-
-> `optional` **copy?**: \[[`CopyHook`](../type-aliases/CopyHook.md), `...rest: CopyHook[]`\]
-
-Defined in: [editor.ts:135](https://github.com/inokawa/editate/blob/d46349a29ec95cd9d8330041874bdfb327a4ebb9/src/editor.ts#L135)
-
-Functions to handle copy events
-
-#### Default
-
-```ts
-[plainCopy()]
-```
-
-***
-
-### paste?
-
-> `optional` **paste?**: \[[`PasteHook`](../type-aliases/PasteHook.md), `...rest: PasteHook[]`\]
-
-Defined in: [editor.ts:140](https://github.com/inokawa/editate/blob/d46349a29ec95cd9d8330041874bdfb327a4ebb9/src/editor.ts#L140)
-
-Functions to handle paste / drop events
-
-#### Default
-
-```ts
-[plainPaste()]
-```
 
 ***
 
@@ -98,7 +54,7 @@ Functions to handle paste / drop events
 
 > `optional` **isBlock?**: (`node`) => `boolean`
 
-Defined in: [editor.ts:144](https://github.com/inokawa/editate/blob/d46349a29ec95cd9d8330041874bdfb327a4ebb9/src/editor.ts#L144)
+Defined in: [editor.ts:125](https://github.com/inokawa/editate/blob/ce6b010f119c8164ca856f84509db1367eebcdde/src/editor.ts#L125)
 
 TODO
 
@@ -114,31 +70,11 @@ TODO
 
 ***
 
-### onChange
+### onWarn?
 
-> **onChange**: (`doc`) => `void`
+> `optional` **onWarn?**: (`message`) => `void`
 
-Defined in: [editor.ts:148](https://github.com/inokawa/editate/blob/d46349a29ec95cd9d8330041874bdfb327a4ebb9/src/editor.ts#L148)
-
-Callback invoked when document changes.
-
-#### Parameters
-
-##### doc
-
-`T`
-
-#### Returns
-
-`void`
-
-***
-
-### onError?
-
-> `optional` **onError?**: (`message`) => `void`
-
-Defined in: [editor.ts:154](https://github.com/inokawa/editate/blob/d46349a29ec95cd9d8330041874bdfb327a4ebb9/src/editor.ts#L154)
+Defined in: [editor.ts:131](https://github.com/inokawa/editate/blob/ce6b010f119c8164ca856f84509db1367eebcdde/src/editor.ts#L131)
 
 Callback invoked when errors happen.
 
@@ -155,5 +91,29 @@ Callback invoked when errors happen.
 #### Default
 
 ```ts
-console.error
+console.warn
 ```
+
+***
+
+### onError?
+
+> `optional` **onError?**: (`message`) => `never`
+
+Defined in: [editor.ts:137](https://github.com/inokawa/editate/blob/ce6b010f119c8164ca856f84509db1367eebcdde/src/editor.ts#L137)
+
+Callback invoked when errors happen.
+
+#### Parameters
+
+##### message
+
+`string`
+
+#### Returns
+
+`never`
+
+#### Default
+
+`throw new Error(message)`

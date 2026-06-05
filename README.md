@@ -106,7 +106,12 @@ You can define document schema with [Standard Schema](https://github.com/standar
 
 ```tsx
 import { useState, useEffect, useRef, useMemo } from "react";
-import { createEditor, ToggleFormat, ToggleBlockAttr } from "edix";
+import {
+  createEditor,
+  plainTransferPlugin,
+  ToggleFormat,
+  ToggleBlockAttr,
+} from "edix";
 import * as z from "zod";
 
 const schema = z.strictObject({
@@ -141,15 +146,16 @@ export const App = () => {
     ],
   });
 
-  const editor = useMemo(
-    () =>
-      createEditor({
-        doc,
-        schema,
-        onChange: setDoc,
-      }),
-    [],
-  );
+  const editor = useMemo(() => {
+    const e = createEditor({
+      doc,
+      schema,
+    }).exec(plainTransferPlugin);
+    e.on("change", () => {
+      setDoc(e.doc);
+    });
+    return e;
+  }, []);
 
   useEffect(() => {
     return editor.input(ref.current);
@@ -217,6 +223,7 @@ export const App = () => {
 - Solid ([Demo](https://lofcz.github.io/edix/solid), [Source](./examples/solid))
 - Angular ([Demo](https://lofcz.github.io/edix/angular), [Source](./examples/angular))
 - Preact ([Demo](https://lofcz.github.io/edix/preact), [Source](./examples/preact))
+- Alpine ([Demo](https://lofcz.github.io/edix/alpine), [Source](./examples/alpine))
 - Vanilla ([Demo](https://lofcz.github.io/edix/vanilla), [Source](./examples/vanilla))
 
 ...and more! Contribution welcome!

@@ -4,9 +4,9 @@
 
 # Function: SetBlockAttr()
 
-> **SetBlockAttr**\<`T`, `N`, `K`\>(`editor`, `key`, `value`, `path?`): `void`
+> **SetBlockAttr**\<`T`, `N`, `K`\>(`editor`, `key`, `value`, `offset?`): `void`
 
-Defined in: [commands.ts:122](https://github.com/inokawa/editate/blob/d46349a29ec95cd9d8330041874bdfb327a4ebb9/src/commands.ts#L122)
+Defined in: [commands.ts:134](https://github.com/inokawa/editate/blob/ce6b010f119c8164ca856f84509db1367eebcdde/src/commands.ts#L134)
 
 Set attr to a block node at the caret or specified position.
 
@@ -38,9 +38,9 @@ Set attr to a block node at the caret or specified position.
 
 `N`\[`K`\]
 
-### path?
+### offset?
 
-`Path` = `...`
+`number` = `...`
 
 ## Returns
 

@@ -10,11 +10,11 @@
   },
   "dependencies": {
     "edix": "file:../..",
-    "solid-js": "^1.9.10"
+    "solid-js": "^1.9.13"
   },
   "devDependencies": {
-    "typescript": "^5.9.3",
-    "vite": "^8.0.0",
+    "typescript": "^6.0.0",
+    "vite": "^8.0.13",
     "vite-plugin-solid": "^2.11.11"
   }
 }

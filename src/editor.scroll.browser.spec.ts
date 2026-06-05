@@ -1,6 +1,5 @@
 import { afterEach, describe, expect, it } from "vitest";
 import { createPlainEditor } from "./presets/plain.js";
-import { Transaction } from "./doc/edit.js";
 import type { Editor } from "./editor.js";
 
 // ---------------------------------------------------------------------------
@@ -89,12 +88,12 @@ function caretVisible(host: HTMLElement): boolean {
 
 /**
  * Insert a single character at the current selection by applying an edit
- * transaction. This triggers the editor's "change" event which is what calls
+ * operation. This triggers the editor's "change" event which is what calls
  * `scheduleScroll`.
  */
 function insertAtCaret(editor: Editor, ch = "x"): void {
   const at = editor.selection[0];
-  editor.apply(new Transaction().insertText(at, ch));
+  editor.apply({ type: "insert_text", at, text: ch });
 }
 
 // ---------------------------------------------------------------------------
