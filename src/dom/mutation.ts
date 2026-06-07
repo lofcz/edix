@@ -6,8 +6,8 @@ export const createMutationObserver = (
   onMutationIgnored: () => void,
 ) => {
   let isInputing = false;
+  let queue: MutationRecord[] = [];
 
-  const queue: MutationRecord[] = [];
   const process = (records: MutationRecord[]) => {
     if (isInputing) {
       queue.push(...records);
@@ -27,7 +27,9 @@ export const createMutationObserver = (
 
   const flush = (): MutationRecord[] => {
     sync();
-    return queue.splice(0);
+    const prev = queue;
+    queue = [];
+    return prev;
   };
 
   mo.observe(element, {
