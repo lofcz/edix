@@ -6,7 +6,7 @@
 
 > **plainTransferPlugin**\<`T`\>(`editor`, `options?`): `void`
 
-Defined in: [plugins/transfer/plainTransfer.ts:10](https://github.com/inokawa/editate/blob/97bfbfe75814191ffd6b40fcd13b77e332522872/src/plugins/transfer/plainTransfer.ts#L10)
+Defined in: [plugins/transfer/plainTransfer.ts:10](https://github.com/inokawa/editate/blob/b79665986a52dd60978d940ed7a1fd5d6a57fa28/src/plugins/transfer/plainTransfer.ts#L10)
 
 A plugin to handle copying / pasting plain text.
 
