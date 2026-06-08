@@ -3,13 +3,8 @@ import { isElementNode, isTextNode } from "./utils.js";
 let walker: TreeWalker | null = null;
 let node: Node | null = null;
 let _token: TokenType | null = null;
-let config: ParserConfig | null = null;
+let isBlock: ((node: Element) => boolean) | null = null;
 let parse: Parser | null = null;
-
-interface ParserConfig {
-  readonly _document: Document;
-  readonly _isBlock: (node: Element) => boolean;
-}
 
 const LINE_BREAK_ELEMENT = 1;
 const HIDDEN_ELEMENT = 2;
@@ -159,7 +154,7 @@ export const readToken = (): TokenType => {
               : elementType === VOID_ELEMENT
                 ? TOKEN_VOID
                 : TOKEN_HIDDEN);
-        } else if (config!._isBlock(node)) {
+        } else if (isBlock!(node)) {
           return (_token = TOKEN_BLOCK);
         }
       }
@@ -276,28 +271,31 @@ export const readNext = (): Exclude<
 /**
  * @internal
  */
-export const createParser = (initConfig: ParserConfig): Parser => {
+export const createParser = ({
+  _document: document,
+  _isBlock: initIsBlock,
+}: {
+  _document: Document;
+  _isBlock: Exclude<typeof isBlock, null>;
+}): Parser => {
   const parser: Parser = (scopeFn, root, startNode) => {
-    const prevConfig = config;
+    const prevIsBlock = isBlock;
     const prevParse = parse;
     const prevWalker = walker;
     const prevNode = node;
     const prevToken = _token;
     try {
       if (!walker) {
-        config = initConfig;
+        isBlock = initIsBlock;
         parse = parser;
-        walker = config._document.createTreeWalker(
-          root!,
-          SHOW_TEXT | SHOW_ELEMENT,
-        );
+        walker = document.createTreeWalker(root!, SHOW_TEXT | SHOW_ELEMENT);
       }
       if (startNode) {
         walker!.currentNode = node = startNode;
       }
       return scopeFn();
     } finally {
-      config = prevConfig;
+      isBlock = prevIsBlock;
       parse = prevParse;
       walker = prevWalker;
       node = prevNode;
