@@ -1,8 +1,7 @@
 /**
  * @vitest-environment jsdom
  */
-import { JSDOM } from "jsdom";
-import { afterAll, describe, expect, it } from "vitest";
+import { describe, expect, it } from "vitest";
 import {
   createParser,
   defaultIsBlockNode,
@@ -12,44 +11,32 @@ import {
 
 type DomPosition = [node: Node, offset: number];
 
-const context = () => {
-  const jsdom = new JSDOM("<!DOCTYPE html><html><body></body></html>", {
-    url: "https://localhost",
-  });
-  const window = jsdom.window;
-  const document = window.document;
-  const parser = createParser({
-    _document: document,
-    _isBlock: defaultIsBlockNode,
-  });
-  const builder = <
-    T extends
-      | keyof HTMLElementTagNameMap
-      | keyof SVGElementTagNameMap
-      | keyof MathMLElementTagNameMap,
-  >(
-    type: T,
-    children: (HTMLElement | string)[] = [],
-  ): HTMLElement => {
-    const node = document.createElement(type);
+const document = window.document;
+const parser = createParser({
+  _document: document,
+  _isBlock: defaultIsBlockNode,
+});
 
-    children.forEach((c) => {
-      if (typeof c === "string") {
-        node.appendChild(document.createTextNode(c));
-      } else {
-        node.appendChild(c);
-      }
-    });
+const h = <
+  T extends
+    | keyof HTMLElementTagNameMap
+    | keyof SVGElementTagNameMap
+    | keyof MathMLElementTagNameMap,
+>(
+  type: T,
+  children: (HTMLElement | string)[] = [],
+): HTMLElement => {
+  const node = document.createElement(type);
 
-    return node;
-  };
-  return {
-    h: builder,
-    parser,
-    cleanup: () => {
-      window.close();
-    },
-  };
+  children.forEach((c) => {
+    if (typeof c === "string") {
+      node.appendChild(document.createTextNode(c));
+    } else {
+      node.appendChild(c);
+    }
+  });
+
+  return node;
 };
 
 const nodeAtPath = (node: Node, path: number[]): Node => {
@@ -58,9 +45,6 @@ const nodeAtPath = (node: Node, path: number[]): Node => {
   }
   return node;
 };
-
-const { h, parser, cleanup } = context();
-afterAll(cleanup);
 
 describe("div", () => {
   describe("br", () => {
