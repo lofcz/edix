@@ -89,9 +89,9 @@ const setRangeToSelection = (
 export const setSelectionToDOM = (
   document: Document,
   root: Element,
+  parse: Parser,
   [anchor, focus]: SelectionSnapshot,
   posDiff: number, // TODO remove
-  parse: Parser,
   force?: boolean,
 ): void => {
   const isCollapsed = posDiff === 0;
@@ -112,12 +112,12 @@ export const setSelectionToDOM = (
     return setRangeToSelection(root, range, force);
   }
 
-  const domStart = findPosition(root, start, parse);
+  const domStart = findPosition(root, parse, start);
   if (!domStart) {
     return;
   }
 
-  const domEnd = isCollapsed ? domStart : findPosition(root, end, parse);
+  const domEnd = isCollapsed ? domStart : findPosition(root, parse, end);
   if (!domEnd) {
     return;
   }
@@ -160,8 +160,8 @@ type DOMPosition = [node: Text | Element, offsetAtNode: number];
  */
 export const findPosition = (
   root: Element,
-  [path, offset]: DomPosition,
   parse: Parser,
+  [path, offset]: DomPosition,
 ): DOMPosition | undefined => {
   return parse((): DOMPosition | undefined => {
     let pathIndex = 0;
@@ -194,9 +194,9 @@ export const findPosition = (
  */
 export const serializePosition = (
   root: Element,
+  parse: Parser,
   node: Node,
   offsetAtNode: number,
-  parse: Parser,
 ): DomPosition => {
   let excludeEnd = true;
   if (root === node && !node.hasChildNodes()) {
@@ -278,12 +278,12 @@ export const serializeRange = (
   parse: Parser,
   { startOffset, startContainer, endOffset, endContainer }: AbstractRange,
 ): [DomPosition, DomPosition] => {
-  const start = serializePosition(root, startContainer, startOffset, parse);
+  const start = serializePosition(root, parse, startContainer, startOffset);
   return [
     start,
     startContainer === endContainer && startOffset === endOffset
       ? start
-      : serializePosition(root, endContainer, endOffset, parse),
+      : serializePosition(root, parse, endContainer, endOffset),
   ];
 };
 
@@ -387,11 +387,11 @@ export const domToFragment = (
  * @internal
  */
 export const getPointedCaretPosition = (
-  document: Document,
   root: Element,
-  { clientX, clientY }: MouseEvent,
   parse: Parser,
+  { clientX, clientY }: MouseEvent,
 ): DomPosition | void => {
+  const document = getCurrentDocument(root);
   // https://developer.mozilla.org/en-US/docs/Web/API/Document/caretPositionFromPoint
   // https://developer.mozilla.org/en-US/docs/Web/API/Document/caretRangeFromPoint
   //          caretPositionFromPoint caretRangeFromPoint
@@ -403,9 +403,9 @@ export const getPointedCaretPosition = (
     if (position) {
       return serializePosition(
         root,
+        parse,
         position.offsetNode,
         position.offset,
-        parse,
       );
     }
   } else if (document.caretRangeFromPoint) {
@@ -413,9 +413,9 @@ export const getPointedCaretPosition = (
     if (range) {
       return serializePosition(
         root,
+        parse,
         range.startContainer,
         range.startOffset,
-        parse,
       );
     }
   }

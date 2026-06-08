@@ -503,9 +503,9 @@ export const createEditor = <
         setSelectionToDOM(
           document,
           element,
+          parser,
           selectionToDomSelection(doc, selection),
           selection[0] - selection[1],
-          parser,
         );
       });
 
@@ -530,9 +530,9 @@ export const createEditor = <
           setSelectionToDOM(
             document,
             element,
+            parser,
             selectionToDomSelection(doc, selection),
             selection[0] - selection[1],
-            parser,
             true,
           );
           document.addEventListener("selectionchange", onSelectionChange);
@@ -692,12 +692,7 @@ export const createEditor = <
         e.preventDefault();
 
         const dataTransfer = e.dataTransfer;
-        const droppedPosition = getPointedCaretPosition(
-          document,
-          element,
-          e,
-          parser,
-        );
+        const droppedPosition = getPointedCaretPosition(element, parser, e);
         if (dataTransfer && droppedPosition) {
           let afterSelection: Selection | undefined;
           const ops: Operation[] = [];
