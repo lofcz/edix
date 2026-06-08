@@ -3,7 +3,6 @@ import {
   type Parser,
   getNodeSize,
   getDomNode,
-  isElementNode,
   TOKEN_TEXT,
   TOKEN_VOID,
   TOKEN_SOFT_BREAK,
@@ -24,6 +23,7 @@ import type {
   BlockNode,
 } from "../doc/types.js";
 import { min } from "../utils.js";
+import { isElementNode } from "./utils.js";
 
 export { createParser } from "./parser.js";
 export { defaultIsBlockNode } from "./default.js";
