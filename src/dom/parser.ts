@@ -8,11 +8,11 @@ let parse: Parser | null = null;
 
 const LINE_BREAK_ELEMENT = 1;
 const HIDDEN_ELEMENT = 2;
-const VOID_ELEMENT = 3;
+const STUB_ELEMENT = 3;
 type ElementType =
   | typeof LINE_BREAK_ELEMENT
   | typeof HIDDEN_ELEMENT
-  | typeof VOID_ELEMENT;
+  | typeof STUB_ELEMENT;
 
 type TagName = Uppercase<
   | keyof HTMLElementTagNameMap
@@ -43,26 +43,26 @@ const ELEMENT_TO_TYPE_MAP = new Map<string, ElementType>([
   ["COLGROUP", HIDDEN_ELEMENT],
   // https://html.spec.whatwg.org/#void-elements
   // https://html.spec.whatwg.org/multipage/rendering.html#the-hr-element-2
-  ["HR", VOID_ELEMENT],
+  ["HR", STUB_ELEMENT],
   // https://html.spec.whatwg.org/multipage/dom.html#embedded-content-category
   // https://html.spec.whatwg.org/multipage/rendering.html#replaced-elements
-  ["AUDIO", VOID_ELEMENT],
-  ["CANVAS", VOID_ELEMENT],
-  ["EMBED", VOID_ELEMENT],
-  ["IFRAME", VOID_ELEMENT],
-  ["IMG", VOID_ELEMENT],
-  ["OBJECT", VOID_ELEMENT],
-  ["PICTURE", VOID_ELEMENT],
-  ["VIDEO", VOID_ELEMENT],
-  ["SVG", VOID_ELEMENT],
-  ["MATH", VOID_ELEMENT],
+  ["AUDIO", STUB_ELEMENT],
+  ["CANVAS", STUB_ELEMENT],
+  ["EMBED", STUB_ELEMENT],
+  ["IFRAME", STUB_ELEMENT],
+  ["IMG", STUB_ELEMENT],
+  ["OBJECT", STUB_ELEMENT],
+  ["PICTURE", STUB_ELEMENT],
+  ["VIDEO", STUB_ELEMENT],
+  ["SVG", STUB_ELEMENT],
+  ["MATH", STUB_ELEMENT],
   // https://html.spec.whatwg.org/multipage/rendering.html#widgets
-  ["BUTTON", VOID_ELEMENT],
-  ["INPUT", VOID_ELEMENT],
-  ["METER", VOID_ELEMENT],
-  ["PROGRESS", VOID_ELEMENT],
-  ["SELECT", VOID_ELEMENT],
-  ["TEXTAREA", VOID_ELEMENT],
+  ["BUTTON", STUB_ELEMENT],
+  ["INPUT", STUB_ELEMENT],
+  ["METER", STUB_ELEMENT],
+  ["PROGRESS", STUB_ELEMENT],
+  ["SELECT", STUB_ELEMENT],
+  ["TEXTAREA", STUB_ELEMENT],
 ] satisfies [TagName, ElementType][]) as ReadonlyMap<string, ElementType>;
 
 const SHOW_ELEMENT = 0x1;
@@ -151,7 +151,7 @@ export const readToken = (): TokenType => {
                   TOKEN_SOFT_BREAK
                 : // Returning <div><br/></div> is necessary to anchor selection
                   TOKEN_ANCHORABLE
-              : elementType === VOID_ELEMENT
+              : elementType === STUB_ELEMENT
                 ? TOKEN_VOID
                 : TOKEN_HIDDEN);
         } else if (isBlock!(node)) {
