@@ -88,9 +88,12 @@ export function ReplaceDoc<T extends DocNode>(
   fragment: T["children"],
 ) {
   // TODO revisit
-  editor
-    .apply({ type: "delete", range: [0, getNodeSize(editor.doc)] })
-    .apply({ type: "insert_node", at: 0, fragment });
+  editor.apply({
+    type: "set_node_attr",
+    path: [],
+    key: "children",
+    value: fragment,
+  });
 }
 
 /**
@@ -126,7 +129,7 @@ export function Format<
   value: N[K],
   range: Range = toRange(editor.selection),
 ) {
-  editor.apply({ type: "set_attr", range, key, value });
+  editor.apply({ type: "format", range, key, value });
 }
 
 /**
@@ -154,7 +157,7 @@ export function ToggleFormat<T extends DocNode>(
 
   if (texts.length) {
     editor.apply({
-      type: "set_attr",
+      type: "format",
       range,
       key,
       value: texts.some((n) => !n[key as keyof typeof n]) ? true : false,

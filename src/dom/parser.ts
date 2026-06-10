@@ -1,14 +1,69 @@
+import { isElementNode, isTextNode } from "./utils.js";
+
 let walker: TreeWalker | null = null;
 let node: Node | null = null;
 let _token: TokenType | null = null;
-let config: ParserConfig | null = null;
+let isBlock: ((node: Element) => boolean) | null = null;
 let parse: Parser | null = null;
 
-interface ParserConfig {
-  readonly _document: Document;
-  readonly _isBlock: (node: Element) => boolean;
-  readonly _isVoid: (node: Element) => boolean;
-}
+const LINE_BREAK_ELEMENT = 1;
+const HIDDEN_ELEMENT = 2;
+const STUB_ELEMENT = 3;
+type ElementType =
+  | typeof LINE_BREAK_ELEMENT
+  | typeof HIDDEN_ELEMENT
+  | typeof STUB_ELEMENT;
+
+type TagName = Uppercase<
+  | keyof HTMLElementTagNameMap
+  | keyof SVGElementTagNameMap
+  | keyof MathMLElementTagNameMap
+>;
+
+const ELEMENT_TO_TYPE_MAP = new Map<string, ElementType>([
+  ["BR", LINE_BREAK_ELEMENT],
+  ["WBR", LINE_BREAK_ELEMENT],
+  // https://html.spec.whatwg.org/multipage/rendering.html#hidden-elements
+  ["AREA", HIDDEN_ELEMENT],
+  ["BASE", HIDDEN_ELEMENT],
+  // "BASEFONT",
+  ["DATALIST", HIDDEN_ELEMENT],
+  ["HEAD", HIDDEN_ELEMENT],
+  ["LINK", HIDDEN_ELEMENT],
+  ["META", HIDDEN_ELEMENT],
+  // "NOEMBED",
+  // "NOFRAMES",
+  // "PARAM",
+  ["RP", HIDDEN_ELEMENT],
+  ["SCRIPT", HIDDEN_ELEMENT],
+  ["STYLE", HIDDEN_ELEMENT],
+  ["TEMPLATE", HIDDEN_ELEMENT],
+  ["TITLE", HIDDEN_ELEMENT],
+  // https://html.spec.whatwg.org/multipage/rendering.html#tables-2
+  ["COLGROUP", HIDDEN_ELEMENT],
+  // https://html.spec.whatwg.org/#void-elements
+  // https://html.spec.whatwg.org/multipage/rendering.html#the-hr-element-2
+  ["HR", STUB_ELEMENT],
+  // https://html.spec.whatwg.org/multipage/dom.html#embedded-content-category
+  // https://html.spec.whatwg.org/multipage/rendering.html#replaced-elements
+  ["AUDIO", STUB_ELEMENT],
+  ["CANVAS", STUB_ELEMENT],
+  ["EMBED", STUB_ELEMENT],
+  ["IFRAME", STUB_ELEMENT],
+  ["IMG", STUB_ELEMENT],
+  ["OBJECT", STUB_ELEMENT],
+  ["PICTURE", STUB_ELEMENT],
+  ["VIDEO", STUB_ELEMENT],
+  ["SVG", STUB_ELEMENT],
+  ["MATH", STUB_ELEMENT],
+  // https://html.spec.whatwg.org/multipage/rendering.html#widgets
+  ["BUTTON", STUB_ELEMENT],
+  ["INPUT", STUB_ELEMENT],
+  ["METER", STUB_ELEMENT],
+  ["PROGRESS", STUB_ELEMENT],
+  ["SELECT", STUB_ELEMENT],
+  ["TEXTAREA", STUB_ELEMENT],
+] satisfies [TagName, ElementType][]) as ReadonlyMap<string, ElementType>;
 
 const SHOW_ELEMENT = 0x1;
 const SHOW_TEXT = 0x4;
@@ -36,31 +91,6 @@ export type TokenType =
   | typeof TOKEN_BLOCK
   | typeof TOKEN_ANCHORABLE
   | typeof TOKEN_HIDDEN;
-
-const ELEMENT_NODE = 1;
-const TEXT_NODE = 3;
-const COMMENT_NODE = 8;
-
-/**
- * @internal
- */
-export const isTextNode = (node: Node): node is Text => {
-  return node.nodeType === TEXT_NODE;
-};
-
-/**
- * @internal
- */
-export const isElementNode = (node: Node): node is Element => {
-  return node.nodeType === ELEMENT_NODE;
-};
-
-/**
- * @internal
- */
-export const isCommentNode = (node: Node): node is Comment => {
-  return node.nodeType === COMMENT_NODE;
-};
 
 /**
  * @internal
@@ -109,19 +139,28 @@ export const readToken = (): TokenType => {
             : TOKEN_TEXT);
       }
     } else if (isElementNode(node)) {
-      if (node.tagName === "BR") {
-        return (_token = isValidSoftBreak()
-          ? // Especially Shift+Enter in Firefox
-            TOKEN_SOFT_BREAK
-          : // Returning <div><br/></div> is necessary to anchor selection
-            TOKEN_ANCHORABLE);
-      } else if (isHiddenNode(node)) {
-        return (_token = TOKEN_HIDDEN);
-      } else if (config!._isVoid(node)) {
+      if ((node as HTMLElement).contentEditable === "false") {
         return (_token = TOKEN_VOID);
-      } else if (config!._isBlock(node)) {
-        return (_token = TOKEN_BLOCK);
+      } else {
+        const elementType = ELEMENT_TO_TYPE_MAP.get(node.tagName);
+        if (elementType != null) {
+          return (_token =
+            elementType === LINE_BREAK_ELEMENT
+              ? isValidSoftBreak()
+                ? // Especially Shift+Enter in Firefox
+                  TOKEN_SOFT_BREAK
+                : // Returning <div><br/></div> is necessary to anchor selection
+                  TOKEN_ANCHORABLE
+              : elementType === STUB_ELEMENT
+                ? TOKEN_VOID
+                : TOKEN_HIDDEN);
+        } else if (isBlock!(node)) {
+          return (_token = TOKEN_BLOCK);
+        }
       }
+    } else {
+      // e.g. Comment
+      return (_token = TOKEN_HIDDEN);
     }
   }
   return (_token = TOKEN_NULL);
@@ -170,18 +209,11 @@ export const parentBlock = () => {
   }
 };
 
-const HIDDEN_ELEMENT_NAMES = new Set([
-  "TEMPLATE",
-  "STYLE",
-  "SCRIPT",
-  "COLGROUP",
-]);
-
 /**
  * @internal
  */
 export const isHiddenNode = (node: Element): boolean => {
-  return HIDDEN_ELEMENT_NAMES.has(node.tagName);
+  return ELEMENT_TO_TYPE_MAP.get(node.tagName) === HIDDEN_ELEMENT;
 };
 
 const isValidSoftBreak = (): boolean => {
@@ -239,28 +271,31 @@ export const readNext = (): Exclude<
 /**
  * @internal
  */
-export const createParser = (initConfig: ParserConfig): Parser => {
+export const createParser = ({
+  _document: document,
+  _isBlock: initIsBlock,
+}: {
+  _document: Document;
+  _isBlock: Exclude<typeof isBlock, null>;
+}): Parser => {
   const parser: Parser = (scopeFn, root, startNode) => {
-    const prevConfig = config;
+    const prevIsBlock = isBlock;
     const prevParse = parse;
     const prevWalker = walker;
     const prevNode = node;
     const prevToken = _token;
     try {
       if (!walker) {
-        config = initConfig;
+        isBlock = initIsBlock;
         parse = parser;
-        walker = config._document.createTreeWalker(
-          root!,
-          SHOW_TEXT | SHOW_ELEMENT,
-        );
+        walker = document.createTreeWalker(root!, SHOW_TEXT | SHOW_ELEMENT);
       }
       if (startNode) {
         walker!.currentNode = node = startNode;
       }
       return scopeFn();
     } finally {
-      config = prevConfig;
+      isBlock = prevIsBlock;
       parse = prevParse;
       walker = prevWalker;
       node = prevNode;

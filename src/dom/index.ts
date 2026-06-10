@@ -3,7 +3,6 @@ import {
   type Parser,
   getNodeSize,
   getDomNode,
-  isElementNode,
   TOKEN_TEXT,
   TOKEN_VOID,
   TOKEN_SOFT_BREAK,
@@ -24,9 +23,10 @@ import type {
   BlockNode,
 } from "../doc/types.js";
 import { min } from "../utils.js";
+import { isElementNode } from "./utils.js";
 
 export { createParser } from "./parser.js";
-export { defaultIsBlockNode, defaultIsVoidNode } from "./default.js";
+export { defaultIsBlockNode } from "./default.js";
 
 // const DOCUMENT_POSITION_DISCONNECTED = 0x01;
 const DOCUMENT_POSITION_PRECEDING = 0x02;
@@ -89,9 +89,9 @@ const setRangeToSelection = (
 export const setSelectionToDOM = (
   document: Document,
   root: Element,
+  parse: Parser,
   [anchor, focus]: SelectionSnapshot,
   posDiff: number, // TODO remove
-  parse: Parser,
   force?: boolean,
 ): void => {
   const isCollapsed = posDiff === 0;
@@ -112,12 +112,12 @@ export const setSelectionToDOM = (
     return setRangeToSelection(root, range, force);
   }
 
-  const domStart = findPosition(root, start, parse);
+  const domStart = findPosition(root, parse, start);
   if (!domStart) {
     return;
   }
 
-  const domEnd = isCollapsed ? domStart : findPosition(root, end, parse);
+  const domEnd = isCollapsed ? domStart : findPosition(root, parse, end);
   if (!domEnd) {
     return;
   }
@@ -153,14 +153,20 @@ export const setSelectionToDOM = (
   setRangeToSelection(root, range, force, backward);
 };
 
-type DOMPosition = [node: Text | Element, offsetAtNode: number];
+/**
+ * @internal
+ */
+export type DomPoint = [node: Node, offsetAtNode: number];
 
-const findPosition = (
+/**
+ * @internal
+ */
+export const findPosition = (
   root: Element,
-  [path, offset]: DomPosition,
   parse: Parser,
-): DOMPosition | undefined => {
-  return parse((): DOMPosition | undefined => {
+  [path, offset]: DomPosition,
+): DomPoint | undefined => {
+  return parse((): DomPoint | undefined => {
     let pathIndex = 0;
     let type: TokenType | void;
     while ((type = next())) {
@@ -186,11 +192,14 @@ const findPosition = (
   }, root);
 };
 
-const serializePosition = (
+/**
+ * @internal
+ */
+export const serializePosition = (
   root: Element,
-  node: Node,
-  offsetAtNode: number,
   parse: Parser,
+  node: DomPoint[0],
+  offsetAtNode: DomPoint[1],
 ): DomPosition => {
   let excludeEnd = true;
   if (root === node && !node.hasChildNodes()) {
@@ -272,12 +281,12 @@ export const serializeRange = (
   parse: Parser,
   { startOffset, startContainer, endOffset, endContainer }: AbstractRange,
 ): [DomPosition, DomPosition] => {
-  const start = serializePosition(root, startContainer, startOffset, parse);
+  const start = serializePosition(root, parse, startContainer, startOffset);
   return [
     start,
     startContainer === endContainer && startOffset === endOffset
       ? start
-      : serializePosition(root, endContainer, endOffset, parse),
+      : serializePosition(root, parse, endContainer, endOffset),
   ];
 };
 
@@ -381,11 +390,11 @@ export const domToFragment = (
  * @internal
  */
 export const getPointedCaretPosition = (
-  document: Document,
   root: Element,
-  { clientX, clientY }: MouseEvent,
   parse: Parser,
+  { clientX, clientY }: MouseEvent,
 ): DomPosition | void => {
+  const document = getCurrentDocument(root);
   // https://developer.mozilla.org/en-US/docs/Web/API/Document/caretPositionFromPoint
   // https://developer.mozilla.org/en-US/docs/Web/API/Document/caretRangeFromPoint
   //          caretPositionFromPoint caretRangeFromPoint
@@ -397,9 +406,9 @@ export const getPointedCaretPosition = (
     if (position) {
       return serializePosition(
         root,
+        parse,
         position.offsetNode,
         position.offset,
-        parse,
       );
     }
   } else if (document.caretRangeFromPoint) {
@@ -407,9 +416,9 @@ export const getPointedCaretPosition = (
     if (range) {
       return serializePosition(
         root,
+        parse,
         range.startContainer,
         range.startOffset,
-        parse,
       );
     }
   }

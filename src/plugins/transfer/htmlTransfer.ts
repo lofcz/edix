@@ -5,7 +5,7 @@ import {
   getSelectionRangeInEditor,
   domToFragment,
 } from "../../dom/index.js";
-import { isCommentNode } from "../../dom/parser.js";
+import { isCommentNode } from "../../dom/utils.js";
 import type { DocNode, InferInlineNode, TextNode } from "../../doc/types.js";
 import type { PasteHook } from "../../editor.js";
 

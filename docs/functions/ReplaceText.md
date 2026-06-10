@@ -6,7 +6,7 @@
 
 > **ReplaceText**(`editor`, `text`): `void`
 
-Defined in: [commands.ts:58](https://github.com/inokawa/editate/blob/ce6b010f119c8164ca856f84509db1367eebcdde/src/commands.ts#L58)
+Defined in: [commands.ts:57](https://github.com/inokawa/editate/blob/b79665986a52dd60978d940ed7a1fd5d6a57fa28/src/commands.ts#L57)
 
 Replace text in the selection or specified range.
 

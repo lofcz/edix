@@ -5,7 +5,6 @@ import {
   setSelectionToDOM,
   getPointedCaretPosition,
   defaultIsBlockNode,
-  defaultIsVoidNode,
   serializeRange,
 } from "./dom/index.js";
 import { createMutationObserver } from "./dom/mutation.js";
@@ -369,20 +368,22 @@ export const createEditor = <
     Set<EditorEventMap[keyof EditorEventMap]>
   >();
 
-  const publishing: (() => void)[] = [];
+  const publishing = new Set<() => void>();
 
   const publish = <K extends keyof EditorEventMap>(key: K) => {
     const sub = subs.get(key);
     if (sub) {
-      if (!publishing.length) {
+      if (!publishing.size) {
         microtask(() => {
           publishing.forEach((cb) => {
             cb();
           });
-          publishing.splice(0);
+          publishing.clear();
         });
       }
-      publishing.push(...sub);
+      sub.forEach((s) => {
+        publishing.add(s);
+      });
     }
   };
 
@@ -561,7 +562,6 @@ export const createEditor = <
       const parser = createParser({
         _document: document,
         _isBlock: isBlock as (node: Element) => boolean,
-        _isVoid: defaultIsVoidNode,
       });
 
       const setEditableState = () => {
@@ -600,9 +600,9 @@ export const createEditor = <
         setSelectionToDOM(
           document,
           element,
+          parser,
           selectionToDomSelection(doc, selection),
           selection[0] - selection[1],
-          parser,
         );
       });
 
@@ -627,9 +627,9 @@ export const createEditor = <
           setSelectionToDOM(
             document,
             element,
+            parser,
             selectionToDomSelection(doc, selection),
             selection[0] - selection[1],
-            parser,
             true,
           );
           document.addEventListener("selectionchange", onSelectionChange);
@@ -789,12 +789,7 @@ export const createEditor = <
         e.preventDefault();
 
         const dataTransfer = e.dataTransfer;
-        const droppedPosition = getPointedCaretPosition(
-          document,
-          element,
-          e,
-          parser,
-        );
+        const droppedPosition = getPointedCaretPosition(element, parser, e);
         if (dataTransfer && droppedPosition) {
           let afterSelection: Selection | undefined;
           const ops: Operation[] = [];
