@@ -866,7 +866,9 @@ const elToString = (element: Element): string => {
   }
 
   {
-    const doc = h("div", [h("ul", [h("li", ["Hello"]), h("li", ["world"])])]);
+    const doc = h("div", [
+      h("ul", [h("li", ["Hello"]), h("li", ["world"]), h("li", ["world"])]),
+    ]);
 
     it.for<[DomPosition, DomPosition]>([
       [
@@ -885,6 +887,14 @@ const elToString = (element: Element): string => {
         [[0, 1, 0], 5],
         [[1], 5], // TODO fix
       ],
+      [
+        [[0, 2, 0], 0],
+        [[2], 0], // TODO fix
+      ],
+      [
+        [[0, 2, 0], 5],
+        [[2], 5], // TODO fix
+      ],
     ])(`${elToString(doc)}: $0 $1`, ([p, expectedPos]) => {
       const domPos = posAt(doc, ...p);
       const pos = serializePosition(doc, parser, ...domPos);
@@ -896,7 +906,10 @@ const elToString = (element: Element): string => {
 
   {
     const doc = h("div", [
-      h("table", [h("tr", [h("td", ["Hello"]), h("td", ["world"])])]),
+      h("table", [
+        h("tr", [h("td", ["Hello"]), h("td", ["world"])]),
+        h("tr", [h("td", ["Hello"]), h("td", ["world"])]),
+      ]),
     ]);
 
     it.for<[DomPosition, DomPosition]>([
@@ -914,6 +927,22 @@ const elToString = (element: Element): string => {
       ],
       [
         [[0, 0, 1, 0], 5],
+        [[1], 5], // TODO fix
+      ],
+      [
+        [[0, 1, 0, 0], 0],
+        [[0], 0], // TODO fix
+      ],
+      [
+        [[0, 1, 0, 0], 5],
+        [[0], 5], // TODO fix
+      ],
+      [
+        [[0, 1, 1, 0], 0],
+        [[1], 0], // TODO fix
+      ],
+      [
+        [[0, 1, 1, 0], 5],
         [[1], 5], // TODO fix
       ],
     ])(`${elToString(doc)}: $0 $1`, ([p, expectedPos]) => {
