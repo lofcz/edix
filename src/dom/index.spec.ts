@@ -14,10 +14,7 @@ import { isElementNode, isTextNode } from "./utils.js";
 import { isHiddenNode } from "./parser.js";
 
 const document = window.document;
-const parser = createParser({
-  _document: document,
-  _isBlock: defaultIsBlockNode,
-});
+const parser = createParser(document, defaultIsBlockNode);
 
 const allowedAttrs = ["contentEditable"] as const;
 

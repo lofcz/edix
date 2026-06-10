@@ -38,12 +38,12 @@ export const getText = async (
       return window.editate
         .domToFragment(
           element,
-          window.editate.createParser({
-            _document: document,
-            _isBlock: blockTag
+          window.editate.createParser(
+            document,
+            blockTag
               ? (n) => n.tagName === blockTag.toUpperCase()
               : window.editate.defaultIsBlockNode,
-          }),
+          ),
           (text) => ({ text }),
           () => ({}),
         )
@@ -69,12 +69,12 @@ export const getSeletedText = (
       return window.editate
         .domToFragment(
           range,
-          window.editate.createParser({
-            _document: document,
-            _isBlock: blockTag
+          window.editate.createParser(
+            document,
+            blockTag
               ? (n) => n.tagName === blockTag.toUpperCase()
               : window.editate.defaultIsBlockNode,
-          }),
+          ),
           (text) => ({ text }),
           () => ({}),
         )
@@ -146,12 +146,12 @@ export const getSelection = (
   return editable.evaluate((element, { blockTag }) => {
     return window.editate.takeSelectionSnapshot(
       element,
-      window.editate.createParser({
-        _document: element.ownerDocument,
-        _isBlock: blockTag
+      window.editate.createParser(
+        element.ownerDocument,
+        blockTag
           ? (n) => n.tagName === blockTag.toUpperCase()
           : window.editate.defaultIsBlockNode,
-      }),
+      ),
     );
   }, config);
 };

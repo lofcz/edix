@@ -271,13 +271,10 @@ export const readNext = (): Exclude<
 /**
  * @internal
  */
-export const createParser = ({
-  _document: document,
-  _isBlock: initIsBlock,
-}: {
-  _document: Document;
-  _isBlock: Exclude<typeof isBlock, null>;
-}): Parser => {
+export const createParser = (
+  document: Document,
+  initIsBlock: Exclude<typeof isBlock, null>,
+): Parser => {
   const parser: Parser = (scopeFn, root, startNode) => {
     const prevIsBlock = isBlock;
     const prevParse = parse;

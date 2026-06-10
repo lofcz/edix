@@ -10,10 +10,7 @@ const dataTransferShim = (str: string): DataTransfer => {
   return { getData: () => str } as any as DataTransfer;
 };
 
-const parser = createParser({
-  _document: document,
-  _isBlock: defaultIsBlockNode,
-});
+const parser = createParser(document, defaultIsBlockNode);
 
 it("single paragraph root", () => {
   const handler = htmlPaste((text) => ({ text }));

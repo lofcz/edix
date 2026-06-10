@@ -462,10 +462,10 @@ export const createEditor = <
 
       const document = getCurrentDocument(element);
 
-      const parser = createParser({
-        _document: document,
-        _isBlock: isBlock as (node: Element) => boolean,
-      });
+      const parser = createParser(
+        document,
+        isBlock as (node: Element) => boolean,
+      );
 
       const setEditableState = () => {
         element.contentEditable = readonly ? "false" : "true";
