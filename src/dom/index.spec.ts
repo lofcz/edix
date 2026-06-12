@@ -54,9 +54,6 @@ const posAt = (node: Node, path: Path, offset: number): DomPoint => {
   if (isElementNode(node) && isHiddenNode(node)) {
     throw new Error(`${elToString(node)} is hidden`);
   }
-  if (!path.length) {
-    return [node, offset];
-  }
   return [node, offset];
 };
 
