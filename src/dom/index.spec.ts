@@ -106,1114 +106,1110 @@ const elToString = (element: Element): string => {
   return `${tag}[${results.join(",")}]`;
 };
 
-{
-  describe("placeholder", () => {
-    const doc = h("div", []);
+describe("placeholder", () => {
+  const doc = h("div", []);
 
-    it("0", () => {
-      const domPos = posAt(doc, [], 0);
-      const pos = serializePosition(doc, parser, ...domPos);
-      expect(pos).toEqual([[0], 0]);
-      // TODO fix
-      // const domPos2 = toRange(findPosition(doc, parser, pos)!);
-      // expect(serializePosition(doc, parser, ...domPos2)).toEqual(pos);
-    });
+  it("0", () => {
+    const domPos = posAt(doc, [], 0);
+    const pos = serializePosition(doc, parser, ...domPos);
+    expect(pos).toEqual([[0], 0]);
+    // TODO fix
+    // const domPos2 = toRange(findPosition(doc, parser, pos)!);
+    // expect(serializePosition(doc, parser, ...domPos2)).toEqual(pos);
   });
+});
 
-  {
-    const doc = h("div", [h("br")]);
+{
+  const doc = h("div", [h("br")]);
 
-    it.for<[DomPosition, DomPosition]>([
-      [
-        [[0], 0],
-        [[0], 0],
-      ],
-    ])(`${elToString(doc)}: $0 $1`, ([p, expectedPos]) => {
-      const domPos = posAt(doc, ...p);
-      const pos = serializePosition(doc, parser, ...domPos);
-      expect(pos).toEqual(expectedPos);
-      const domPos2 = toRange(findPosition(doc, parser, pos)!);
-      expect(serializePosition(doc, parser, ...domPos2)).toEqual(pos);
-    });
-  }
-
-  {
-    const doc = h("div", ["Hello"]);
-
-    it.for<[DomPosition, DomPosition]>([
-      [
-        [[0], 0],
-        [[0], 0],
-      ],
-      [
-        [[0], 5],
-        [[0], 5],
-      ],
-      // firefox
-      [
-        [[], 0],
-        [[0], 0],
-      ],
-      [
-        [[], 1],
-        [[0], 5],
-      ],
-    ])(`${elToString(doc)}: $0 $1`, ([p, expectedPos]) => {
-      const domPos = posAt(doc, ...p);
-      const pos = serializePosition(doc, parser, ...domPos);
-      expect(pos).toEqual(expectedPos);
-      const domPos2 = toRange(findPosition(doc, parser, pos)!);
-      expect(serializePosition(doc, parser, ...domPos2)).toEqual(pos);
-    });
-  }
-
-  {
-    const doc = h("div", ["Hello", h("br")]);
-
-    it.for<[DomPosition, DomPosition]>([
-      [
-        [[0], 0],
-        [[0], 0],
-      ],
-      [
-        [[0], 5],
-        [[0], 5],
-      ],
-    ])(`${elToString(doc)}: $0 $1`, ([p, expectedPos]) => {
-      const domPos = posAt(doc, ...p);
-      const pos = serializePosition(doc, parser, ...domPos);
-      expect(pos).toEqual(expectedPos);
-      const domPos2 = toRange(findPosition(doc, parser, pos)!);
-      expect(serializePosition(doc, parser, ...domPos2)).toEqual(pos);
-    });
-  }
-
-  {
-    const doc = h("div", ["Hello", h("br"), "world"]);
-
-    it.for<[DomPosition, DomPosition]>([
-      [
-        [[0], 0],
-        [[0], 0],
-      ],
-      [
-        [[0], 5],
-        [[0], 5],
-      ],
-      [
-        [[2], 0],
-        [[0], 5],
-      ],
-      [
-        [[2], 5],
-        [[0], 10],
-      ],
-    ])(`${elToString(doc)}: $0 $1`, ([p, expectedPos]) => {
-      const domPos = posAt(doc, ...p);
-      const pos = serializePosition(doc, parser, ...domPos);
-      expect(pos).toEqual(expectedPos);
-      const domPos2 = toRange(findPosition(doc, parser, pos)!);
-      expect(serializePosition(doc, parser, ...domPos2)).toEqual(pos);
-    });
-  }
-
-  {
-    const doc = h("div", ["Hello\nworld"]);
-
-    it.for<[DomPosition, DomPosition]>([
-      [
-        [[0], 0],
-        [[0], 0],
-      ],
-      [
-        [[0], 5],
-        [[0], 5],
-      ],
-      [
-        [[0], 10],
-        [[0], 10],
-      ],
-    ])(`${elToString(doc)}: $0 $1`, ([p, expectedPos]) => {
-      const domPos = posAt(doc, ...p);
-      const pos = serializePosition(doc, parser, ...domPos);
-      expect(pos).toEqual(expectedPos);
-      const domPos2 = toRange(findPosition(doc, parser, pos)!);
-      expect(serializePosition(doc, parser, ...domPos2)).toEqual(pos);
-    });
-  }
-
-  {
-    const doc = h("div", ["Hello", "\n", "world"]);
-
-    it.for<[DomPosition, DomPosition]>([
-      [
-        [[0], 0],
-        [[0], 0],
-      ],
-      [
-        [[0], 5],
-        [[0], 5],
-      ],
-      [
-        [[2], 0],
-        [[0], 5],
-      ],
-      [
-        [[2], 5],
-        [[0], 10],
-      ],
-    ])(`${elToString(doc)}: $0 $1`, ([p, expectedPos]) => {
-      const domPos = posAt(doc, ...p);
-      const pos = serializePosition(doc, parser, ...domPos);
-      expect(pos).toEqual(expectedPos);
-      const domPos2 = toRange(findPosition(doc, parser, pos)!);
-      expect(serializePosition(doc, parser, ...domPos2)).toEqual(pos);
-    });
-  }
-
-  {
-    const doc = h("div", [h("img")]);
-
-    it.for<[DomPosition, DomPosition]>([
-      [
-        [[], 0],
-        [[0], 0],
-      ],
-      [
-        [[], 1],
-        [[0], 1],
-      ],
-    ])(`${elToString(doc)}: $0 $1`, ([p, expectedPos]) => {
-      const domPos = posAt(doc, ...p);
-      const pos = serializePosition(doc, parser, ...domPos);
-      expect(pos).toEqual(expectedPos);
-      const domPos2 = toRange(findPosition(doc, parser, pos)!);
-      expect(serializePosition(doc, parser, ...domPos2)).toEqual(pos);
-    });
-  }
-
-  {
-    const doc = h("div", [h("img"), "Hello"]);
-
-    it.for<[DomPosition, DomPosition]>([
-      [
-        [[], 0],
-        [[0], 0],
-      ],
-      [
-        [[], 1],
-        [[0], 1],
-      ],
-      [
-        [[1], 0],
-        [[0], 1],
-      ],
-      [
-        [[1], 5],
-        [[0], 6],
-      ],
-    ])(`${elToString(doc)}: $0 $1`, ([p, expectedPos]) => {
-      const domPos = posAt(doc, ...p);
-      const pos = serializePosition(doc, parser, ...domPos);
-      expect(pos).toEqual(expectedPos);
-      const domPos2 = toRange(findPosition(doc, parser, pos)!);
-      expect(serializePosition(doc, parser, ...domPos2)).toEqual(pos);
-    });
-  }
-
-  {
-    const doc = h("div", ["Hello", h("img")]);
-
-    it.for<[DomPosition, DomPosition]>([
-      [
-        [[0], 0],
-        [[0], 0],
-      ],
-      [
-        [[0], 5],
-        [[0], 5],
-      ],
-      [
-        [[], 1],
-        [[0], 5],
-      ],
-      [
-        [[], 2],
-        [[0], 6],
-      ],
-    ])(`${elToString(doc)}: $0 $1`, ([p, expectedPos]) => {
-      const domPos = posAt(doc, ...p);
-      const pos = serializePosition(doc, parser, ...domPos);
-      expect(pos).toEqual(expectedPos);
-      const domPos2 = toRange(findPosition(doc, parser, pos)!);
-      expect(serializePosition(doc, parser, ...domPos2)).toEqual(pos);
-    });
-  }
-
-  {
-    const doc = h("div", ["Hello", h("img"), "world"]);
-
-    it.for<[DomPosition, DomPosition]>([
-      [
-        [[0], 0],
-        [[0], 0],
-      ],
-      [
-        [[0], 5],
-        [[0], 5],
-      ],
-      [
-        [[], 1],
-        [[0], 5],
-      ],
-      [
-        [[], 2],
-        [[0], 6],
-      ],
-      [
-        [[2], 0],
-        [[0], 6],
-      ],
-      [
-        [[2], 5],
-        [[0], 11],
-      ],
-    ])(`${elToString(doc)}: $0 $1`, ([p, expectedPos]) => {
-      const domPos = posAt(doc, ...p);
-      const pos = serializePosition(doc, parser, ...domPos);
-      expect(pos).toEqual(expectedPos);
-      const domPos2 = toRange(findPosition(doc, parser, pos)!);
-      expect(serializePosition(doc, parser, ...domPos2)).toEqual(pos);
-    });
-  }
-
-  {
-    const doc = h("div", [h("span", ["void"], { contentEditable: "false" })]);
-
-    it.for<[DomPosition, DomPosition]>([
-      [
-        [[], 0],
-        [[0], 0],
-      ],
-      [
-        [[], 1],
-        [[0], 1],
-      ],
-    ])(`${elToString(doc)}: $0 $1`, ([p, expectedPos]) => {
-      const domPos = posAt(doc, ...p);
-      const pos = serializePosition(doc, parser, ...domPos);
-      expect(pos).toEqual(expectedPos);
-      const domPos2 = toRange(findPosition(doc, parser, pos)!);
-      expect(serializePosition(doc, parser, ...domPos2)).toEqual(pos);
-    });
-  }
-
-  {
-    const doc = h("div", [
-      h("span", ["void"], { contentEditable: "false" }),
-      "Hello",
-    ]);
-
-    it.for<[DomPosition, DomPosition]>([
-      [
-        [[], 0],
-        [[0], 0],
-      ],
-      [
-        [[], 1],
-        [[0], 1],
-      ],
-      [
-        [[1], 0],
-        [[0], 1],
-      ],
-      [
-        [[1], 5],
-        [[0], 6],
-      ],
-    ])(`${elToString(doc)}: $0 $1`, ([p, expectedPos]) => {
-      const domPos = posAt(doc, ...p);
-      const pos = serializePosition(doc, parser, ...domPos);
-      expect(pos).toEqual(expectedPos);
-      const domPos2 = toRange(findPosition(doc, parser, pos)!);
-      expect(serializePosition(doc, parser, ...domPos2)).toEqual(pos);
-    });
-  }
-
-  {
-    const doc = h("div", [
-      "Hello",
-      h("span", ["void"], { contentEditable: "false" }),
-    ]);
-
-    it.for<[DomPosition, DomPosition]>([
-      [
-        [[0], 0],
-        [[0], 0],
-      ],
-      [
-        [[0], 5],
-        [[0], 5],
-      ],
-      [
-        [[], 1],
-        [[0], 5],
-      ],
-      [
-        [[], 2],
-        [[0], 6],
-      ],
-    ])(`${elToString(doc)}: $0 $1`, ([p, expectedPos]) => {
-      const domPos = posAt(doc, ...p);
-      const pos = serializePosition(doc, parser, ...domPos);
-      expect(pos).toEqual(expectedPos);
-      const domPos2 = toRange(findPosition(doc, parser, pos)!);
-      expect(serializePosition(doc, parser, ...domPos2)).toEqual(pos);
-    });
-  }
-
-  {
-    const doc = h("div", [
-      "Hello",
-      h("span", ["void"], { contentEditable: "false" }),
-      "world",
-    ]);
-
-    it.for<[DomPosition, DomPosition]>([
-      [
-        [[0], 0],
-        [[0], 0],
-      ],
-      [
-        [[0], 5],
-        [[0], 5],
-      ],
-      [
-        [[], 1],
-        [[0], 5],
-      ],
-      [
-        [[], 2],
-        [[0], 6],
-      ],
-      [
-        [[2], 0],
-        [[0], 6],
-      ],
-      [
-        [[2], 5],
-        [[0], 11],
-      ],
-    ])(`${elToString(doc)}: $0 $1`, ([p, expectedPos]) => {
-      const domPos = posAt(doc, ...p);
-      const pos = serializePosition(doc, parser, ...domPos);
-      expect(pos).toEqual(expectedPos);
-      const domPos2 = toRange(findPosition(doc, parser, pos)!);
-      expect(serializePosition(doc, parser, ...domPos2)).toEqual(pos);
-    });
-  }
-
-  {
-    const doc = h("div", [h("template"), "Hello", h("template")]);
-
-    it.for<[DomPosition, DomPosition]>([
-      [
-        [[1], 0],
-        [[0], 0],
-      ],
-      [
-        [[1], 5],
-        [[0], 5],
-      ],
-    ])(`${elToString(doc)}: $0 $1`, ([p, expectedPos]) => {
-      const domPos = posAt(doc, ...p);
-      const pos = serializePosition(doc, parser, ...domPos);
-      expect(pos).toEqual(expectedPos);
-      const domPos2 = toRange(findPosition(doc, parser, pos)!);
-      expect(serializePosition(doc, parser, ...domPos2)).toEqual(pos);
-    });
-  }
+  it.for<[DomPosition, DomPosition]>([
+    [
+      [[0], 0],
+      [[0], 0],
+    ],
+  ])(`${elToString(doc)}: $0 $1`, ([p, expectedPos]) => {
+    const domPos = posAt(doc, ...p);
+    const pos = serializePosition(doc, parser, ...domPos);
+    expect(pos).toEqual(expectedPos);
+    const domPos2 = toRange(findPosition(doc, parser, pos)!);
+    expect(serializePosition(doc, parser, ...domPos2)).toEqual(pos);
+  });
 }
 
 {
-  describe("placeholder", () => {
-    const doc = h("div", [h("div", [])]);
+  const doc = h("div", ["Hello"]);
 
-    it("0", () => {
-      const domPos = posAt(doc, [0], 0);
-      const pos = serializePosition(doc, parser, ...domPos);
-      expect(pos).toEqual([[0], 0]);
-      // TODO fix
-      // const domPos2 = toRange(findPosition(doc, parser, pos)!);
-      // expect(serializePosition(doc, parser, ...domPos2)).toEqual(pos);
-    });
+  it.for<[DomPosition, DomPosition]>([
+    [
+      [[0], 0],
+      [[0], 0],
+    ],
+    [
+      [[0], 5],
+      [[0], 5],
+    ],
+    // firefox
+    [
+      [[], 0],
+      [[0], 0],
+    ],
+    [
+      [[], 1],
+      [[0], 5],
+    ],
+  ])(`${elToString(doc)}: $0 $1`, ([p, expectedPos]) => {
+    const domPos = posAt(doc, ...p);
+    const pos = serializePosition(doc, parser, ...domPos);
+    expect(pos).toEqual(expectedPos);
+    const domPos2 = toRange(findPosition(doc, parser, pos)!);
+    expect(serializePosition(doc, parser, ...domPos2)).toEqual(pos);
   });
+}
 
-  {
-    const doc = h("div", [h("div", [h("br")])]);
+{
+  const doc = h("div", ["Hello", h("br")]);
 
-    it.for<[DomPosition, DomPosition]>([
-      [
-        [[0, 0], 0],
-        [[0], 0],
-      ],
-    ])(`${elToString(doc)}: $0 $1`, ([p, expectedPos]) => {
-      const domPos = posAt(doc, ...p);
-      const pos = serializePosition(doc, parser, ...domPos);
-      expect(pos).toEqual(expectedPos);
-      const domPos2 = toRange(findPosition(doc, parser, pos)!);
-      expect(serializePosition(doc, parser, ...domPos2)).toEqual(pos);
-    });
-  }
+  it.for<[DomPosition, DomPosition]>([
+    [
+      [[0], 0],
+      [[0], 0],
+    ],
+    [
+      [[0], 5],
+      [[0], 5],
+    ],
+  ])(`${elToString(doc)}: $0 $1`, ([p, expectedPos]) => {
+    const domPos = posAt(doc, ...p);
+    const pos = serializePosition(doc, parser, ...domPos);
+    expect(pos).toEqual(expectedPos);
+    const domPos2 = toRange(findPosition(doc, parser, pos)!);
+    expect(serializePosition(doc, parser, ...domPos2)).toEqual(pos);
+  });
+}
 
-  {
-    const doc = h("div", [h("div", ["Hello"])]);
+{
+  const doc = h("div", ["Hello", h("br"), "world"]);
 
-    it.for<[DomPosition, DomPosition]>([
-      [
-        [[0, 0], 0],
-        [[0], 0],
-      ],
-      [
-        [[0, 0], 5],
-        [[0], 5],
-      ],
-    ])(`${elToString(doc)}: $0 $1`, ([p, expectedPos]) => {
-      const domPos = posAt(doc, ...p);
-      const pos = serializePosition(doc, parser, ...domPos);
-      expect(pos).toEqual(expectedPos);
-      const domPos2 = toRange(findPosition(doc, parser, pos)!);
-      expect(serializePosition(doc, parser, ...domPos2)).toEqual(pos);
-    });
-  }
+  it.for<[DomPosition, DomPosition]>([
+    [
+      [[0], 0],
+      [[0], 0],
+    ],
+    [
+      [[0], 5],
+      [[0], 5],
+    ],
+    [
+      [[2], 0],
+      [[0], 5],
+    ],
+    [
+      [[2], 5],
+      [[0], 10],
+    ],
+  ])(`${elToString(doc)}: $0 $1`, ([p, expectedPos]) => {
+    const domPos = posAt(doc, ...p);
+    const pos = serializePosition(doc, parser, ...domPos);
+    expect(pos).toEqual(expectedPos);
+    const domPos2 = toRange(findPosition(doc, parser, pos)!);
+    expect(serializePosition(doc, parser, ...domPos2)).toEqual(pos);
+  });
+}
 
-  {
-    const doc = h("div", [h("div", ["Hello", h("br")])]);
+{
+  const doc = h("div", ["Hello\nworld"]);
 
-    it.for<[DomPosition, DomPosition]>([
-      [
-        [[0, 0], 0],
-        [[0], 0],
-      ],
-      [
-        [[0, 0], 5],
-        [[0], 5],
-      ],
-    ])(`${elToString(doc)}: $0 $1`, ([p, expectedPos]) => {
-      const domPos = posAt(doc, ...p);
-      const pos = serializePosition(doc, parser, ...domPos);
-      expect(pos).toEqual(expectedPos);
-      const domPos2 = toRange(findPosition(doc, parser, pos)!);
-      expect(serializePosition(doc, parser, ...domPos2)).toEqual(pos);
-    });
-  }
+  it.for<[DomPosition, DomPosition]>([
+    [
+      [[0], 0],
+      [[0], 0],
+    ],
+    [
+      [[0], 5],
+      [[0], 5],
+    ],
+    [
+      [[0], 10],
+      [[0], 10],
+    ],
+  ])(`${elToString(doc)}: $0 $1`, ([p, expectedPos]) => {
+    const domPos = posAt(doc, ...p);
+    const pos = serializePosition(doc, parser, ...domPos);
+    expect(pos).toEqual(expectedPos);
+    const domPos2 = toRange(findPosition(doc, parser, pos)!);
+    expect(serializePosition(doc, parser, ...domPos2)).toEqual(pos);
+  });
+}
 
-  {
-    const doc = h("div", [h("div", ["Hello", h("br"), "world"])]);
+{
+  const doc = h("div", ["Hello", "\n", "world"]);
 
-    it.for<[DomPosition, DomPosition]>([
-      [
-        [[0, 0], 0],
-        [[0], 0],
-      ],
-      [
-        [[0, 0], 5],
-        [[0], 5],
-      ],
-      [
-        [[0, 2], 0],
-        [[0], 5],
-      ],
-      [
-        [[0, 2], 5],
-        [[0], 10],
-      ],
-    ])(`${elToString(doc)}: $0 $1`, ([p, expectedPos]) => {
-      const domPos = posAt(doc, ...p);
-      const pos = serializePosition(doc, parser, ...domPos);
-      expect(pos).toEqual(expectedPos);
-      const domPos2 = toRange(findPosition(doc, parser, pos)!);
-      expect(serializePosition(doc, parser, ...domPos2)).toEqual(pos);
-    });
-  }
+  it.for<[DomPosition, DomPosition]>([
+    [
+      [[0], 0],
+      [[0], 0],
+    ],
+    [
+      [[0], 5],
+      [[0], 5],
+    ],
+    [
+      [[2], 0],
+      [[0], 5],
+    ],
+    [
+      [[2], 5],
+      [[0], 10],
+    ],
+  ])(`${elToString(doc)}: $0 $1`, ([p, expectedPos]) => {
+    const domPos = posAt(doc, ...p);
+    const pos = serializePosition(doc, parser, ...domPos);
+    expect(pos).toEqual(expectedPos);
+    const domPos2 = toRange(findPosition(doc, parser, pos)!);
+    expect(serializePosition(doc, parser, ...domPos2)).toEqual(pos);
+  });
+}
 
-  {
-    const doc = h("div", [h("div", ["Hello", "\n", "world"])]);
+{
+  const doc = h("div", [h("img")]);
 
-    it.for<[DomPosition, DomPosition]>([
-      [
-        [[0, 0], 0],
-        [[0], 0],
-      ],
-      [
-        [[0, 0], 5],
-        [[0], 5],
-      ],
-      [
-        [[0, 2], 0],
-        [[0], 5],
-      ],
-      [
-        [[0, 2], 5],
-        [[0], 10],
-      ],
-    ])(`${elToString(doc)}: $0 $1`, ([p, expectedPos]) => {
-      const domPos = posAt(doc, ...p);
-      const pos = serializePosition(doc, parser, ...domPos);
-      expect(pos).toEqual(expectedPos);
-      const domPos2 = toRange(findPosition(doc, parser, pos)!);
-      expect(serializePosition(doc, parser, ...domPos2)).toEqual(pos);
-    });
-  }
+  it.for<[DomPosition, DomPosition]>([
+    [
+      [[], 0],
+      [[0], 0],
+    ],
+    [
+      [[], 1],
+      [[0], 1],
+    ],
+  ])(`${elToString(doc)}: $0 $1`, ([p, expectedPos]) => {
+    const domPos = posAt(doc, ...p);
+    const pos = serializePosition(doc, parser, ...domPos);
+    expect(pos).toEqual(expectedPos);
+    const domPos2 = toRange(findPosition(doc, parser, pos)!);
+    expect(serializePosition(doc, parser, ...domPos2)).toEqual(pos);
+  });
+}
 
-  {
-    const doc = h("div", [h("div", ["Hello\nworld"])]);
+{
+  const doc = h("div", [h("img"), "Hello"]);
 
-    it.for<[DomPosition, DomPosition]>([
-      [
-        [[0, 0], 0],
-        [[0], 0],
-      ],
-      [
-        [[0, 0], 5],
-        [[0], 5],
-      ],
-      [
-        [[0, 0], 10],
-        [[0], 10],
-      ],
-    ])(`${elToString(doc)}: $0 $1`, ([p, expectedPos]) => {
-      const domPos = posAt(doc, ...p);
-      const pos = serializePosition(doc, parser, ...domPos);
-      expect(pos).toEqual(expectedPos);
-      const domPos2 = toRange(findPosition(doc, parser, pos)!);
-      expect(serializePosition(doc, parser, ...domPos2)).toEqual(pos);
-    });
-  }
+  it.for<[DomPosition, DomPosition]>([
+    [
+      [[], 0],
+      [[0], 0],
+    ],
+    [
+      [[], 1],
+      [[0], 1],
+    ],
+    [
+      [[1], 0],
+      [[0], 1],
+    ],
+    [
+      [[1], 5],
+      [[0], 6],
+    ],
+  ])(`${elToString(doc)}: $0 $1`, ([p, expectedPos]) => {
+    const domPos = posAt(doc, ...p);
+    const pos = serializePosition(doc, parser, ...domPos);
+    expect(pos).toEqual(expectedPos);
+    const domPos2 = toRange(findPosition(doc, parser, pos)!);
+    expect(serializePosition(doc, parser, ...domPos2)).toEqual(pos);
+  });
+}
 
-  {
-    const doc = h("div", [h("div", [h("img")])]);
+{
+  const doc = h("div", ["Hello", h("img")]);
 
-    it.for<[DomPosition, DomPosition]>([
-      [
-        [[0], 0],
-        [[0], 0],
-      ],
-      [
-        [[0], 1],
-        [[0], 1],
-      ],
-    ])(`${elToString(doc)}: $0 $1`, ([p, expectedPos]) => {
-      const domPos = posAt(doc, ...p);
-      const pos = serializePosition(doc, parser, ...domPos);
-      expect(pos).toEqual(expectedPos);
-      const domPos2 = toRange(findPosition(doc, parser, pos)!);
-      expect(serializePosition(doc, parser, ...domPos2)).toEqual(pos);
-    });
-  }
+  it.for<[DomPosition, DomPosition]>([
+    [
+      [[0], 0],
+      [[0], 0],
+    ],
+    [
+      [[0], 5],
+      [[0], 5],
+    ],
+    [
+      [[], 1],
+      [[0], 5],
+    ],
+    [
+      [[], 2],
+      [[0], 6],
+    ],
+  ])(`${elToString(doc)}: $0 $1`, ([p, expectedPos]) => {
+    const domPos = posAt(doc, ...p);
+    const pos = serializePosition(doc, parser, ...domPos);
+    expect(pos).toEqual(expectedPos);
+    const domPos2 = toRange(findPosition(doc, parser, pos)!);
+    expect(serializePosition(doc, parser, ...domPos2)).toEqual(pos);
+  });
+}
 
-  {
-    const doc = h("div", [h("div", [h("img"), "Hello"])]);
+{
+  const doc = h("div", ["Hello", h("img"), "world"]);
 
-    it.for<[DomPosition, DomPosition]>([
-      [
-        [[0], 0],
-        [[0], 0],
-      ],
-      [
-        [[0], 1],
-        [[0], 1],
-      ],
-      [
-        [[0, 1], 0],
-        [[0], 1],
-      ],
-      [
-        [[0, 1], 5],
-        [[0], 6],
-      ],
-    ])(`${elToString(doc)}: $0 $1`, ([p, expectedPos]) => {
-      const domPos = posAt(doc, ...p);
-      const pos = serializePosition(doc, parser, ...domPos);
-      expect(pos).toEqual(expectedPos);
-      const domPos2 = toRange(findPosition(doc, parser, pos)!);
-      expect(serializePosition(doc, parser, ...domPos2)).toEqual(pos);
-    });
-  }
+  it.for<[DomPosition, DomPosition]>([
+    [
+      [[0], 0],
+      [[0], 0],
+    ],
+    [
+      [[0], 5],
+      [[0], 5],
+    ],
+    [
+      [[], 1],
+      [[0], 5],
+    ],
+    [
+      [[], 2],
+      [[0], 6],
+    ],
+    [
+      [[2], 0],
+      [[0], 6],
+    ],
+    [
+      [[2], 5],
+      [[0], 11],
+    ],
+  ])(`${elToString(doc)}: $0 $1`, ([p, expectedPos]) => {
+    const domPos = posAt(doc, ...p);
+    const pos = serializePosition(doc, parser, ...domPos);
+    expect(pos).toEqual(expectedPos);
+    const domPos2 = toRange(findPosition(doc, parser, pos)!);
+    expect(serializePosition(doc, parser, ...domPos2)).toEqual(pos);
+  });
+}
 
-  {
-    const doc = h("div", [h("div", ["Hello", h("img")])]);
+{
+  const doc = h("div", [h("span", ["void"], { contentEditable: "false" })]);
 
-    it.for<[DomPosition, DomPosition]>([
-      [
-        [[0, 0], 0],
-        [[0], 0],
-      ],
-      [
-        [[0, 0], 5],
-        [[0], 5],
-      ],
-      [
-        [[0], 1],
-        [[0], 5],
-      ],
-      [
-        [[0], 2],
-        [[0], 6],
-      ],
-    ])(`${elToString(doc)}: $0 $1`, ([p, expectedPos]) => {
-      const domPos = posAt(doc, ...p);
-      const pos = serializePosition(doc, parser, ...domPos);
-      expect(pos).toEqual(expectedPos);
-      const domPos2 = toRange(findPosition(doc, parser, pos)!);
-      expect(serializePosition(doc, parser, ...domPos2)).toEqual(pos);
-    });
-  }
+  it.for<[DomPosition, DomPosition]>([
+    [
+      [[], 0],
+      [[0], 0],
+    ],
+    [
+      [[], 1],
+      [[0], 1],
+    ],
+  ])(`${elToString(doc)}: $0 $1`, ([p, expectedPos]) => {
+    const domPos = posAt(doc, ...p);
+    const pos = serializePosition(doc, parser, ...domPos);
+    expect(pos).toEqual(expectedPos);
+    const domPos2 = toRange(findPosition(doc, parser, pos)!);
+    expect(serializePosition(doc, parser, ...domPos2)).toEqual(pos);
+  });
+}
 
-  {
-    const doc = h("div", [h("div", ["Hello", h("img"), "world"])]);
+{
+  const doc = h("div", [
+    h("span", ["void"], { contentEditable: "false" }),
+    "Hello",
+  ]);
 
-    it.for<[DomPosition, DomPosition]>([
-      [
-        [[0, 0], 0],
-        [[0], 0],
-      ],
-      [
-        [[0, 0], 5],
-        [[0], 5],
-      ],
-      [
-        [[0], 1],
-        [[0], 5],
-      ],
-      [
-        [[0], 2],
-        [[0], 6],
-      ],
-      [
-        [[0, 2], 0],
-        [[0], 6],
-      ],
-      [
-        [[0, 2], 5],
-        [[0], 11],
-      ],
-    ])(`${elToString(doc)}: $0 $1`, ([p, expectedPos]) => {
-      const domPos = posAt(doc, ...p);
-      const pos = serializePosition(doc, parser, ...domPos);
-      expect(pos).toEqual(expectedPos);
-      const domPos2 = toRange(findPosition(doc, parser, pos)!);
-      expect(serializePosition(doc, parser, ...domPos2)).toEqual(pos);
-    });
-  }
+  it.for<[DomPosition, DomPosition]>([
+    [
+      [[], 0],
+      [[0], 0],
+    ],
+    [
+      [[], 1],
+      [[0], 1],
+    ],
+    [
+      [[1], 0],
+      [[0], 1],
+    ],
+    [
+      [[1], 5],
+      [[0], 6],
+    ],
+  ])(`${elToString(doc)}: $0 $1`, ([p, expectedPos]) => {
+    const domPos = posAt(doc, ...p);
+    const pos = serializePosition(doc, parser, ...domPos);
+    expect(pos).toEqual(expectedPos);
+    const domPos2 = toRange(findPosition(doc, parser, pos)!);
+    expect(serializePosition(doc, parser, ...domPos2)).toEqual(pos);
+  });
+}
 
-  {
-    const doc = h("div", [
-      h("div", [h("span", ["void"], { contentEditable: "false" })]),
-    ]);
+{
+  const doc = h("div", [
+    "Hello",
+    h("span", ["void"], { contentEditable: "false" }),
+  ]);
 
-    it.for<[DomPosition, DomPosition]>([
-      [
-        [[0], 0],
-        [[0], 0],
-      ],
-      [
-        [[0], 1],
-        [[0], 1],
-      ],
-    ])(`${elToString(doc)}: $0 $1`, ([p, expectedPos]) => {
-      const domPos = posAt(doc, ...p);
-      const pos = serializePosition(doc, parser, ...domPos);
-      expect(pos).toEqual(expectedPos);
-      const domPos2 = toRange(findPosition(doc, parser, pos)!);
-      expect(serializePosition(doc, parser, ...domPos2)).toEqual(pos);
-    });
-  }
+  it.for<[DomPosition, DomPosition]>([
+    [
+      [[0], 0],
+      [[0], 0],
+    ],
+    [
+      [[0], 5],
+      [[0], 5],
+    ],
+    [
+      [[], 1],
+      [[0], 5],
+    ],
+    [
+      [[], 2],
+      [[0], 6],
+    ],
+  ])(`${elToString(doc)}: $0 $1`, ([p, expectedPos]) => {
+    const domPos = posAt(doc, ...p);
+    const pos = serializePosition(doc, parser, ...domPos);
+    expect(pos).toEqual(expectedPos);
+    const domPos2 = toRange(findPosition(doc, parser, pos)!);
+    expect(serializePosition(doc, parser, ...domPos2)).toEqual(pos);
+  });
+}
 
-  {
-    const doc = h("div", [
-      h("div", [h("span", ["void"], { contentEditable: "false" }), "Hello"]),
-    ]);
+{
+  const doc = h("div", [
+    "Hello",
+    h("span", ["void"], { contentEditable: "false" }),
+    "world",
+  ]);
 
-    it.for<[DomPosition, DomPosition]>([
-      [
-        [[0], 0],
-        [[0], 0],
-      ],
-      [
-        [[0], 1],
-        [[0], 1],
-      ],
-      [
-        [[0, 1], 0],
-        [[0], 1],
-      ],
-      [
-        [[0, 1], 5],
-        [[0], 6],
-      ],
-    ])(`${elToString(doc)}: $0 $1`, ([p, expectedPos]) => {
-      const domPos = posAt(doc, ...p);
-      const pos = serializePosition(doc, parser, ...domPos);
-      expect(pos).toEqual(expectedPos);
-      const domPos2 = toRange(findPosition(doc, parser, pos)!);
-      expect(serializePosition(doc, parser, ...domPos2)).toEqual(pos);
-    });
-  }
+  it.for<[DomPosition, DomPosition]>([
+    [
+      [[0], 0],
+      [[0], 0],
+    ],
+    [
+      [[0], 5],
+      [[0], 5],
+    ],
+    [
+      [[], 1],
+      [[0], 5],
+    ],
+    [
+      [[], 2],
+      [[0], 6],
+    ],
+    [
+      [[2], 0],
+      [[0], 6],
+    ],
+    [
+      [[2], 5],
+      [[0], 11],
+    ],
+  ])(`${elToString(doc)}: $0 $1`, ([p, expectedPos]) => {
+    const domPos = posAt(doc, ...p);
+    const pos = serializePosition(doc, parser, ...domPos);
+    expect(pos).toEqual(expectedPos);
+    const domPos2 = toRange(findPosition(doc, parser, pos)!);
+    expect(serializePosition(doc, parser, ...domPos2)).toEqual(pos);
+  });
+}
 
-  {
-    const doc = h("div", [
-      h("div", ["Hello", h("span", ["void"], { contentEditable: "false" })]),
-    ]);
+{
+  const doc = h("div", [h("template"), "Hello", h("template")]);
 
-    it.for<[DomPosition, DomPosition]>([
-      [
-        [[0, 0], 0],
-        [[0], 0],
-      ],
-      [
-        [[0, 0], 5],
-        [[0], 5],
-      ],
-      [
-        [[0], 1],
-        [[0], 5],
-      ],
-      [
-        [[0], 2],
-        [[0], 6],
-      ],
-    ])(`${elToString(doc)}: $0 $1`, ([p, expectedPos]) => {
-      const domPos = posAt(doc, ...p);
-      const pos = serializePosition(doc, parser, ...domPos);
-      expect(pos).toEqual(expectedPos);
-      const domPos2 = toRange(findPosition(doc, parser, pos)!);
-      expect(serializePosition(doc, parser, ...domPos2)).toEqual(pos);
-    });
-  }
+  it.for<[DomPosition, DomPosition]>([
+    [
+      [[1], 0],
+      [[0], 0],
+    ],
+    [
+      [[1], 5],
+      [[0], 5],
+    ],
+  ])(`${elToString(doc)}: $0 $1`, ([p, expectedPos]) => {
+    const domPos = posAt(doc, ...p);
+    const pos = serializePosition(doc, parser, ...domPos);
+    expect(pos).toEqual(expectedPos);
+    const domPos2 = toRange(findPosition(doc, parser, pos)!);
+    expect(serializePosition(doc, parser, ...domPos2)).toEqual(pos);
+  });
+}
 
-  {
-    const doc = h("div", [
-      h("div", [
-        "Hello",
-        h("span", ["void"], { contentEditable: "false" }),
-        "world",
+describe("placeholder", () => {
+  const doc = h("div", [h("div", [])]);
+
+  it("0", () => {
+    const domPos = posAt(doc, [0], 0);
+    const pos = serializePosition(doc, parser, ...domPos);
+    expect(pos).toEqual([[0], 0]);
+    // TODO fix
+    // const domPos2 = toRange(findPosition(doc, parser, pos)!);
+    // expect(serializePosition(doc, parser, ...domPos2)).toEqual(pos);
+  });
+});
+
+{
+  const doc = h("div", [h("div", [h("br")])]);
+
+  it.for<[DomPosition, DomPosition]>([
+    [
+      [[0, 0], 0],
+      [[0], 0],
+    ],
+  ])(`${elToString(doc)}: $0 $1`, ([p, expectedPos]) => {
+    const domPos = posAt(doc, ...p);
+    const pos = serializePosition(doc, parser, ...domPos);
+    expect(pos).toEqual(expectedPos);
+    const domPos2 = toRange(findPosition(doc, parser, pos)!);
+    expect(serializePosition(doc, parser, ...domPos2)).toEqual(pos);
+  });
+}
+
+{
+  const doc = h("div", [h("div", ["Hello"])]);
+
+  it.for<[DomPosition, DomPosition]>([
+    [
+      [[0, 0], 0],
+      [[0], 0],
+    ],
+    [
+      [[0, 0], 5],
+      [[0], 5],
+    ],
+  ])(`${elToString(doc)}: $0 $1`, ([p, expectedPos]) => {
+    const domPos = posAt(doc, ...p);
+    const pos = serializePosition(doc, parser, ...domPos);
+    expect(pos).toEqual(expectedPos);
+    const domPos2 = toRange(findPosition(doc, parser, pos)!);
+    expect(serializePosition(doc, parser, ...domPos2)).toEqual(pos);
+  });
+}
+
+{
+  const doc = h("div", [h("div", ["Hello", h("br")])]);
+
+  it.for<[DomPosition, DomPosition]>([
+    [
+      [[0, 0], 0],
+      [[0], 0],
+    ],
+    [
+      [[0, 0], 5],
+      [[0], 5],
+    ],
+  ])(`${elToString(doc)}: $0 $1`, ([p, expectedPos]) => {
+    const domPos = posAt(doc, ...p);
+    const pos = serializePosition(doc, parser, ...domPos);
+    expect(pos).toEqual(expectedPos);
+    const domPos2 = toRange(findPosition(doc, parser, pos)!);
+    expect(serializePosition(doc, parser, ...domPos2)).toEqual(pos);
+  });
+}
+
+{
+  const doc = h("div", [h("div", ["Hello", h("br"), "world"])]);
+
+  it.for<[DomPosition, DomPosition]>([
+    [
+      [[0, 0], 0],
+      [[0], 0],
+    ],
+    [
+      [[0, 0], 5],
+      [[0], 5],
+    ],
+    [
+      [[0, 2], 0],
+      [[0], 5],
+    ],
+    [
+      [[0, 2], 5],
+      [[0], 10],
+    ],
+  ])(`${elToString(doc)}: $0 $1`, ([p, expectedPos]) => {
+    const domPos = posAt(doc, ...p);
+    const pos = serializePosition(doc, parser, ...domPos);
+    expect(pos).toEqual(expectedPos);
+    const domPos2 = toRange(findPosition(doc, parser, pos)!);
+    expect(serializePosition(doc, parser, ...domPos2)).toEqual(pos);
+  });
+}
+
+{
+  const doc = h("div", [h("div", ["Hello", "\n", "world"])]);
+
+  it.for<[DomPosition, DomPosition]>([
+    [
+      [[0, 0], 0],
+      [[0], 0],
+    ],
+    [
+      [[0, 0], 5],
+      [[0], 5],
+    ],
+    [
+      [[0, 2], 0],
+      [[0], 5],
+    ],
+    [
+      [[0, 2], 5],
+      [[0], 10],
+    ],
+  ])(`${elToString(doc)}: $0 $1`, ([p, expectedPos]) => {
+    const domPos = posAt(doc, ...p);
+    const pos = serializePosition(doc, parser, ...domPos);
+    expect(pos).toEqual(expectedPos);
+    const domPos2 = toRange(findPosition(doc, parser, pos)!);
+    expect(serializePosition(doc, parser, ...domPos2)).toEqual(pos);
+  });
+}
+
+{
+  const doc = h("div", [h("div", ["Hello\nworld"])]);
+
+  it.for<[DomPosition, DomPosition]>([
+    [
+      [[0, 0], 0],
+      [[0], 0],
+    ],
+    [
+      [[0, 0], 5],
+      [[0], 5],
+    ],
+    [
+      [[0, 0], 10],
+      [[0], 10],
+    ],
+  ])(`${elToString(doc)}: $0 $1`, ([p, expectedPos]) => {
+    const domPos = posAt(doc, ...p);
+    const pos = serializePosition(doc, parser, ...domPos);
+    expect(pos).toEqual(expectedPos);
+    const domPos2 = toRange(findPosition(doc, parser, pos)!);
+    expect(serializePosition(doc, parser, ...domPos2)).toEqual(pos);
+  });
+}
+
+{
+  const doc = h("div", [h("div", [h("img")])]);
+
+  it.for<[DomPosition, DomPosition]>([
+    [
+      [[0], 0],
+      [[0], 0],
+    ],
+    [
+      [[0], 1],
+      [[0], 1],
+    ],
+  ])(`${elToString(doc)}: $0 $1`, ([p, expectedPos]) => {
+    const domPos = posAt(doc, ...p);
+    const pos = serializePosition(doc, parser, ...domPos);
+    expect(pos).toEqual(expectedPos);
+    const domPos2 = toRange(findPosition(doc, parser, pos)!);
+    expect(serializePosition(doc, parser, ...domPos2)).toEqual(pos);
+  });
+}
+
+{
+  const doc = h("div", [h("div", [h("img"), "Hello"])]);
+
+  it.for<[DomPosition, DomPosition]>([
+    [
+      [[0], 0],
+      [[0], 0],
+    ],
+    [
+      [[0], 1],
+      [[0], 1],
+    ],
+    [
+      [[0, 1], 0],
+      [[0], 1],
+    ],
+    [
+      [[0, 1], 5],
+      [[0], 6],
+    ],
+  ])(`${elToString(doc)}: $0 $1`, ([p, expectedPos]) => {
+    const domPos = posAt(doc, ...p);
+    const pos = serializePosition(doc, parser, ...domPos);
+    expect(pos).toEqual(expectedPos);
+    const domPos2 = toRange(findPosition(doc, parser, pos)!);
+    expect(serializePosition(doc, parser, ...domPos2)).toEqual(pos);
+  });
+}
+
+{
+  const doc = h("div", [h("div", ["Hello", h("img")])]);
+
+  it.for<[DomPosition, DomPosition]>([
+    [
+      [[0, 0], 0],
+      [[0], 0],
+    ],
+    [
+      [[0, 0], 5],
+      [[0], 5],
+    ],
+    [
+      [[0], 1],
+      [[0], 5],
+    ],
+    [
+      [[0], 2],
+      [[0], 6],
+    ],
+  ])(`${elToString(doc)}: $0 $1`, ([p, expectedPos]) => {
+    const domPos = posAt(doc, ...p);
+    const pos = serializePosition(doc, parser, ...domPos);
+    expect(pos).toEqual(expectedPos);
+    const domPos2 = toRange(findPosition(doc, parser, pos)!);
+    expect(serializePosition(doc, parser, ...domPos2)).toEqual(pos);
+  });
+}
+
+{
+  const doc = h("div", [h("div", ["Hello", h("img"), "world"])]);
+
+  it.for<[DomPosition, DomPosition]>([
+    [
+      [[0, 0], 0],
+      [[0], 0],
+    ],
+    [
+      [[0, 0], 5],
+      [[0], 5],
+    ],
+    [
+      [[0], 1],
+      [[0], 5],
+    ],
+    [
+      [[0], 2],
+      [[0], 6],
+    ],
+    [
+      [[0, 2], 0],
+      [[0], 6],
+    ],
+    [
+      [[0, 2], 5],
+      [[0], 11],
+    ],
+  ])(`${elToString(doc)}: $0 $1`, ([p, expectedPos]) => {
+    const domPos = posAt(doc, ...p);
+    const pos = serializePosition(doc, parser, ...domPos);
+    expect(pos).toEqual(expectedPos);
+    const domPos2 = toRange(findPosition(doc, parser, pos)!);
+    expect(serializePosition(doc, parser, ...domPos2)).toEqual(pos);
+  });
+}
+
+{
+  const doc = h("div", [
+    h("div", [h("span", ["void"], { contentEditable: "false" })]),
+  ]);
+
+  it.for<[DomPosition, DomPosition]>([
+    [
+      [[0], 0],
+      [[0], 0],
+    ],
+    [
+      [[0], 1],
+      [[0], 1],
+    ],
+  ])(`${elToString(doc)}: $0 $1`, ([p, expectedPos]) => {
+    const domPos = posAt(doc, ...p);
+    const pos = serializePosition(doc, parser, ...domPos);
+    expect(pos).toEqual(expectedPos);
+    const domPos2 = toRange(findPosition(doc, parser, pos)!);
+    expect(serializePosition(doc, parser, ...domPos2)).toEqual(pos);
+  });
+}
+
+{
+  const doc = h("div", [
+    h("div", [h("span", ["void"], { contentEditable: "false" }), "Hello"]),
+  ]);
+
+  it.for<[DomPosition, DomPosition]>([
+    [
+      [[0], 0],
+      [[0], 0],
+    ],
+    [
+      [[0], 1],
+      [[0], 1],
+    ],
+    [
+      [[0, 1], 0],
+      [[0], 1],
+    ],
+    [
+      [[0, 1], 5],
+      [[0], 6],
+    ],
+  ])(`${elToString(doc)}: $0 $1`, ([p, expectedPos]) => {
+    const domPos = posAt(doc, ...p);
+    const pos = serializePosition(doc, parser, ...domPos);
+    expect(pos).toEqual(expectedPos);
+    const domPos2 = toRange(findPosition(doc, parser, pos)!);
+    expect(serializePosition(doc, parser, ...domPos2)).toEqual(pos);
+  });
+}
+
+{
+  const doc = h("div", [
+    h("div", ["Hello", h("span", ["void"], { contentEditable: "false" })]),
+  ]);
+
+  it.for<[DomPosition, DomPosition]>([
+    [
+      [[0, 0], 0],
+      [[0], 0],
+    ],
+    [
+      [[0, 0], 5],
+      [[0], 5],
+    ],
+    [
+      [[0], 1],
+      [[0], 5],
+    ],
+    [
+      [[0], 2],
+      [[0], 6],
+    ],
+  ])(`${elToString(doc)}: $0 $1`, ([p, expectedPos]) => {
+    const domPos = posAt(doc, ...p);
+    const pos = serializePosition(doc, parser, ...domPos);
+    expect(pos).toEqual(expectedPos);
+    const domPos2 = toRange(findPosition(doc, parser, pos)!);
+    expect(serializePosition(doc, parser, ...domPos2)).toEqual(pos);
+  });
+}
+
+{
+  const doc = h("div", [
+    h("div", [
+      "Hello",
+      h("span", ["void"], { contentEditable: "false" }),
+      "world",
+    ]),
+  ]);
+
+  it.for<[DomPosition, DomPosition]>([
+    [
+      [[0, 0], 0],
+      [[0], 0],
+    ],
+    [
+      [[0, 0], 5],
+      [[0], 5],
+    ],
+    [
+      [[0], 1],
+      [[0], 5],
+    ],
+    [
+      [[0], 2],
+      [[0], 6],
+    ],
+    [
+      [[0, 2], 0],
+      [[0], 6],
+    ],
+    [
+      [[0, 2], 5],
+      [[0], 11],
+    ],
+  ])(`${elToString(doc)}: $0 $1`, ([p, expectedPos]) => {
+    const domPos = posAt(doc, ...p);
+    const pos = serializePosition(doc, parser, ...domPos);
+    expect(pos).toEqual(expectedPos);
+    const domPos2 = toRange(findPosition(doc, parser, pos)!);
+    expect(serializePosition(doc, parser, ...domPos2)).toEqual(pos);
+  });
+}
+
+{
+  const doc = h("div", [h("template"), "Hello", h("template")]);
+
+  it.for<[DomPosition, DomPosition]>([
+    [
+      [[1], 0],
+      [[0], 0],
+    ],
+    [
+      [[1], 5],
+      [[0], 5],
+    ],
+  ])(`${elToString(doc)}: $0 $1`, ([p, expectedPos]) => {
+    const domPos = posAt(doc, ...p);
+    const pos = serializePosition(doc, parser, ...domPos);
+    expect(pos).toEqual(expectedPos);
+    const domPos2 = toRange(findPosition(doc, parser, pos)!);
+    expect(serializePosition(doc, parser, ...domPos2)).toEqual(pos);
+  });
+}
+
+{
+  const doc = h("div", [
+    h("div", ["Hello"]),
+    h("div", [h("br")]),
+    h("div", ["world"]),
+  ]);
+
+  it.for<[DomPosition, DomPosition]>([
+    [
+      [[0, 0], 0],
+      [[0], 0],
+    ],
+    [
+      [[0, 0], 5],
+      [[0], 5],
+    ],
+    [
+      [[1], 0],
+      [[1], 0],
+    ],
+    [
+      [[1, 0], 0],
+      [[1], 0],
+    ],
+    [
+      [[2, 0], 0],
+      [[2], 0],
+    ],
+    [
+      [[2, 0], 5],
+      [[2], 5],
+    ],
+    // firefox
+    [
+      [[], 0],
+      [[0], 0],
+    ],
+    [
+      [[1], 1],
+      [[1], 0],
+    ],
+    [
+      [[], 3],
+      [[2], 5],
+    ],
+  ])(`${elToString(doc)}: $0 $1`, ([p, expectedPos]) => {
+    const domPos = posAt(doc, ...p);
+    const pos = serializePosition(doc, parser, ...domPos);
+    expect(pos).toEqual(expectedPos);
+    const domPos2 = toRange(findPosition(doc, parser, pos)!);
+    expect(serializePosition(doc, parser, ...domPos2)).toEqual(pos);
+  });
+}
+
+{
+  const doc = h("div", [
+    h("ul", [h("li", ["Hello"]), h("li", ["world"]), h("li", ["world"])]),
+  ]);
+
+  it.for<[DomPosition, DomPosition]>([
+    [
+      [[0, 0, 0], 0],
+      [[0], 0], // TODO fix
+    ],
+    [
+      [[0, 0, 0], 5],
+      [[0], 5], // TODO fix
+    ],
+    [
+      [[0, 1, 0], 0],
+      [[1], 0], // TODO fix
+    ],
+    [
+      [[0, 1, 0], 5],
+      [[1], 5], // TODO fix
+    ],
+    [
+      [[0, 2, 0], 0],
+      [[2], 0], // TODO fix
+    ],
+    [
+      [[0, 2, 0], 5],
+      [[2], 5], // TODO fix
+    ],
+  ])(`${elToString(doc)}: $0 $1`, ([p, expectedPos]) => {
+    const domPos = posAt(doc, ...p);
+    const pos = serializePosition(doc, parser, ...domPos);
+    expect(pos).toEqual(expectedPos);
+    const domPos2 = toRange(findPosition(doc, parser, pos)!);
+    expect(serializePosition(doc, parser, ...domPos2)).toEqual(pos);
+  });
+}
+
+{
+  const doc = h("div", [
+    h("table", [
+      h("tbody", [
+        h("tr", [h("td", ["Hello"]), h("td", ["world"])]),
+        h("tr", [h("td", ["Hello"]), h("td", ["world"])]),
       ]),
-    ]);
+    ]),
+  ]);
 
-    it.for<[DomPosition, DomPosition]>([
-      [
-        [[0, 0], 0],
-        [[0], 0],
-      ],
-      [
-        [[0, 0], 5],
-        [[0], 5],
-      ],
-      [
-        [[0], 1],
-        [[0], 5],
-      ],
-      [
-        [[0], 2],
-        [[0], 6],
-      ],
-      [
-        [[0, 2], 0],
-        [[0], 6],
-      ],
-      [
-        [[0, 2], 5],
-        [[0], 11],
-      ],
-    ])(`${elToString(doc)}: $0 $1`, ([p, expectedPos]) => {
-      const domPos = posAt(doc, ...p);
-      const pos = serializePosition(doc, parser, ...domPos);
-      expect(pos).toEqual(expectedPos);
-      const domPos2 = toRange(findPosition(doc, parser, pos)!);
-      expect(serializePosition(doc, parser, ...domPos2)).toEqual(pos);
-    });
-  }
+  it.for<[DomPosition, DomPosition]>([
+    [
+      [[0, 0, 0, 0, 0], 0],
+      [[0], 0], // TODO fix
+    ],
+    [
+      [[0, 0, 0, 0, 0], 5],
+      [[0], 5], // TODO fix
+    ],
+    [
+      [[0, 0, 0, 1, 0], 0],
+      [[1], 0], // TODO fix
+    ],
+    [
+      [[0, 0, 0, 1, 0], 5],
+      [[1], 5], // TODO fix
+    ],
+    [
+      [[0, 0, 1, 0, 0], 0],
+      [[0], 0], // TODO fix
+    ],
+    [
+      [[0, 0, 1, 0, 0], 5],
+      [[0], 5], // TODO fix
+    ],
+    [
+      [[0, 0, 1, 1, 0], 0],
+      [[1], 0], // TODO fix
+    ],
+    [
+      [[0, 0, 1, 1, 0], 5],
+      [[1], 5], // TODO fix
+    ],
+  ])(`${elToString(doc)}: $0 $1`, ([p, expectedPos]) => {
+    const domPos = posAt(doc, ...p);
+    const pos = serializePosition(doc, parser, ...domPos);
+    expect(pos).toEqual(expectedPos);
+    const domPos2 = toRange(findPosition(doc, parser, pos)!);
+    expect(serializePosition(doc, parser, ...domPos2)).toEqual(pos);
+  });
+}
 
-  {
-    const doc = h("div", [h("template"), "Hello", h("template")]);
+// {
+//   const doc = h("div", [h("div", ["Hello"]), h("hr")]);
 
-    it.for<[DomPosition, DomPosition]>([
-      [
-        [[1], 0],
-        [[0], 0],
-      ],
-      [
-        [[1], 5],
-        [[0], 5],
-      ],
-    ])(`${elToString(doc)}: $0 $1`, ([p, expectedPos]) => {
-      const domPos = posAt(doc, ...p);
-      const pos = serializePosition(doc, parser, ...domPos);
-      expect(pos).toEqual(expectedPos);
-      const domPos2 = toRange(findPosition(doc, parser, pos)!);
-      expect(serializePosition(doc, parser, ...domPos2)).toEqual(pos);
-    });
-  }
+//   it.for<[DomPosition, DomPosition]>([
+//     [
+//       [[0, 0], 0],
+//       [[0], 0],
+//     ],
+//     [
+//       [[0, 0], 5],
+//       [[0], 5],
+//     ],
+//     [
+//       [[], 1],
+//       [[0], 5],
+//     ],
+//     [
+//       [[], 2],
+//       [[0], 6],
+//     ],
+//   ])(`${elToString(doc)}: $0 $1`, ([p, expectedPos]) => {
+//     const domPos = posAt(doc, ...p);
+//     const pos = serializePosition(doc, parser, ...domPos);
+//     expect(pos).toEqual(expectedPos);
+//     const domPos2 = toRange(findPosition(doc, parser, pos)!);
+//     expect(serializePosition(doc, parser, ...domPos2)).toEqual(pos);
+//   });
+// }
 
-  {
-    const doc = h("div", [
-      h("div", ["Hello"]),
-      h("div", [h("br")]),
-      h("div", ["world"]),
-    ]);
+// {
+//   const doc = h("div", [h("hr"), h("div", ["Hello"])]);
 
-    it.for<[DomPosition, DomPosition]>([
-      [
-        [[0, 0], 0],
-        [[0], 0],
-      ],
-      [
-        [[0, 0], 5],
-        [[0], 5],
-      ],
-      [
-        [[1], 0],
-        [[1], 0],
-      ],
-      [
-        [[1, 0], 0],
-        [[1], 0],
-      ],
-      [
-        [[2, 0], 0],
-        [[2], 0],
-      ],
-      [
-        [[2, 0], 5],
-        [[2], 5],
-      ],
-      // firefox
-      [
-        [[], 0],
-        [[0], 0],
-      ],
-      [
-        [[1], 1],
-        [[1], 0],
-      ],
-      [
-        [[], 3],
-        [[2], 5],
-      ],
-    ])(`${elToString(doc)}: $0 $1`, ([p, expectedPos]) => {
-      const domPos = posAt(doc, ...p);
-      const pos = serializePosition(doc, parser, ...domPos);
-      expect(pos).toEqual(expectedPos);
-      const domPos2 = toRange(findPosition(doc, parser, pos)!);
-      expect(serializePosition(doc, parser, ...domPos2)).toEqual(pos);
-    });
-  }
+//   it.for<[DomPosition, DomPosition]>([
+//     [
+//       [[], 0],
+//       [[0], 0],
+//     ],
+//     [
+//       [[], 1],
+//       [[1], 0],
+//     ],
+//     [
+//       [[1], 0],
+//       [[1], 0],
+//     ],
+//     [
+//       [[1], 5],
+//       [[1], 5],
+//     ],
+//   ])(`${elToString(doc)}: $0 $1`, ([p, expectedPos]) => {
+//     const domPos = posAt(doc, ...p);
+//     const pos = serializePosition(doc, parser, ...domPos);
+//     expect(pos).toEqual(expectedPos);
+//     const domPos2 = toRange(findPosition(doc, parser, pos)!);
+//     expect(serializePosition(doc, parser, ...domPos2)).toEqual(pos);
+//   });
+// }
 
-  {
-    const doc = h("div", [
-      h("ul", [h("li", ["Hello"]), h("li", ["world"]), h("li", ["world"])]),
-    ]);
+// {
+//   const doc = h("div", [h("div", ["Hello"]), h("hr"), h("div", ["world"])]);
 
-    it.for<[DomPosition, DomPosition]>([
-      [
-        [[0, 0, 0], 0],
-        [[0], 0], // TODO fix
-      ],
-      [
-        [[0, 0, 0], 5],
-        [[0], 5], // TODO fix
-      ],
-      [
-        [[0, 1, 0], 0],
-        [[1], 0], // TODO fix
-      ],
-      [
-        [[0, 1, 0], 5],
-        [[1], 5], // TODO fix
-      ],
-      [
-        [[0, 2, 0], 0],
-        [[2], 0], // TODO fix
-      ],
-      [
-        [[0, 2, 0], 5],
-        [[2], 5], // TODO fix
-      ],
-    ])(`${elToString(doc)}: $0 $1`, ([p, expectedPos]) => {
-      const domPos = posAt(doc, ...p);
-      const pos = serializePosition(doc, parser, ...domPos);
-      expect(pos).toEqual(expectedPos);
-      const domPos2 = toRange(findPosition(doc, parser, pos)!);
-      expect(serializePosition(doc, parser, ...domPos2)).toEqual(pos);
-    });
-  }
+//   it.for<[DomPosition, DomPosition]>([
+//     [
+//       [[0, 0], 0],
+//       [[0], 0],
+//     ],
+//     [
+//       [[0, 0], 5],
+//       [[0], 5],
+//     ],
+//     [
+//       [[], 1],
+//       [[0], 5],
+//     ],
+//     [
+//       [[], 2],
+//       [[0], 6],
+//     ],
+//     [
+//       [[2, 0], 0],
+//       [[0], 6],
+//     ],
+//     [
+//       [[2, 0], 5],
+//       [[0], 11],
+//     ],
+//   ])(`${elToString(doc)}: $0 $1`, ([p, expectedPos]) => {
+//     const domPos = posAt(doc, ...p);
+//     const pos = serializePosition(doc, parser, ...domPos);
+//     expect(pos).toEqual(expectedPos);
+//     const domPos2 = toRange(findPosition(doc, parser, pos)!);
+//     expect(serializePosition(doc, parser, ...domPos2)).toEqual(pos);
+//   });
+// }
 
-  {
-    const doc = h("div", [
-      h("table", [
-        h("tbody", [
-          h("tr", [h("td", ["Hello"]), h("td", ["world"])]),
-          h("tr", [h("td", ["Hello"]), h("td", ["world"])]),
-        ]),
-      ]),
-    ]);
+{
+  const doc = h("div", [h("template"), h("div", ["Hello"]), h("template")]);
 
-    it.for<[DomPosition, DomPosition]>([
-      [
-        [[0, 0, 0, 0, 0], 0],
-        [[0], 0], // TODO fix
-      ],
-      [
-        [[0, 0, 0, 0, 0], 5],
-        [[0], 5], // TODO fix
-      ],
-      [
-        [[0, 0, 0, 1, 0], 0],
-        [[1], 0], // TODO fix
-      ],
-      [
-        [[0, 0, 0, 1, 0], 5],
-        [[1], 5], // TODO fix
-      ],
-      [
-        [[0, 0, 1, 0, 0], 0],
-        [[0], 0], // TODO fix
-      ],
-      [
-        [[0, 0, 1, 0, 0], 5],
-        [[0], 5], // TODO fix
-      ],
-      [
-        [[0, 0, 1, 1, 0], 0],
-        [[1], 0], // TODO fix
-      ],
-      [
-        [[0, 0, 1, 1, 0], 5],
-        [[1], 5], // TODO fix
-      ],
-    ])(`${elToString(doc)}: $0 $1`, ([p, expectedPos]) => {
-      const domPos = posAt(doc, ...p);
-      const pos = serializePosition(doc, parser, ...domPos);
-      expect(pos).toEqual(expectedPos);
-      const domPos2 = toRange(findPosition(doc, parser, pos)!);
-      expect(serializePosition(doc, parser, ...domPos2)).toEqual(pos);
-    });
-  }
-
-  // {
-  //   const doc = h("div", [h("div", ["Hello"]), h("hr")]);
-
-  //   it.for<[DomPosition, DomPosition]>([
-  //     [
-  //       [[0, 0], 0],
-  //       [[0], 0],
-  //     ],
-  //     [
-  //       [[0, 0], 5],
-  //       [[0], 5],
-  //     ],
-  //     [
-  //       [[], 1],
-  //       [[0], 5],
-  //     ],
-  //     [
-  //       [[], 2],
-  //       [[0], 6],
-  //     ],
-  //   ])(`${elToString(doc)}: $0 $1`, ([p, expectedPos]) => {
-  //     const domPos = posAt(doc, ...p);
-  //     const pos = serializePosition(doc, parser, ...domPos);
-  //     expect(pos).toEqual(expectedPos);
-  //     const domPos2 = toRange(findPosition(doc, parser, pos)!);
-  //     expect(serializePosition(doc, parser, ...domPos2)).toEqual(pos);
-  //   });
-  // }
-
-  // {
-  //   const doc = h("div", [h("hr"), h("div", ["Hello"])]);
-
-  //   it.for<[DomPosition, DomPosition]>([
-  //     [
-  //       [[], 0],
-  //       [[0], 0],
-  //     ],
-  //     [
-  //       [[], 1],
-  //       [[1], 0],
-  //     ],
-  //     [
-  //       [[1], 0],
-  //       [[1], 0],
-  //     ],
-  //     [
-  //       [[1], 5],
-  //       [[1], 5],
-  //     ],
-  //   ])(`${elToString(doc)}: $0 $1`, ([p, expectedPos]) => {
-  //     const domPos = posAt(doc, ...p);
-  //     const pos = serializePosition(doc, parser, ...domPos);
-  //     expect(pos).toEqual(expectedPos);
-  //     const domPos2 = toRange(findPosition(doc, parser, pos)!);
-  //     expect(serializePosition(doc, parser, ...domPos2)).toEqual(pos);
-  //   });
-  // }
-
-  // {
-  //   const doc = h("div", [h("div", ["Hello"]), h("hr"), h("div", ["world"])]);
-
-  //   it.for<[DomPosition, DomPosition]>([
-  //     [
-  //       [[0, 0], 0],
-  //       [[0], 0],
-  //     ],
-  //     [
-  //       [[0, 0], 5],
-  //       [[0], 5],
-  //     ],
-  //     [
-  //       [[], 1],
-  //       [[0], 5],
-  //     ],
-  //     [
-  //       [[], 2],
-  //       [[0], 6],
-  //     ],
-  //     [
-  //       [[2, 0], 0],
-  //       [[0], 6],
-  //     ],
-  //     [
-  //       [[2, 0], 5],
-  //       [[0], 11],
-  //     ],
-  //   ])(`${elToString(doc)}: $0 $1`, ([p, expectedPos]) => {
-  //     const domPos = posAt(doc, ...p);
-  //     const pos = serializePosition(doc, parser, ...domPos);
-  //     expect(pos).toEqual(expectedPos);
-  //     const domPos2 = toRange(findPosition(doc, parser, pos)!);
-  //     expect(serializePosition(doc, parser, ...domPos2)).toEqual(pos);
-  //   });
-  // }
-
-  {
-    const doc = h("div", [h("template"), h("div", ["Hello"]), h("template")]);
-
-    it.for<[DomPosition, DomPosition]>([
-      [
-        [[1, 0], 0],
-        [[0], 0],
-      ],
-      [
-        [[1, 0], 5],
-        [[0], 5],
-      ],
-    ])(`${elToString(doc)}: $0 $1`, ([p, expectedPos]) => {
-      const domPos = posAt(doc, ...p);
-      const pos = serializePosition(doc, parser, ...domPos);
-      expect(pos).toEqual(expectedPos);
-      const domPos2 = toRange(findPosition(doc, parser, pos)!);
-      expect(serializePosition(doc, parser, ...domPos2)).toEqual(pos);
-    });
-  }
+  it.for<[DomPosition, DomPosition]>([
+    [
+      [[1, 0], 0],
+      [[0], 0],
+    ],
+    [
+      [[1, 0], 5],
+      [[0], 5],
+    ],
+  ])(`${elToString(doc)}: $0 $1`, ([p, expectedPos]) => {
+    const domPos = posAt(doc, ...p);
+    const pos = serializePosition(doc, parser, ...domPos);
+    expect(pos).toEqual(expectedPos);
+    const domPos2 = toRange(findPosition(doc, parser, pos)!);
+    expect(serializePosition(doc, parser, ...domPos2)).toEqual(pos);
+  });
 }
