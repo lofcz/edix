@@ -60,23 +60,6 @@ export const getSelectionRangeInEditor = (
   }
 };
 
-const setRangeToSelection = (
-  root: Element,
-  range: Range,
-  force: boolean | undefined,
-  backward?: boolean,
-): void => {
-  const selection = getDOMSelection(root);
-  if (force || getSelectionRangeInEditor(selection, root)) {
-    selection.removeAllRanges();
-    selection.addRange(range);
-    if (backward) {
-      selection.collapseToEnd();
-      selection.extend(range.startContainer, range.startOffset);
-    }
-  }
-};
-
 /**
  * @internal
  */
@@ -88,55 +71,51 @@ export const setSelectionToDOM = (
   posDiff: number, // TODO remove
   force?: boolean,
 ): void => {
-  const isCollapsed = posDiff === 0;
-  const backward = posDiff > 0;
-  const start = backward ? focus : anchor;
-  const end = backward ? anchor : focus;
+  const selection = getDOMSelection(root);
 
-  const range = document.createRange();
+  if (force || getSelectionRangeInEditor(selection, root)) {
+    const isCollapsed = posDiff === 0;
+    const backward = posDiff > 0;
+    const start = backward ? focus : anchor;
+    const end = backward ? anchor : focus;
 
-  // special path for empty content with empty selection, necessary for placeholder
-  if (
-    start[0].length === 0 &&
-    start[1] === 0 &&
-    isCollapsed &&
-    !root.hasChildNodes()
-  ) {
-    range.setStart(root, 0);
-    range.setEnd(root, 0);
+    const domStart = findPosition(root, parse, start);
+    const domEnd = isCollapsed ? domStart : findPosition(root, parse, end);
 
-    return setRangeToSelection(root, range, force);
-  }
+    const range = document.createRange();
 
-  const domStart = findPosition(root, parse, start);
-  const domEnd = isCollapsed ? domStart : findPosition(root, parse, end);
+    const [startNode, startOffset] = domStart;
+    const [endNode, endOffset] = domEnd;
 
-  const [startNode, startOffset] = domStart;
-  const [endNode, endOffset] = domEnd;
-
-  // embed or br
-  if (isElementNode(startNode)) {
-    if (startOffset < 1) {
-      range.setStartBefore(startNode);
+    // embed or br
+    if (isElementNode(startNode) && root !== startNode) {
+      if (startOffset < 1) {
+        range.setStartBefore(startNode);
+      } else {
+        range.setStartAfter(startNode);
+      }
     } else {
-      range.setStartAfter(startNode);
+      range.setStart(startNode, startOffset);
     }
-  } else {
-    range.setStart(startNode, startOffset);
-  }
 
-  // embed or br
-  if (isElementNode(endNode)) {
-    if (endOffset < 1) {
-      range.setEndBefore(endNode);
+    // embed or br
+    if (isElementNode(endNode) && root !== endNode) {
+      if (endOffset < 1) {
+        range.setEndBefore(endNode);
+      } else {
+        range.setEndAfter(endNode);
+      }
     } else {
-      range.setEndAfter(endNode);
+      range.setEnd(endNode, endOffset);
     }
-  } else {
-    range.setEnd(endNode, endOffset);
-  }
 
-  setRangeToSelection(root, range, force, backward);
+    selection.removeAllRanges();
+    selection.addRange(range);
+    if (backward) {
+      selection.collapseToEnd();
+      selection.extend(range.startContainer, range.startOffset);
+    }
+  }
 };
 
 /**
@@ -180,6 +159,8 @@ export const findPosition = (
           offset -= size;
         }
       }
+
+      // special path for empty content with empty selection, necessary for placeholder
       return [root, 0];
     },
     root,
