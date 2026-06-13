@@ -1108,6 +1108,90 @@ const elToString = (element: Element): string => {
   });
 }
 
+{
+  const doc = h("div", [
+    h("table", [
+      h("thead", [h("tr", [h("th", ["Hello"]), h("th", ["world"])])]),
+      h("tbody", [h("tr", [h("td", ["Hello"]), h("td", ["world"])])]),
+    ]),
+  ]);
+
+  it.for<[DomPosition, DomPosition]>([
+    [
+      [[0, 0, 0, 0, 0], 0],
+      [[0], 0], // TODO fix
+    ],
+    [
+      [[0, 0, 0, 0, 0], 5],
+      [[0], 5], // TODO fix
+    ],
+    [
+      [[0, 0, 0, 1, 0], 0],
+      [[1], 0], // TODO fix
+    ],
+    [
+      [[0, 0, 0, 1, 0], 5],
+      [[1], 5], // TODO fix
+    ],
+    [
+      [[0, 1, 0, 0, 0], 0],
+      [[0], 0], // TODO fix
+    ],
+    [
+      [[0, 1, 0, 0, 0], 5],
+      [[0], 5], // TODO fix
+    ],
+    [
+      [[0, 1, 0, 1, 0], 0],
+      [[1], 0], // TODO fix
+    ],
+    [
+      [[0, 1, 0, 1, 0], 5],
+      [[1], 5], // TODO fix
+    ],
+  ])(`${elToString(doc)}: $0 $1`, ([p, expectedPos]) => {
+    const domPos = posAt(doc, ...p);
+    const pos = serializePosition(doc, parser, ...domPos);
+    expect(pos).toEqual(expectedPos);
+    const domPos2 = toRange(findPosition(doc, parser, pos));
+    expect(serializePosition(doc, parser, ...domPos2)).toEqual(pos);
+  });
+}
+
+{
+  const doc = h("div", [
+    h("table", [
+      h("colgroup", [h("col"), h("col")]),
+      h("tbody", [h("tr", [h("td", ["Hello"]), h("td", ["world"])])]),
+    ]),
+  ]);
+
+  it.for<[DomPosition, DomPosition]>([
+    [
+      [[0, 1, 0, 0, 0], 0],
+      [[0], 0], // TODO fix
+    ],
+    [
+      [[0, 1, 0, 0, 0], 5],
+      [[0], 5], // TODO fix
+    ],
+    [
+      [[0, 1, 0, 1, 0], 0],
+      [[1], 0], // TODO fix
+    ],
+    [
+      [[0, 1, 0, 1, 0], 5],
+      [[1], 5], // TODO fix
+    ],
+  ])(`${elToString(doc)}: $0 $1`, ([p, expectedPos]) => {
+    const domPos = posAt(doc, ...p);
+    const pos = serializePosition(doc, parser, ...domPos);
+    expect(pos).toEqual(expectedPos);
+    const domPos2 = toRange(findPosition(doc, parser, pos));
+    expect(serializePosition(doc, parser, ...domPos2)).toEqual(pos);
+  });
+}
+
 // {
 //   const doc = h("div", [h("div", ["Hello"]), h("hr")]);
 
