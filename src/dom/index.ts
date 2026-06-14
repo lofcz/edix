@@ -199,12 +199,14 @@ export const serializePosition = (
   return parse(
     ({
       _next: next,
+      _moveTo: moveTo,
       _parentBlock: parentBlock,
       _prevBlock: prevBlock,
       _domNode: domNode,
       _nodeSize: nodeSize,
       _readToken: readToken,
     }) => {
+      moveTo(node);
       if (readToken() !== TOKEN_BLOCK) {
         parentBlock();
       }
@@ -249,7 +251,6 @@ export const serializePosition = (
       return [path, offset + offsetAtNode];
     },
     root,
-    node,
   );
 };
 

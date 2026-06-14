@@ -126,6 +126,10 @@ interface ParserContext {
   /**
    * @internal
    */
+  _moveTo: (node: Node) => void;
+  /**
+   * @internal
+   */
   _prevBlock: () => void;
   /**
    * @internal
@@ -254,17 +258,15 @@ export const createParser = (
     });
   };
 
-  const readNext = (): VisibleTokenType | void => {
-    while (nextNode()) {
-      const t = readToken();
-      if (t && t !== TOKEN_HIDDEN) {
-        return t;
-      }
-    }
-  };
-
   const context: ParserContext = {
-    _next: readNext,
+    _next: (): VisibleTokenType | void => {
+      while (nextNode()) {
+        const t = readToken();
+        if (t && t !== TOKEN_HIDDEN) {
+          return t;
+        }
+      }
+    },
     _readToken: readToken,
     _domNode: () => {
       return node as any;
@@ -276,6 +278,10 @@ export const createParser = (
         : token === TOKEN_VOID
           ? 1
           : 0;
+    },
+    _moveTo: (nextNode) => {
+      _token = null;
+      walker!.currentNode = node = nextNode;
     },
     _prevBlock: () => {
       while ((_token = null) || (node = walker!.previousSibling())) {
@@ -302,7 +308,6 @@ export const createParser = (
   const parser: Parser = <T>(
     scopeFn: (ctx: ParserContext) => T,
     root?: Node,
-    startNode?: Node,
   ): T => {
     const prevWalker = walker;
     const prevNode = node;
@@ -311,9 +316,6 @@ export const createParser = (
       if (!walker) {
         walker = document.createTreeWalker(root!, SHOW_TEXT | SHOW_ELEMENT);
         node = root!;
-      }
-      if (startNode) {
-        walker.currentNode = node = startNode;
       }
       return scopeFn(context);
     } finally {
@@ -329,6 +331,5 @@ export const createParser = (
 };
 
 export interface Parser {
-  <T>(scopeFn: (ctx: ParserContext) => T, root: Node, startNode?: Node): T;
-  <T>(scopeFn: (ctx: ParserContext) => T): T;
+  <T>(scopeFn: (ctx: ParserContext) => T, root?: Node): T;
 }
