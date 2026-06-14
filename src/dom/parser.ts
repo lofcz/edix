@@ -297,7 +297,11 @@ export const createParser = (
       }
     },
   };
-  const parser: Parser = (scopeFn, root, startNode) => {
+  const parser: Parser = <T>(
+    scopeFn: (ctx: ParserContext) => T,
+    root?: Node,
+    startNode?: Node,
+  ): T => {
     const prevWalker = walker;
     const prevNode = node;
     const prevToken = _token;
@@ -321,8 +325,7 @@ export const createParser = (
   return parser;
 };
 
-export type Parser = <T>(
-  scopeFn: (ctx: ParserContext) => T,
-  root?: Node,
-  startNode?: Node,
-) => T;
+export interface Parser {
+  <T>(scopeFn: (ctx: ParserContext) => T, root: Node, startNode?: Node): T;
+  <T>(scopeFn: (ctx: ParserContext) => T): T;
+}
