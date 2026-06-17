@@ -7,7 +7,6 @@ import {
   insertAt,
   insertLineBreakAt,
   getSelectedRect,
-  getSeletedText,
   replaceAt,
   moveSelectionToOrigin,
   waitForStyleSet,
