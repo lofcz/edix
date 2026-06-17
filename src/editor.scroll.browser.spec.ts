@@ -20,7 +20,12 @@ function mount(
   lines: number,
   caretAt: "start" | "middle" | "end",
   autoScroll = true,
-): { editor: Editor; host: HTMLDivElement; cleanup: () => void; lineEls: HTMLDivElement[] } {
+): {
+  editor: Editor;
+  host: HTMLDivElement;
+  cleanup: () => void;
+  lineEls: HTMLDivElement[];
+} {
   const host = document.createElement("div");
   host.style.cssText = [
     "width: 320px",
@@ -35,7 +40,10 @@ function mount(
 
   // Pre-render the DOM children so the doc and DOM agree.
   const lineEls: HTMLDivElement[] = [];
-  const text = Array.from({ length: lines }, (_, i) => `${i}: ${LINE_TEXT}`).join("\n");
+  const text = Array.from(
+    { length: lines },
+    (_, i) => `${i}: ${LINE_TEXT}`,
+  ).join("\n");
   for (const line of text.split("\n")) {
     const div = document.createElement("div");
     div.appendChild(document.createTextNode(line));
@@ -55,7 +63,11 @@ function mount(
 
   // Place the DOM selection at the requested location.
   const targetLineIndex =
-    caretAt === "start" ? 0 : caretAt === "end" ? lines - 1 : Math.floor(lines / 2);
+    caretAt === "start"
+      ? 0
+      : caretAt === "end"
+        ? lines - 1
+        : Math.floor(lines / 2);
   const targetLine = lineEls[targetLineIndex]!;
   const textNode = targetLine.firstChild as Text;
   const range = document.createRange();
@@ -67,7 +79,15 @@ function mount(
   // Make sure host has focus so selection isn't dropped.
   host.focus({ preventScroll: true });
 
-  return { editor, host, cleanup: () => { stop(); host.remove(); }, lineEls };
+  return {
+    editor,
+    host,
+    cleanup: () => {
+      stop();
+      host.remove();
+    },
+    lineEls,
+  };
 }
 
 /** Wait one rAF tick (where `scheduleScroll` runs) plus a microtask flush. */
