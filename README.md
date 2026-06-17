@@ -35,7 +35,11 @@ npm install @lofcz/edix
 
 ### Supported browsers
 
-Browser versions supporting [beforeinput event](https://developer.mozilla.org/en-US/docs/Web/API/Element/beforeinput_event#browser_compatibility) are supported.
+Both desktop and mobile browsers that support [beforeinput event](https://developer.mozilla.org/en-US/docs/Web/API/Element/beforeinput_event#browser_compatibility) are supported. Basically tested with Mac / Windows / iOS / Android.
+
+- Chrome
+- Safari
+- Firefox
 
 Mobile browsers are also supported, but with some issues (https://github.com/lofcz/edix/issues/97).
 

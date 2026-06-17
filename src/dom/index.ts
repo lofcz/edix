@@ -1,31 +1,15 @@
-import {
-  type TokenType,
-  type Parser,
-  getNodeSize,
-  getDomNode,
+import { type TokenType, type Parser, TOKEN_BLOCK } from "./parser.js";
+import type { DomPosition, SelectionSnapshot, Path } from "../doc/types.js";
+import { min } from "../utils.js";
+import { isElementNode } from "./utils.js";
+
+export {
+  createParser,
   TOKEN_TEXT,
   TOKEN_VOID,
   TOKEN_SOFT_BREAK,
   TOKEN_BLOCK,
-  nextBlock,
-  readNext as next,
-  parentBlock,
-  readToken,
-  isHiddenNode,
 } from "./parser.js";
-import type {
-  DomPosition,
-  InlineNode,
-  SelectionSnapshot,
-  Fragment,
-  TextNode,
-  Path,
-  BlockNode,
-} from "../doc/types.js";
-import { min } from "../utils.js";
-import { isElementNode } from "./utils.js";
-
-export { createParser } from "./parser.js";
 export { defaultIsBlockNode } from "./default.js";
 
 // const DOCUMENT_POSITION_DISCONNECTED = 0x01;
@@ -66,23 +50,6 @@ export const getSelectionRangeInEditor = (
   }
 };
 
-const setRangeToSelection = (
-  root: Element,
-  range: Range,
-  force: boolean | undefined,
-  backward?: boolean,
-): void => {
-  const selection = getDOMSelection(root);
-  if (force || getSelectionRangeInEditor(selection, root)) {
-    selection.removeAllRanges();
-    selection.addRange(range);
-    if (backward) {
-      selection.collapseToEnd();
-      selection.extend(range.startContainer, range.startOffset);
-    }
-  }
-};
-
 /**
  * @internal
  */
@@ -94,63 +61,51 @@ export const setSelectionToDOM = (
   posDiff: number, // TODO remove
   force?: boolean,
 ): void => {
-  const isCollapsed = posDiff === 0;
-  const backward = posDiff > 0;
-  const start = backward ? focus : anchor;
-  const end = backward ? anchor : focus;
-  // special path for empty content with empty selection, necessary for placeholder
-  if (
-    start[0].length === 0 &&
-    start[1] === 0 &&
-    isCollapsed &&
-    !root.hasChildNodes()
-  ) {
+  const selection = getDOMSelection(root);
+
+  if (force || getSelectionRangeInEditor(selection, root)) {
+    const isCollapsed = posDiff === 0;
+    const backward = posDiff > 0;
+    const start = backward ? focus : anchor;
+    const end = backward ? anchor : focus;
+
+    const domStart = findPosition(root, parse, start);
+    const domEnd = isCollapsed ? domStart : findPosition(root, parse, end);
+
     const range = document.createRange();
-    range.setStart(root, 0);
-    range.setEnd(root, 0);
 
-    return setRangeToSelection(root, range, force);
-  }
+    const [startNode, startOffset] = domStart;
+    const [endNode, endOffset] = domEnd;
 
-  const domStart = findPosition(root, parse, start);
-  if (!domStart) {
-    return;
-  }
-
-  const domEnd = isCollapsed ? domStart : findPosition(root, parse, end);
-  if (!domEnd) {
-    return;
-  }
-
-  // https://w3c.github.io/contentEditable/#dfn-legal-caret-positions
-  const range = document.createRange();
-
-  const [startNode, startOffset] = domStart;
-  const [endNode, endOffset] = domEnd;
-
-  // embed or br
-  if (isElementNode(startNode)) {
-    if (startOffset < 1) {
-      range.setStartBefore(startNode);
+    // embed or br
+    if (isElementNode(startNode) && root !== startNode) {
+      if (startOffset < 1) {
+        range.setStartBefore(startNode);
+      } else {
+        range.setStartAfter(startNode);
+      }
     } else {
-      range.setStartAfter(startNode);
+      range.setStart(startNode, startOffset);
     }
-  } else {
-    range.setStart(startNode, startOffset);
-  }
 
-  // embed or br
-  if (isElementNode(endNode)) {
-    if (endOffset < 1) {
-      range.setEndBefore(endNode);
+    // embed or br
+    if (isElementNode(endNode) && root !== endNode) {
+      if (endOffset < 1) {
+        range.setEndBefore(endNode);
+      } else {
+        range.setEndAfter(endNode);
+      }
     } else {
-      range.setEndAfter(endNode);
+      range.setEnd(endNode, endOffset);
     }
-  } else {
-    range.setEnd(endNode, endOffset);
-  }
 
-  setRangeToSelection(root, range, force, backward);
+    selection.removeAllRanges();
+    selection.addRange(range);
+    if (backward) {
+      selection.collapseToEnd();
+      selection.extend(range.startContainer, range.startOffset);
+    }
+  }
 };
 
 /**
@@ -165,31 +120,41 @@ export const findPosition = (
   root: Element,
   parse: Parser,
   [path, offset]: DomPosition,
-): DomPoint | undefined => {
-  return parse((): DomPoint | undefined => {
-    let pathIndex = 0;
-    let type: TokenType | void;
-    while ((type = next())) {
-      if (type === TOKEN_BLOCK) {
-        if (pathIndex < path.length) {
-          for (
-            let blockIndex = path[pathIndex++]!;
-            blockIndex > 0;
-            blockIndex--
-          ) {
-            nextBlock();
+): DomPoint => {
+  return parse(
+    ({
+      _next: next,
+      _nextBlock: nextBlock,
+      _domNode: domNode,
+      _nodeSize: nodeSize,
+    }): DomPoint => {
+      let pathIndex = 0;
+      let type: TokenType | void;
+      while ((type = next())) {
+        if (type === TOKEN_BLOCK) {
+          if (pathIndex < path.length) {
+            for (
+              let blockIndex = path[pathIndex++]!;
+              blockIndex > 0;
+              blockIndex--
+            ) {
+              nextBlock();
+            }
           }
+        } else {
+          const size = nodeSize();
+          if (offset <= size) {
+            return [domNode<typeof type>(), offset];
+          }
+          offset -= size;
         }
-      } else {
-        const size = getNodeSize();
-        if (offset <= size) {
-          return [getDomNode<typeof type>(), offset];
-        }
-        offset -= size;
       }
-    }
-    return;
-  }, root);
+
+      // special path for empty content with empty selection, necessary for placeholder
+      return [root, 0];
+    },
+    root,
+  );
 };
 
 /**
@@ -223,37 +188,45 @@ export const serializePosition = (
   }
 
   return parse(
-    () => {
+    ({
+      _next: next,
+      _moveTo: moveTo,
+      _parentBlock: parentBlock,
+      _prevBlock: prevBlock,
+      _domNode: domNode,
+      _nodeSize: nodeSize,
+      _readToken: readToken,
+    }) => {
+      moveTo(node);
       if (readToken() !== TOKEN_BLOCK) {
         parentBlock();
       }
 
       const path = parse((): Path => {
-        const blocks: Element[] = [];
-        // TODO improve type
-        let block: Element | null;
-        while ((block = getDomNode<typeof TOKEN_BLOCK>()) && block !== root) {
-          blocks.unshift(block);
+        const p: number[] = [];
+        while (readToken() && domNode() !== root) {
+          let i = 0;
+          while (true) {
+            prevBlock();
+            if (!readToken()) {
+              break;
+            }
+            i++;
+          }
+          p.unshift(i);
           parentBlock();
         }
 
-        if (!blocks.length) {
+        if (!p.length) {
           return [0];
         }
 
-        let i = 0;
-        let sib: Element = blocks[blocks.length - 1]!;
-        while ((sib = sib.previousElementSibling!)) {
-          if (!isHiddenNode(sib)) {
-            i++;
-          }
-        }
-        return [i];
+        return p;
       });
 
       let offset = 0;
       while (next()) {
-        const comp = compareDomPosition(node, getDomNode());
+        const comp = compareDomPosition(node, domNode());
         if (
           comp === 0 || // same object
           comp & DOCUMENT_POSITION_CONTAINED_BY
@@ -264,12 +237,11 @@ export const serializePosition = (
         } else if (comp & DOCUMENT_POSITION_FOLLOWING) {
           break;
         }
-        offset += getNodeSize();
+        offset += nodeSize();
       }
       return [path, offset + offsetAtNode];
     },
     root,
-    node,
   );
 };
 
@@ -317,73 +289,6 @@ export const takeSelectionSnapshot = (
   )
     ? [range[1], range[0]]
     : range;
-};
-
-/**
- * @internal
- */
-export const domToFragment = (
-  root: Node,
-  parse: Parser,
-  serializeText: (text: string) => TextNode,
-  serializeVoid: (node: Element) => InlineNode | void,
-): Fragment => {
-  return parse(() => {
-    let type: TokenType | void;
-    let row: InlineNode[] | null = null;
-    let text = "";
-    let hasContent = false;
-
-    const rows: BlockNode[] = [];
-
-    const completeText = () => {
-      if (text) {
-        if (!row) {
-          row = [];
-        }
-        row.push(serializeText(text));
-        text = "";
-      }
-    };
-    const completeRow = () => {
-      completeText();
-      if (!row && hasContent) {
-        row = [];
-      }
-      if (row) {
-        rows.push({ children: row });
-      }
-      row = null;
-      hasContent = false;
-    };
-
-    while ((type = next())) {
-      if (type === TOKEN_BLOCK) {
-        completeRow();
-      } else {
-        hasContent = true;
-
-        if (type === TOKEN_TEXT) {
-          text += getDomNode<typeof type>().data;
-        } else if (type === TOKEN_VOID) {
-          completeText();
-          const docNode = serializeVoid(getDomNode<typeof type>());
-          if (docNode) {
-            row!.push(docNode);
-          }
-        } else if (type === TOKEN_SOFT_BREAK) {
-          completeRow();
-        }
-      }
-    }
-    completeRow();
-
-    if (!rows.length) {
-      rows.push({ children: [] });
-    }
-
-    return rows;
-  }, root);
 };
 
 /**

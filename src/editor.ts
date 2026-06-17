@@ -180,12 +180,11 @@ export type CopyHook = (dataTransfer: DataTransfer) => void;
  */
 export type PasteHook = (
   dataTransfer: DataTransfer,
-  parser: Parser,
 ) => string | Fragment | null;
 
 type EditorHookMap = {
   apply: (op: Operation, next: (op?: Operation) => void) => void;
-  mount: (element: HTMLElement) => void | (() => void);
+  mount: (element: HTMLElement, parser: Parser) => void | (() => void);
   keyboard: KeyboardHook;
   copy: CopyHook;
   paste: PasteHook;
@@ -559,10 +558,10 @@ export const createEditor = <
 
       const document = getCurrentDocument(element);
 
-      const parser = createParser({
-        _document: document,
-        _isBlock: isBlock as (node: Element) => boolean,
-      });
+      const parser = createParser(
+        document,
+        isBlock as (node: Element) => boolean,
+      );
 
       const setEditableState = () => {
         element.contentEditable = readonly ? "false" : "true";
@@ -586,7 +585,7 @@ export const createEditor = <
 
       const paste = (dataTransfer: DataTransfer): string | Fragment | void => {
         for (const ex of getHook("paste")) {
-          const pasted = ex(dataTransfer, parser);
+          const pasted = ex(dataTransfer);
           if (pasted) {
             return pasted;
           }
@@ -838,7 +837,7 @@ export const createEditor = <
 
       const unmountHooks: (() => void)[] = [];
       getHook("mount").forEach((mount) => {
-        const cb = mount(element);
+        const cb = mount(element, parser);
         if (cb) {
           unmountHooks.push(cb);
         }

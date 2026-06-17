@@ -6,7 +6,7 @@
 
 > **htmlTransferPlugin**\<`T`\>(`editor`, `options`): `void`
 
-Defined in: [plugins/transfer/htmlTransfer.ts:58](https://github.com/inokawa/editate/blob/b79665986a52dd60978d940ed7a1fd5d6a57fa28/src/plugins/transfer/htmlTransfer.ts#L58)
+Defined in: [plugins/transfer/htmlTransfer.ts:128](https://github.com/lofcz/edix/blob/d9da6da70816800733ae5769854e6cd585f2cdcf/src/plugins/transfer/htmlTransfer.ts#L128)
 
 A plugin to handle copying / pasting HTML
 
@@ -24,13 +24,9 @@ A plugin to handle copying / pasting HTML
 
 ### options
 
-#### serializeText
+#### serializers
 
-(`t`) => `Extract`\<`InferInlineNode`\<`T`\>, `TextNode`\>
-
-#### serializers?
-
-(`node`) => `void` \| `Exclude`\<`InferInlineNode`\<`T`\>, `TextNode`\>[]
+`HtmlSerializers`\<`T`\>
 
 ## Returns
 

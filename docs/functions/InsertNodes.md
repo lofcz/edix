@@ -4,13 +4,14 @@
 
 # Function: InsertNodes()
 
-> **InsertNodes**\<`T`\>(`this`, `nodes`, `position`, `moveCaret`): `void`
+> **InsertNodes**\<`T`\>(`editor`, `nodes`, `position?`): `void`
 
-Defined in: [commands.ts:54](https://github.com/lofcz/edix/blob/c3e2464dd9fb3308ead13fab4a3705fded785408/src/commands.ts#L54)
+Defined in: [commands.ts:61](https://github.com/lofcz/edix/blob/d9da6da70816800733ae5769854e6cd585f2cdcf/src/commands.ts#L61)
 
 Insert multiple inline nodes as a single line fragment in one transaction.
-When `moveCaret` is true (default), the caret moves to the end of the
-inserted content.
+
+Fork-only command. Useful when a single insert needs to interleave text and
+void nodes (e.g. mention chips) without splitting blocks.
 
 ## Type Parameters
 
@@ -20,21 +21,17 @@ inserted content.
 
 ## Parameters
 
-### this
+### editor
 
 [`Editor`](../interfaces/Editor.md)\<`T`\>
 
 ### nodes
 
-`InferNode`\<`T`\>[]
+`InferInlineNode`\<`T`\>[]
 
-### position
+### position?
 
-`Position` = `...`
-
-### moveCaret
-
-`boolean` = `true`
+`number` = `...`
 
 ## Returns
 

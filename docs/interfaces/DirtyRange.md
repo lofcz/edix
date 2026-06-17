@@ -4,7 +4,7 @@
 
 # Interface: DirtyRange
 
-Defined in: [presets/plain.ts:15](https://github.com/lofcz/edix/blob/c3e2464dd9fb3308ead13fab4a3705fded785408/src/presets/plain.ts#L15)
+Defined in: [presets/plain.ts:14](https://github.com/lofcz/edix/blob/d9da6da70816800733ae5769854e6cd585f2cdcf/src/presets/plain.ts#L14)
 
 Describes which lines changed between two document snapshots.
 Starting at line `start`, `oldCount` lines were replaced with `newCount` lines.
@@ -16,7 +16,7 @@ Starting at line `start`, `oldCount` lines were replaced with `newCount` lines.
 
 > **start**: `number`
 
-Defined in: [presets/plain.ts:16](https://github.com/lofcz/edix/blob/c3e2464dd9fb3308ead13fab4a3705fded785408/src/presets/plain.ts#L16)
+Defined in: [presets/plain.ts:15](https://github.com/lofcz/edix/blob/d9da6da70816800733ae5769854e6cd585f2cdcf/src/presets/plain.ts#L15)
 
 ***
 
@@ -24,7 +24,7 @@ Defined in: [presets/plain.ts:16](https://github.com/lofcz/edix/blob/c3e2464dd9f
 
 > **oldCount**: `number`
 
-Defined in: [presets/plain.ts:17](https://github.com/lofcz/edix/blob/c3e2464dd9fb3308ead13fab4a3705fded785408/src/presets/plain.ts#L17)
+Defined in: [presets/plain.ts:16](https://github.com/lofcz/edix/blob/d9da6da70816800733ae5769854e6cd585f2cdcf/src/presets/plain.ts#L16)
 
 ***
 
@@ -32,7 +32,7 @@ Defined in: [presets/plain.ts:17](https://github.com/lofcz/edix/blob/c3e2464dd9f
 
 > **newCount**: `number`
 
-Defined in: [presets/plain.ts:18](https://github.com/lofcz/edix/blob/c3e2464dd9fb3308ead13fab4a3705fded785408/src/presets/plain.ts#L18)
+Defined in: [presets/plain.ts:17](https://github.com/lofcz/edix/blob/d9da6da70816800733ae5769854e6cd585f2cdcf/src/presets/plain.ts#L17)
 
 ***
 
@@ -40,4 +40,4 @@ Defined in: [presets/plain.ts:18](https://github.com/lofcz/edix/blob/c3e2464dd9f
 
 > **lines**: `string`[]
 
-Defined in: [presets/plain.ts:19](https://github.com/lofcz/edix/blob/c3e2464dd9fb3308ead13fab4a3705fded785408/src/presets/plain.ts#L19)
+Defined in: [presets/plain.ts:18](https://github.com/lofcz/edix/blob/d9da6da70816800733ae5769854e6cd585f2cdcf/src/presets/plain.ts#L18)

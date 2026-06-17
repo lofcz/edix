@@ -6,20 +6,12 @@ import { htmlPaste } from "./htmlTransfer.js";
 import { createParser } from "../../dom/parser.js";
 import { defaultIsBlockNode } from "../../dom/default.js";
 
-const dataTransferShim = (str: string): DataTransfer => {
-  return { getData: () => str } as any as DataTransfer;
-};
-
-const parser = createParser({
-  _document: document,
-  _isBlock: defaultIsBlockNode,
-});
+const parser = createParser(document, defaultIsBlockNode);
 
 it("single paragraph root", () => {
-  const handler = htmlPaste((text) => ({ text }));
   const html = `<meta charset='utf-8'><div><br><div><span>export</span><span> </span><span>const</span><span> </span><span>editable</span><span> </span><span>=</span><span> (</span></div><div><span>  </span><span>element</span><span>:</span><span> </span><span>HTMLElement</span><span>,</span></div><div><span>  { </span><span>readonly</span><span>, </span><span>nodes</span><span>, </span><span>onChange</span><span> }</span><span>:</span><span> </span><span>EditableOptions</span></div><div><span></span></div></div>`;
 
-  expect(handler(dataTransferShim(html), parser)).toEqual([
+  expect(htmlPaste(html, parser, { text: (text) => ({ text }) })).toEqual([
     { children: [] },
     {
       children: [
@@ -46,10 +38,9 @@ it("single paragraph root", () => {
 });
 
 it("multi paragraph root", () => {
-  const handler = htmlPaste((text) => ({ text }));
   const html = `<meta charset='utf-8'><p>#17</p><p>#6</p>`;
 
-  expect(handler(dataTransferShim(html), parser)).toEqual([
+  expect(htmlPaste(html, parser, { text: (text) => ({ text }) })).toEqual([
     {
       children: [
         {
@@ -68,10 +59,9 @@ it("multi paragraph root", () => {
 });
 
 it("single inline root", () => {
-  const handler = htmlPaste((text) => ({ text }));
   const html = `<meta charset='utf-8'><span>#17<br ><em>#6</em></span>`;
 
-  expect(handler(dataTransferShim(html), parser)).toEqual([
+  expect(htmlPaste(html, parser, { text: (text) => ({ text }) })).toEqual([
     {
       children: [
         {
@@ -90,10 +80,9 @@ it("single inline root", () => {
 });
 
 it("multi inline root", () => {
-  const handler = htmlPaste((text) => ({ text }));
   const html = `<meta charset='utf-8'><a>#17</a><br ><a>#6</a>`;
 
-  expect(handler(dataTransferShim(html), parser)).toEqual([
+  expect(htmlPaste(html, parser, { text: (text) => ({ text }) })).toEqual([
     {
       children: [
         {
@@ -112,10 +101,9 @@ it("multi inline root", () => {
 });
 
 it("table root", () => {
-  const handler = htmlPaste((text) => ({ text }));
   const html = `<meta charset='utf-8'><table><tbody><tr><td><span>    <span>const</span> <span>html</span> <span>=</span> <span>clipboardData</span><span>.</span><span>getData</span><span>(</span><span>"text/html"</span><span>)</span><span>;</span></span></td></tr><tr><td></td><td></td><td><button><svg aria-hidden="true" height="16" viewBox="0 0 16 16" version="1.1" width="16"><path></path></svg></button><span>    <span>if</span> <span>(</span><span>html</span><span>)</span> <span>{</span></span></td></tr></tbody></table>`;
 
-  expect(handler(dataTransferShim(html), parser)).toEqual([
+  expect(htmlPaste(html, parser, { text: (text) => ({ text }) })).toEqual([
     {
       children: [
         {
@@ -134,9 +122,8 @@ it("table root", () => {
 });
 
 it("template tag", () => {
-  const handler = htmlPaste((text) => ({ text }));
   const html = `<div><template x-for="v in text.split('\n')"><div><template x-if="v"><span x-text="v"></span></template><template x-if="!v"><br></template></div></template><div><template x-if="v"><span x-text="v"></span></template><span x-text="v">Htest</span><template x-if="!v"><br></template></div><div><template x-if="v"><span x-text="v"></span></template><span x-text="v">ello World.</span><template x-if="!v"><br></template></div><div><template x-if="v"><span x-text="v"></span></template><span x-text="v">こんにちは。</span><template x-if="!v"><br></template></div></div>`;
-  expect(handler(dataTransferShim(html), parser)).toEqual([
+  expect(htmlPaste(html, parser, { text: (text) => ({ text }) })).toEqual([
     { children: [{ text: "Htest" }] },
     { children: [{ text: "ello World." }] },
     { children: [{ text: "こんにちは。" }] },
@@ -144,13 +131,12 @@ it("template tag", () => {
 });
 
 it("copy in windows", () => {
-  const handler = htmlPaste((text) => ({ text }));
   const html = `<html>
 <body>
 <!--StartFragment-->world<!--EndFragment-->
 </body>
 </html>`;
-  expect(handler(dataTransferShim(html), parser)).toEqual([
+  expect(htmlPaste(html, parser, { text: (text) => ({ text }) })).toEqual([
     {
       children: [
         {
