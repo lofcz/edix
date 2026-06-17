@@ -31,10 +31,10 @@ type HtmlSerializers<T extends DocNode> = Partial<{
  * @internal
  */
 export const htmlPaste = <T extends DocNode>(
-  dataTransfer: DataTransfer,
+  html: string,
   parse: Parser,
   serializers: HtmlSerializers<T>,
-): Fragment | null => {
+): Fragment => {
   const serializeText = serializers["text"];
   const serializeVoid = (n: Element) => {
     const s = serializers[n.tagName.toLowerCase() as keyof typeof serializers];
@@ -48,83 +48,79 @@ export const htmlPaste = <T extends DocNode>(
     return;
   };
 
-  const html = dataTransfer.getData("text/html");
-  if (html) {
-    let dom: Node = new DOMParser().parseFromString(html, "text/html").body;
-    let isWindowsCopy = false;
-    // https://github.com/w3c/clipboard-apis/issues/193
-    for (const n of [...dom.childNodes]) {
-      if (isCommentNode(n)) {
-        if (n.data === "StartFragment") {
-          isWindowsCopy = true;
-          dom = new DocumentFragment();
-        } else if (n.data === "EndFragment") {
-          isWindowsCopy = false;
-        }
-      } else if (isWindowsCopy) {
-        dom.appendChild(n);
+  let dom: Node = new DOMParser().parseFromString(html, "text/html").body;
+  let isWindowsCopy = false;
+  // https://github.com/w3c/clipboard-apis/issues/193
+  for (const n of [...dom.childNodes]) {
+    if (isCommentNode(n)) {
+      if (n.data === "StartFragment") {
+        isWindowsCopy = true;
+        dom = new DocumentFragment();
+      } else if (n.data === "EndFragment") {
+        isWindowsCopy = false;
       }
+    } else if (isWindowsCopy) {
+      dom.appendChild(n);
     }
+  }
 
-    // TODO customizable dom to standard schema and validate
-    return parse(({ _next: next, _domNode: domNode }) => {
-      let type: TokenType | void;
-      let row: InlineNode[] | null = null;
-      let text = "";
-      let hasContent = false;
+  // TODO customizable dom to standard schema and validate
+  return parse(({ _next: next, _domNode: domNode }) => {
+    let type: TokenType | void;
+    let row: InlineNode[] | null = null;
+    let text = "";
+    let hasContent = false;
 
-      const rows: BlockNode[] = [];
+    const rows: BlockNode[] = [];
 
-      const completeText = () => {
-        if (text) {
-          if (!row) {
-            row = [];
-          }
-          row.push(serializeText(text));
-          text = "";
-        }
-      };
-      const completeRow = () => {
-        completeText();
-        if (!row && hasContent) {
+    const completeText = () => {
+      if (text) {
+        if (!row) {
           row = [];
         }
-        if (row) {
-          rows.push({ children: row });
-        }
-        row = null;
-        hasContent = false;
-      };
+        row.push(serializeText(text));
+        text = "";
+      }
+    };
+    const completeRow = () => {
+      completeText();
+      if (!row && hasContent) {
+        row = [];
+      }
+      if (row) {
+        rows.push({ children: row });
+      }
+      row = null;
+      hasContent = false;
+    };
 
-      while ((type = next())) {
-        if (type === TOKEN_BLOCK) {
-          completeRow();
-        } else {
-          hasContent = true;
+    while ((type = next())) {
+      if (type === TOKEN_BLOCK) {
+        completeRow();
+      } else {
+        hasContent = true;
 
-          if (type === TOKEN_TEXT) {
-            text += domNode<typeof type>().data;
-          } else if (type === TOKEN_VOID) {
-            completeText();
-            const docNode = serializeVoid(domNode<typeof type>());
-            if (docNode) {
-              row!.push(docNode);
-            }
-          } else if (type === TOKEN_SOFT_BREAK) {
-            completeRow();
+        if (type === TOKEN_TEXT) {
+          text += domNode<typeof type>().data;
+        } else if (type === TOKEN_VOID) {
+          completeText();
+          const docNode = serializeVoid(domNode<typeof type>());
+          if (docNode) {
+            row!.push(docNode);
           }
+        } else if (type === TOKEN_SOFT_BREAK) {
+          completeRow();
         }
       }
-      completeRow();
+    }
+    completeRow();
 
-      if (!rows.length) {
-        rows.push({ children: [] });
-      }
+    if (!rows.length) {
+      rows.push({ children: [] });
+    }
 
-      return rows;
-    }, dom);
-  }
-  return null;
+    return rows;
+  }, dom);
 };
 
 /**
@@ -149,7 +145,11 @@ export function htmlTransferPlugin<T extends DocNode>(
       dataTransfer.setData("text/html", wrapper.innerHTML);
     });
     const cleanupPaste = editor.hook("paste", (dataTransfer) => {
-      return htmlPaste(dataTransfer, parser, options.serializers);
+      const html = dataTransfer.getData("text/html");
+      if (html) {
+        return htmlPaste(html, parser, options.serializers);
+      }
+      return null;
     });
     return () => {
       cleanupCopy();
