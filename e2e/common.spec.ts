@@ -2413,42 +2413,6 @@ test("readonly", async ({ page, browserName }) => {
   await page.getByRole("button").click();
 
   expect(await isReadonly()).toEqual("true");
-
-  // // Move caret
-  // await page.keyboard.press("ArrowRight");
-  // expect(await getSelection(editable)).toEqual([[0,1],[0,1]]);
-
-  // {
-  //   // Input should be ignored
-  //   const text = "test";
-  //   await input(editable, text);
-  //   expect(await getText(editable)).toEqual(initialValue);
-  //   expect(await getSelection(editable)).toEqual(
-  //   [[[0],1],[0,1]]
-  //   );
-  // }
-
-  // if (browserName === "chromium") {
-  //   // IME input should be ignored
-  //   const client = await page.context().newCDPSession(page);
-  //   await client.send("Input.imeSetComposition", {
-  //     selectionStart: -1,
-  //     selectionEnd: -1,
-  //     text: "😂😂",
-  //   });
-  //   await client.send("Input.imeSetComposition", {
-  //     selectionStart: 1,
-  //     selectionEnd: 2,
-  //     text: "😭",
-  //   });
-  //   await client.send("Input.insertText", {
-  //     text: "😂😭",
-  //   });
-  //   expect(await getText(editable)).toEqual(initialValue);
-  //   expect(await getSelection(editable)).toEqual(
-  //   [[[0],1],[0,1]]
-  //   );
-  // }
 });
 
 test("placeholder", async ({ page }) => {
