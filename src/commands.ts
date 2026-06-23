@@ -110,7 +110,7 @@ export function ToggleFormat<T extends DocNode>(
   if (isCollapsed(range)) {
     const inline = getInlineAt(editor.doc, range[0]);
     if (inline) {
-      inlines = [inline._node];
+      inlines = [inline[0]];
     } else {
       return;
     }
@@ -143,7 +143,7 @@ export function SetBlockAttr<
   value: N[K],
   offset: number = editor.selection[0],
 ) {
-  const { _path: path } = getBlockAt(editor.doc, offset);
+  const path = getBlockAt(editor.doc, offset)[2];
   editor.apply({ type: "set_node_attr", path, key, value });
 }
 
@@ -161,7 +161,7 @@ export function ToggleBlockAttr<
   offValue: N[K],
   offset: number = editor.selection[0],
 ) {
-  const { _node: block, _path: path } = getBlockAt(editor.doc, offset);
+  const [block, , path] = getBlockAt(editor.doc, offset);
   editor.apply({
     type: "set_node_attr",
     path,

@@ -302,11 +302,11 @@ export const applyOperation = <T extends DocNode>(
       const { at, text } = op;
       if (isValidPosition(doc, at) && text) {
         // inherit style from previous block/text node
-        const { _node: block, _offset: offset } = getBlockAt(doc, at);
+        const [block, offset] = getBlockAt(doc, at);
         const res = getChildAt(block, offset - 1);
         let anchorNode: TextNode | undefined;
         if (res) {
-          const node = res._node;
+          const node = res[0];
           if (isTextNode(node)) {
             anchorNode = node;
           }
@@ -342,10 +342,7 @@ export const applyOperation = <T extends DocNode>(
         start <= end
       ) {
         if (start === end) {
-          const {
-            _node: { children },
-            _path: path,
-          } = getBlockAt(doc, start);
+          const [{ children }, , path] = getBlockAt(doc, start);
           if (children.length === 1) {
             const maybeText = children[0]!;
             if (isTextNode(maybeText) && !maybeText.text) {

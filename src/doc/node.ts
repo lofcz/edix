@@ -58,7 +58,7 @@ export const getNodeSize = (node: Node): number => {
 export const getChildAt = <T extends BlockNode>(
   { children }: T,
   offset: number,
-): { _node: T["children"][number]; _index: number; _offset: number } | null => {
+): [node: T["children"][number], offset: number, index: number] | null => {
   const length = children.length;
   for (let i = 0; i < length; i++) {
     const node = children[i]!;
@@ -67,7 +67,7 @@ export const getChildAt = <T extends BlockNode>(
       size++;
     }
     if (size > offset || (size === offset && isTextNode(node) && !node.text)) {
-      return { _node: node, _index: i, _offset: offset };
+      return [node, offset, i];
     }
     offset -= size;
   }
@@ -80,22 +80,22 @@ export const getChildAt = <T extends BlockNode>(
 export const getBlockAt = (
   node: DocNode | BlockNode,
   offset: number,
-): { _node: BlockNode; _path: Path; _offset: number } => {
+): [node: BlockNode, offset: number, path: Path] => {
   const path: number[] = [];
   while (node) {
     const found = getChildAt(node, offset);
     if (!found) {
       break;
     }
-    const nextNode = found._node;
+    const nextNode = found[0];
     if (!isBlockNode(nextNode)) {
       break;
     }
-    offset = found._offset;
+    offset = found[1];
     node = nextNode;
-    path.push(found._index);
+    path.push(found[2]);
   }
-  return { _node: node, _path: path, _offset: offset };
+  return [node, offset, path];
 };
 
 /**
@@ -104,9 +104,9 @@ export const getBlockAt = (
 export const getInlineAt = (
   node: DocNode | BlockNode,
   offset: number,
-): { _node: InlineNode; _index: number; _offset: number } | null => {
-  const block = getBlockAt(node, offset);
-  return getChildAt(block._node, block._offset);
+): [node: InlineNode, offset: number, index: number] | null => {
+  const [blockNode, blockOffset] = getBlockAt(node, offset);
+  return getChildAt(blockNode, blockOffset);
 };
 
 /**
@@ -119,7 +119,7 @@ export const splitBlock = <T extends DocNode | BlockNode>(
   const children = block.children;
   const target = getChildAt(block, pos);
   if (target) {
-    const { _node: node, _offset: offsetAtNode, _index: i } = target;
+    const [node, offsetAtNode, i] = target;
     if (isBlockNode(node)) {
       const [childBefore, childAfter] = splitBlock(node, offsetAtNode);
       const before = children.slice(0, i);
@@ -181,8 +181,8 @@ export const offsetToPosition = (
   node: DocNode | BlockNode,
   offset: number,
 ): DomPosition => {
-  const res = getBlockAt(node, offset);
-  return [res._path, res._offset];
+  const [, blockOffset, path] = getBlockAt(node, offset);
+  return [path, blockOffset];
 };
 
 /**
