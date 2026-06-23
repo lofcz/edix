@@ -1,11 +1,33 @@
 import { describe, expect, it } from "vitest";
-import { getChildAt, sliceFragment } from "./node.js";
+import { getChildAt, getNodeSize, sliceFragment } from "./node.js";
 import {
   type BlockNode,
   type DocNode,
   type Fragment,
+  type Node,
   type Range,
 } from "./types.js";
+
+describe(getNodeSize.name, () => {
+  it.each<[Node, number]>([
+    [{ text: "" }, 0],
+    [{ text: "abc" }, 3],
+    [{ foo: "bar" }, 1],
+    [{ children: [{ text: "abc" }] }, 3],
+    [{ children: [{ text: "abc" }, { text: "de" }] }, 5],
+    [
+      {
+        children: [
+          { children: [{ text: "abc" }] },
+          { children: [{ text: "de" }] },
+        ],
+      },
+      6,
+    ],
+  ])(`$0`, (node, res) => {
+    expect(getNodeSize(node)).toEqual(res);
+  });
+});
 
 describe(getChildAt.name, () => {
   describe("block", () => {
