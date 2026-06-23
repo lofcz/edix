@@ -1,74 +1,102 @@
 import { describe, expect, it } from "vitest";
-import { sliceFragment } from "./node.js";
-import { type DocNode, type Fragment, type Range } from "./types.js";
+import { getChildAt, sliceFragment } from "./node.js";
+import {
+  type BlockNode,
+  type DocNode,
+  type Fragment,
+  type Range,
+} from "./types.js";
+
+describe(getChildAt.name, () => {
+  const t0 = "abcde";
+  const t1 = "fghij";
+  const t2 = "klmno";
+  const block: BlockNode = {
+    children: [{ text: t0 }, { text: t1 }, { text: t2 }],
+  };
+  it.each<[number, ReturnType<typeof getChildAt>]>([
+    [0, [block.children[0]!, 0, 0]],
+    [1, [block.children[0]!, 1, 0]],
+    [t0.length - 1, [block.children[0]!, t0.length - 1, 0]],
+    [t0.length, [block.children[1]!, 0, 1]],
+    [t0.length + 1, [block.children[1]!, 1, 1]],
+    [t0.length + t1.length - 1, [block.children[1]!, t1.length - 1, 1]],
+    [t0.length + t1.length, [block.children[2]!, 0, 2]],
+    [t0.length + t1.length + 1, [block.children[2]!, 1, 2]],
+    [
+      t0.length + t1.length + t2.length - 1,
+      [block.children[2]!, t2.length - 1, 2],
+    ],
+    [t0.length + t1.length + t2.length, null],
+  ])(`$0`, (offset, res) => {
+    expect(getChildAt(block, offset)).toEqual(res);
+  });
+});
 
 describe(sliceFragment.name, () => {
-  const text0 = "abcde";
-  const text1 = "fghij";
-  const text2 = "klmno";
+  const t0 = "abcde";
+  const t1 = "fghij";
+  const t2 = "klmno";
   const doc: DocNode = {
     children: [
-      { children: [{ text: text0 }] },
-      { children: [{ text: text1 }] },
-      { children: [{ text: text2 }] },
+      { children: [{ text: t0 }] },
+      { children: [{ text: t1 }] },
+      { children: [{ text: t2 }] },
     ],
   };
   it.each<[Range, Fragment]>([
     [[1, 0], []],
     [[1, 1], []],
     [[0, 0], []],
-    [[0, 1], [{ children: [{ text: text0.slice(0, 1) }] }]],
-    [[0, text0.length], [{ children: [{ text: text0 }] }]],
+    [[0, 1], [{ children: [{ text: t0.slice(0, 1) }] }]],
+    [[0, t0.length], [{ children: [{ text: t0 }] }]],
     [
-      [0, text0.length + 1],
-      [{ children: [{ text: text0 }] }, { children: [{ text: "" }] }],
+      [0, t0.length + 1],
+      [{ children: [{ text: t0 }] }, { children: [{ text: "" }] }],
     ],
     [
-      [0, text0.length + 2],
+      [0, t0.length + 2],
+      [{ children: [{ text: t0 }] }, { children: [{ text: t1.slice(0, 1) }] }],
+    ],
+    [
+      [0, t0.length + 1 + t1.length],
+      [{ children: [{ text: t0 }] }, { children: [{ text: t1 }] }],
+    ],
+    [
+      [0, t0.length + 1 + t1.length + 1],
       [
-        { children: [{ text: text0 }] },
-        { children: [{ text: text1.slice(0, 1) }] },
-      ],
-    ],
-    [
-      [0, text0.length + 1 + text1.length],
-      [{ children: [{ text: text0 }] }, { children: [{ text: text1 }] }],
-    ],
-    [
-      [0, text0.length + 1 + text1.length + 1],
-      [
-        { children: [{ text: text0 }] },
-        { children: [{ text: text1 }] },
+        { children: [{ text: t0 }] },
+        { children: [{ text: t1 }] },
         { children: [{ text: "" }] },
       ],
     ],
     [
-      [0, text0.length + 1 + text1.length + 2],
+      [0, t0.length + 1 + t1.length + 2],
       [
-        { children: [{ text: text0 }] },
-        { children: [{ text: text1 }] },
-        { children: [{ text: text2.slice(0, 1) }] },
+        { children: [{ text: t0 }] },
+        { children: [{ text: t1 }] },
+        { children: [{ text: t2.slice(0, 1) }] },
       ],
     ],
-    [[0, text0.length + 1 + text1.length + 1 + text2.length], doc.children],
+    [[0, t0.length + 1 + t1.length + 1 + t2.length], doc.children],
     [[0, Infinity], doc.children],
     [
-      [3, text0.length + 2],
+      [3, t0.length + 2],
       [
-        { children: [{ text: text0.slice(3) }] },
-        { children: [{ text: text1.slice(0, 1) }] },
+        { children: [{ text: t0.slice(3) }] },
+        { children: [{ text: t1.slice(0, 1) }] },
       ],
     ],
     [
-      [3, text0.length + 1 + text1.length + 2],
+      [3, t0.length + 1 + t1.length + 2],
       [
-        { children: [{ text: text0.slice(3) }] },
-        { children: [{ text: text1 }] },
-        { children: [{ text: text2.slice(0, 1) }] },
+        { children: [{ text: t0.slice(3) }] },
+        { children: [{ text: t1 }] },
+        { children: [{ text: t2.slice(0, 1) }] },
       ],
     ],
     [
-      [text0.length, text0.length + 1],
+      [t0.length, t0.length + 1],
       [{ children: [{ text: "" }] }, { children: [{ text: "" }] }],
     ],
   ])(`$0`, (range, res) => {
