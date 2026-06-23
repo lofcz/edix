@@ -11,13 +11,15 @@ import { createMutationObserver } from "./dom/mutation.js";
 import type { DocNode, Fragment, Selection } from "./doc/types.js";
 import { is, isFunction, isString, microtask } from "./utils.js";
 import {
+  domSelectionToSelection,
+  selectionToDomSelection,
+  positionToOffset,
+} from "./doc/node.js";
+import {
   applyOperation,
   type Operation,
   isUnsafeOperation,
   isValidSelection,
-  domSelectionToSelection,
-  selectionToDomSelection,
-  positionToOffset,
   rebase,
 } from "./doc/operation.js";
 import { createParser } from "./dom/index.js";

@@ -1,7 +1,8 @@
 import { afterEach, describe, expect, it, vi } from "vitest";
-import { applyOperation, getNodeSize, isValidSelection } from "./operation.js";
+import { applyOperation, isValidSelection } from "./operation.js";
 import { type Selection } from "./types.js";
 import { is } from "../utils.js";
+import { getNodeSize } from "./node.js";
 
 type Doc = {
   children: { attr: number; children: { attr: number; text: string }[] }[];

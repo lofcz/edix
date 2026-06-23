@@ -4,7 +4,7 @@ import {
   getInlineAt,
   isTextNode,
   sliceFragment,
-} from "./doc/operation.js";
+} from "./doc/node.js";
 import type { Editor } from "./editor.js";
 import type {
   DocNode,

@@ -1,4 +1,4 @@
-import { isBlockNode, isTextNode } from "./operation.js";
+import { isBlockNode, isTextNode } from "./node.js";
 import {
   type BlockNode,
   type DocNode,
