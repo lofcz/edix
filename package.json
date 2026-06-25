@@ -1,6 +1,6 @@
 {
   "name": "@lofcz/edix",
-  "version": "0.5.5",
+  "version": "0.5.6",
   "description": "An experimental, type-safe, framework agnostic and small (5kB+) contenteditable state manager.",
   "main": "lib/index.cjs",
   "module": "lib/index.js",
