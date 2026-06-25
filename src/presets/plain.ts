@@ -1,5 +1,5 @@
 import { docToString, stringToFragment } from "../doc/utils.js";
-import { isTextNode } from "../doc/edit.js";
+import { isTextNode } from "../doc/node.js";
 import { createEditor, type Editor, type EditorOptions } from "../editor.js";
 import { plainTransferPlugin, singlelinePlugin } from "../plugins/index.js";
 import type { BlockNode, InlineNode } from "../doc/types.js";

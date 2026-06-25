@@ -6,7 +6,7 @@
 
 > **Undo**(`editor`): `void`
 
-Defined in: [plugins/history.ts:111](https://github.com/lofcz/edix/blob/d9da6da70816800733ae5769854e6cd585f2cdcf/src/plugins/history.ts#L111)
+Defined in: [plugins/history.ts:111](https://github.com/lofcz/edix/blob/95ab40cc3eb5ef63e0ae1a5780452a54a56f1a37/src/plugins/history.ts#L111)
 
 Undos the last edit.
 

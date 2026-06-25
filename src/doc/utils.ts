@@ -1,4 +1,4 @@
-import { isBlockNode, isTextNode } from "./edit.js";
+import { isBlockNode, isTextNode } from "./node.js";
 import {
   type BlockNode,
   type DocNode,

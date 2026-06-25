@@ -3,7 +3,7 @@ import { stringToFragment } from "./utils.js";
 import { type Fragment } from "./types.js";
 
 describe(stringToFragment.name, () => {
-  const tests: [string, Fragment][] = [
+  it.each<[string, Fragment]>([
     ["Hello world", [{ children: [{ text: "Hello world" }] }]],
     [
       "Hello\n world",
@@ -22,11 +22,7 @@ describe(stringToFragment.name, () => {
         { children: [{ text: "" }] },
       ],
     ],
-  ];
-
-  tests.forEach(([str, doc]) => {
-    it(str, () => {
-      expect(stringToFragment(str)).toEqual(doc);
-    });
+  ])(`$0`, (str, doc) => {
+    expect(stringToFragment(str)).toEqual(doc);
   });
 });

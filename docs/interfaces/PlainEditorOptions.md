@@ -4,7 +4,7 @@
 
 # Interface: PlainEditorOptions
 
-Defined in: [presets/plain.ts:21](https://github.com/lofcz/edix/blob/d9da6da70816800733ae5769854e6cd585f2cdcf/src/presets/plain.ts#L21)
+Defined in: [presets/plain.ts:21](https://github.com/lofcz/edix/blob/95ab40cc3eb5ef63e0ae1a5780452a54a56f1a37/src/presets/plain.ts#L21)
 
 ## Extends
 
@@ -16,7 +16,7 @@ Defined in: [presets/plain.ts:21](https://github.com/lofcz/edix/blob/d9da6da7081
 
 > **text**: `string`
 
-Defined in: [presets/plain.ts:28](https://github.com/lofcz/edix/blob/d9da6da70816800733ae5769854e6cd585f2cdcf/src/presets/plain.ts#L28)
+Defined in: [presets/plain.ts:28](https://github.com/lofcz/edix/blob/95ab40cc3eb5ef63e0ae1a5780452a54a56f1a37/src/presets/plain.ts#L28)
 
 Initial document text.
 
@@ -26,7 +26,7 @@ Initial document text.
 
 > `optional` **singleline?**: `boolean`
 
-Defined in: [presets/plain.ts:32](https://github.com/lofcz/edix/blob/d9da6da70816800733ae5769854e6cd585f2cdcf/src/presets/plain.ts#L32)
+Defined in: [presets/plain.ts:32](https://github.com/lofcz/edix/blob/95ab40cc3eb5ef63e0ae1a5780452a54a56f1a37/src/presets/plain.ts#L32)
 
 TODO
 
@@ -36,7 +36,7 @@ TODO
 
 > **onChange**: (`text`, `dirtyRange`) => `void`
 
-Defined in: [presets/plain.ts:36](https://github.com/lofcz/edix/blob/d9da6da70816800733ae5769854e6cd585f2cdcf/src/presets/plain.ts#L36)
+Defined in: [presets/plain.ts:36](https://github.com/lofcz/edix/blob/95ab40cc3eb5ef63e0ae1a5780452a54a56f1a37/src/presets/plain.ts#L36)
 
 Callback invoked when document changes.
 
@@ -60,7 +60,7 @@ Callback invoked when document changes.
 
 > `optional` **readonly?**: `boolean`
 
-Defined in: [editor.ts:121](https://github.com/lofcz/edix/blob/d9da6da70816800733ae5769854e6cd585f2cdcf/src/editor.ts#L121)
+Defined in: [editor.ts:123](https://github.com/lofcz/edix/blob/95ab40cc3eb5ef63e0ae1a5780452a54a56f1a37/src/editor.ts#L123)
 
 The state editable or not.
 
@@ -74,7 +74,7 @@ The state editable or not.
 
 > `optional` **isBlock?**: (`node`) => `boolean`
 
-Defined in: [editor.ts:125](https://github.com/lofcz/edix/blob/d9da6da70816800733ae5769854e6cd585f2cdcf/src/editor.ts#L125)
+Defined in: [editor.ts:127](https://github.com/lofcz/edix/blob/95ab40cc3eb5ef63e0ae1a5780452a54a56f1a37/src/editor.ts#L127)
 
 TODO
 
@@ -98,7 +98,7 @@ TODO
 
 > `optional` **autoScroll?**: `boolean`
 
-Defined in: [editor.ts:143](https://github.com/lofcz/edix/blob/d9da6da70816800733ae5769854e6cd585f2cdcf/src/editor.ts#L143)
+Defined in: [editor.ts:145](https://github.com/lofcz/edix/blob/95ab40cc3eb5ef63e0ae1a5780452a54a56f1a37/src/editor.ts#L145)
 
 Keep the caret visible inside the mounted element after document
 changes, behaving like a native `<textarea>`:
@@ -130,7 +130,7 @@ false
 
 > `optional` **onWarn?**: (`message`) => `void`
 
-Defined in: [editor.ts:149](https://github.com/lofcz/edix/blob/d9da6da70816800733ae5769854e6cd585f2cdcf/src/editor.ts#L149)
+Defined in: [editor.ts:151](https://github.com/lofcz/edix/blob/95ab40cc3eb5ef63e0ae1a5780452a54a56f1a37/src/editor.ts#L151)
 
 Callback invoked when errors happen.
 
@@ -160,7 +160,7 @@ console.warn
 
 > `optional` **onError?**: (`message`) => `never`
 
-Defined in: [editor.ts:155](https://github.com/lofcz/edix/blob/d9da6da70816800733ae5769854e6cd585f2cdcf/src/editor.ts#L155)
+Defined in: [editor.ts:157](https://github.com/lofcz/edix/blob/95ab40cc3eb5ef63e0ae1a5780452a54a56f1a37/src/editor.ts#L157)
 
 Callback invoked when errors happen.
 

@@ -11,16 +11,18 @@ import { createMutationObserver } from "./dom/mutation.js";
 import type { DocNode, Fragment, Selection } from "./doc/types.js";
 import { is, isFunction, isString, microtask } from "./utils.js";
 import {
-  applyOperation,
-  isTextNode,
-  type Operation,
-  isUnsafeOperation,
-  isValidSelection,
   domSelectionToSelection,
   selectionToDomSelection,
   positionToOffset,
+  isTextNode,
+} from "./doc/node.js";
+import {
+  applyOperation,
+  type Operation,
+  isUnsafeOperation,
+  isValidSelection,
   rebase,
-} from "./doc/edit.js";
+} from "./doc/operation.js";
 import { createParser } from "./dom/index.js";
 import { isCollapsed, toRange } from "./doc/position.js";
 import { historyPlugin } from "./plugins/history.js";
@@ -420,7 +422,7 @@ export const createEditor = <
           const [nextDoc, nextSelection] = applyOperation(doc, selection, op);
           if (!isUnsafeOperation(op) || validate(nextDoc)) {
             doc = nextDoc;
-            selection = nextSelection;
+            updateSelection(nextSelection);
           }
         } catch (e) {
           // rollback
@@ -688,10 +690,6 @@ export const createEditor = <
         const domRange = e.getTargetRanges()[0];
         if (domRange) {
           // Read input
-          const range = domSelectionToSelection(
-            doc,
-            serializeRange(element, parser, domRange),
-          );
           let data =
             inputType === "insertParagraph" || inputType === "insertLineBreak"
               ? "\n"
@@ -704,11 +702,15 @@ export const createEditor = <
             }
           }
 
-          let ops: Operation[];
           if (!inputTransaction) {
             inputTransaction = [[], selection];
           }
-          ops = inputTransaction[0];
+          const ops = inputTransaction[0];
+
+          const range = domSelectionToSelection(
+            doc,
+            serializeRange(element, parser, domRange),
+          );
           if (!isCollapsed(range)) {
             // replace or delete
             ops.push({ type: "delete", range });
