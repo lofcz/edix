@@ -593,10 +593,6 @@ export const createEditor = <
         const domRange = e.getTargetRanges()[0];
         if (domRange) {
           // Read input
-          const range = domSelectionToSelection(
-            doc,
-            serializeRange(element, parser, domRange),
-          );
           let data =
             inputType === "insertParagraph" || inputType === "insertLineBreak"
               ? "\n"
@@ -609,11 +605,15 @@ export const createEditor = <
             }
           }
 
-          let ops: Operation[];
           if (!inputTransaction) {
             inputTransaction = [[], selection];
           }
-          ops = inputTransaction[0];
+          const ops = inputTransaction[0];
+
+          const range = domSelectionToSelection(
+            doc,
+            serializeRange(element, parser, domRange),
+          );
           if (!isCollapsed(range)) {
             // replace or delete
             ops.push({ type: "delete", range });

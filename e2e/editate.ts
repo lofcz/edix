@@ -1,7 +1,7 @@
 import { BrowserContext, Locator } from "@playwright/test";
 import * as esbuild from "esbuild";
 import * as path from "node:path";
-import { DomPosition, SelectionSnapshot } from "../src/doc/types.ts";
+import { DomPosition } from "../src/doc/types.ts";
 import { TokenType } from "../src/dom/parser.ts";
 
 declare global {
