@@ -1,7 +1,6 @@
 import { describe, expect, it } from "vitest";
 import { applyOperation, isValidSelection } from "./operation.js";
 import { type Selection } from "./types.js";
-import { is } from "../utils.js";
 import { getNodeSize } from "./node.js";
 
 type Doc = {
@@ -55,7 +54,7 @@ describe("insert text", () => {
         text: "test",
       });
 
-      expect(is(res[0], doc)).toBe(true);
+      expect(res[0] === doc).toBe(true);
       expect(res[1]).toEqual(sel);
     });
 
@@ -75,7 +74,7 @@ describe("insert text", () => {
         text: "test",
       });
 
-      expect(is(res[0], doc)).toBe(true);
+      expect(res[0] === doc).toBe(true);
       expect(res[1]).toEqual(sel);
     });
 
@@ -95,7 +94,7 @@ describe("insert text", () => {
         text: "",
       });
 
-      expect(is(res[0], doc)).toBe(true);
+      expect(res[0] === doc).toBe(true);
       expect(res[1]).toEqual(sel);
     });
   });
@@ -808,7 +807,7 @@ describe("insert node", () => {
         fragment: [{ children: [{ text: "test" }] }],
       });
 
-      expect(is(res[0], doc)).toBe(true);
+      expect(res[0] === doc).toBe(true);
       expect(res[1]).toEqual(sel);
     });
 
@@ -828,7 +827,7 @@ describe("insert node", () => {
         fragment: [{ children: [{ text: "test" }] }],
       });
 
-      expect(is(res[0], doc)).toBe(true);
+      expect(res[0] === doc).toBe(true);
       expect(res[1]).toEqual(sel);
     });
 
@@ -848,7 +847,7 @@ describe("insert node", () => {
         fragment: [],
       });
 
-      expect(is(res[0], doc)).toBe(true);
+      expect(res[0] === doc).toBe(true);
       expect(res[1]).toEqual(sel);
     });
   });
@@ -1721,6 +1720,51 @@ describe("insert node", () => {
     });
     expect(res[1]).toEqual(sel);
   });
+
+  it("insert text at empty line", () => {
+    const docText = "abcde";
+    const doc: Doc = {
+      children: [{ attr: 0, children: [{ attr: 0, text: "" }] }],
+    };
+    const sel: Selection = [2, 2];
+    const res = applyOperation(doc, sel, {
+      type: "insert_node",
+      at: 0,
+      fragment: [{ children: [{ text: docText }] }],
+    });
+
+    expect(res[0]).toEqual({
+      children: [
+        {
+          attr: 0,
+          children: [{ text: docText }],
+        },
+      ],
+    });
+    expect(res[1]).toEqual([sel[0] + docText.length, sel[1] + docText.length]);
+  });
+
+  it("insert void at empty line", () => {
+    const doc: Doc = {
+      children: [{ attr: 0, children: [{ attr: 0, text: "" }] }],
+    };
+    const sel: Selection = [2, 2];
+    const res = applyOperation(doc, sel, {
+      type: "insert_node",
+      at: 0,
+      fragment: [{ children: [{ foo: "bar" }] }],
+    });
+
+    expect(res[0]).toEqual({
+      children: [
+        {
+          attr: 0,
+          children: [{ foo: "bar" }],
+        },
+      ],
+    });
+    expect(res[1]).toEqual([sel[0] + 1, sel[1] + 1]);
+  });
 });
 
 describe("delete", () => {
@@ -1736,7 +1780,7 @@ describe("delete", () => {
         range: [-1, 1],
       });
 
-      expect(is(res[0], doc)).toBe(true);
+      expect(res[0] === doc).toBe(true);
       expect(res[1]).toEqual(sel);
     });
 
@@ -1751,7 +1795,7 @@ describe("delete", () => {
         range: [0, 100],
       });
 
-      expect(is(res[0], doc)).toBe(true);
+      expect(res[0] === doc).toBe(true);
       expect(res[1]).toEqual(sel);
     });
 
@@ -1766,7 +1810,7 @@ describe("delete", () => {
         range: [1, 1],
       });
 
-      expect(is(res[0], doc)).toBe(true);
+      expect(res[0] === doc).toBe(true);
       expect(res[1]).toEqual(sel);
     });
 
@@ -1781,7 +1825,7 @@ describe("delete", () => {
         range: [2, 1],
       });
 
-      expect(is(res[0], doc)).toBe(true);
+      expect(res[0] === doc).toBe(true);
       expect(res[1]).toEqual(sel);
     });
   });
@@ -2315,6 +2359,61 @@ describe("delete", () => {
     expect(res[1]).toEqual(sel);
   });
 
+  it("delete text to empty line", () => {
+    const docText = "abcde";
+    const doc = {
+      children: [
+        {
+          attr: 0,
+          children: [{ attr: 0, text: docText }],
+        },
+      ],
+    };
+    const sel: Selection = [0, docText.length];
+
+    const res = applyOperation(doc, sel, {
+      type: "delete",
+      range: [0, docText.length],
+    });
+
+    expect(res[0]).toEqual({
+      children: [
+        {
+          attr: 0,
+          children: [{ attr: 0, text: "" }],
+        },
+      ],
+    });
+    expect(res[1]).toEqual([0, 0]);
+  });
+
+  it("delete void to empty line", () => {
+    const doc = {
+      children: [
+        {
+          attr: 0,
+          children: [{ foo: "bar" }],
+        },
+      ],
+    };
+    const sel: Selection = [0, 1];
+
+    const res = applyOperation(doc, sel, {
+      type: "delete",
+      range: [0, 1],
+    });
+
+    expect(res[0]).toEqual({
+      children: [
+        {
+          attr: 0,
+          children: [{ text: "" }],
+        },
+      ],
+    });
+    expect(res[1]).toEqual([0, 0]);
+  });
+
   it("delete empty line from the start", () => {
     const docText = "abcde";
     const docText2 = "fghij";
@@ -2472,6 +2571,88 @@ describe("delete", () => {
     });
     expect(res[1]).toEqual(sel);
   });
+
+  describe("single line document", () => {
+    it("delete text before caret", () => {
+      const docText = "abcde";
+      const doc = { attr: 0, children: [{ attr: 0, text: docText }] };
+      const sel: Selection = [3, 3];
+      const res = applyOperation(doc, sel, {
+        type: "delete",
+        range: [1, 2],
+      });
+
+      expect(res[0]).toEqual({
+        attr: 0,
+        children: [{ attr: 0, text: deleteAt(docText, 1, 1) }],
+      });
+      expect(res[1]).toEqual([sel[0] + -1, sel[1] + -1]);
+    });
+
+    it("delete text just before caret", () => {
+      const docText = "abcde";
+      const doc = { attr: 0, children: [{ attr: 0, text: docText }] };
+      const sel: Selection = [3, 3];
+      const res = applyOperation(doc, sel, {
+        type: "delete",
+        range: [2, 3],
+      });
+
+      expect(res[0]).toEqual({
+        attr: 0,
+        children: [{ attr: 0, text: deleteAt(docText, 2, 1) }],
+      });
+      expect(res[1]).toEqual([sel[0] + -1, sel[1] + -1]);
+    });
+
+    it("delete text around caret", () => {
+      const docText = "abcde";
+      const doc = { attr: 0, children: [{ attr: 0, text: docText }] };
+      const sel: Selection = [3, 3];
+      const res = applyOperation(doc, sel, {
+        type: "delete",
+        range: [2, 4],
+      });
+
+      expect(res[0]).toEqual({
+        attr: 0,
+        children: [{ attr: 0, text: deleteAt(docText, 2, 2) }],
+      });
+      expect(res[1]).toEqual([sel[0] + -1, sel[1] + -1]);
+    });
+
+    it("delete text just after caret", () => {
+      const docText = "abcde";
+      const doc = { attr: 0, children: [{ attr: 0, text: docText }] };
+      const sel: Selection = [3, 3];
+      const res = applyOperation(doc, sel, {
+        type: "delete",
+        range: [3, 4],
+      });
+
+      expect(res[0]).toEqual({
+        attr: 0,
+        children: [{ attr: 0, text: deleteAt(docText, 3, 1) }],
+      });
+      expect(res[1]).toEqual(sel);
+    });
+
+    it("delete text after caret", () => {
+      const docText = "abcde";
+      const doc = { attr: 0, children: [{ attr: 0, text: docText }] };
+      const sel: Selection = [3, 3];
+      const res = applyOperation(doc, sel, {
+        type: "delete",
+        range: [4, 5],
+      });
+
+      expect(res[0]).toEqual({
+        attr: 0,
+        children: [{ attr: 0, text: deleteAt(docText, 4, 1) }],
+      });
+      expect(res[1]).toEqual(sel);
+    });
+  });
 });
 
 describe("format", () => {
@@ -2489,7 +2670,7 @@ describe("format", () => {
         value: "bar",
       });
 
-      expect(is(res[0], doc)).toBe(true);
+      expect(res[0] === doc).toBe(true);
       expect(res[1]).toEqual(sel);
     });
 
@@ -2506,7 +2687,7 @@ describe("format", () => {
         value: "bar",
       });
 
-      expect(is(res[0], doc)).toBe(true);
+      expect(res[0] === doc).toBe(true);
       expect(res[1]).toEqual(sel);
     });
 
@@ -2523,7 +2704,7 @@ describe("format", () => {
         value: "bar",
       });
 
-      expect(is(res[0], doc)).toBe(true);
+      expect(res[0] === doc).toBe(true);
       expect(res[1]).toEqual(sel);
     });
 
@@ -2540,7 +2721,7 @@ describe("format", () => {
         value: "bar",
       });
 
-      expect(is(res[0], doc)).toBe(true);
+      expect(res[0] === doc).toBe(true);
       expect(res[1]).toEqual(sel);
     });
   });
@@ -2929,7 +3110,7 @@ describe("format", () => {
   });
 });
 
-describe("set attr", () => {
+describe("patch node", () => {
   describe("validation", () => {
     it("path less than min", () => {
       const docText = "abcde";
@@ -2938,13 +3119,13 @@ describe("set attr", () => {
       };
       const sel: Selection = [2, 2];
       const res = applyOperation(doc, sel, {
-        type: "set_node_attr",
+        type: "patch_node",
         path: [-1],
         key: "foo",
         value: "bar",
       });
 
-      expect(is(res[0], doc)).toBe(true);
+      expect(res[0] === doc).toBe(true);
       expect(res[1]).toEqual(sel);
     });
 
@@ -2955,13 +3136,13 @@ describe("set attr", () => {
       };
       const sel: Selection = [2, 2];
       const res = applyOperation(doc, sel, {
-        type: "set_node_attr",
+        type: "patch_node",
         path: [100],
         key: "foo",
         value: "bar",
       });
 
-      expect(is(res[0], doc)).toBe(true);
+      expect(res[0] === doc).toBe(true);
       expect(res[1]).toEqual(sel);
     });
   });
@@ -2977,7 +3158,7 @@ describe("set attr", () => {
     };
     const sel: Selection = [docText.length + 1 + 2, docText.length + 1 + 2];
     const res = applyOperation(doc, sel, {
-      type: "set_node_attr",
+      type: "patch_node",
       path: [],
       key: "foo",
       value: "bar",
@@ -3004,7 +3185,7 @@ describe("set attr", () => {
     };
     const sel: Selection = [docText.length + 1 + 2, docText.length + 1 + 2];
     const res = applyOperation(doc, sel, {
-      type: "set_node_attr",
+      type: "patch_node",
       path: [0],
       key: "foo",
       value: "bar",
@@ -3030,7 +3211,7 @@ describe("set attr", () => {
     };
     const sel: Selection = [docText.length + 1 + 2, docText.length + 1 + 2];
     const res = applyOperation(doc, sel, {
-      type: "set_node_attr",
+      type: "patch_node",
       path: [1],
       key: "foo",
       value: "bar",
@@ -3040,6 +3221,69 @@ describe("set attr", () => {
       children: [
         { attr: 0, children: [{ attr: 0, text: docText }] },
         { attr: 1, foo: "bar", children: [{ attr: 0, text: docText2 }] },
+      ],
+    });
+    expect(res[1]).toEqual(sel);
+  });
+
+  it("update text node", () => {
+    const docText = "abcde";
+    const docText2 = "fghij";
+    const doc: Doc = {
+      children: [
+        { attr: 0, children: [{ attr: 0, text: docText }] },
+        { attr: 1, children: [{ attr: 0, text: docText2 }] },
+      ],
+    };
+    const sel: Selection = [2, 2];
+    const res = applyOperation(doc, sel, {
+      type: "patch_node",
+      path: [0, 0],
+      key: "foo",
+      value: "bar",
+    });
+
+    expect(res[0]).toEqual({
+      children: [
+        {
+          attr: 0,
+          children: [
+            {
+              attr: 0,
+              text: docText,
+              foo: "bar",
+            },
+          ],
+        },
+        { attr: 1, children: [{ attr: 0, text: docText2 }] },
+      ],
+    });
+    expect(res[1]).toEqual(sel);
+  });
+
+  it("update void node", () => {
+    const docText2 = "fghij";
+    const doc = {
+      children: [
+        { attr: 0, children: [{ attr: 0, foo: "baz" }] },
+        { attr: 1, children: [{ attr: 0, text: docText2 }] },
+      ],
+    };
+    const sel: Selection = [2, 2];
+    const res = applyOperation(doc, sel, {
+      type: "patch_node",
+      path: [0, 0],
+      key: "foo",
+      value: "bar",
+    });
+
+    expect(res[0]).toEqual({
+      children: [
+        {
+          attr: 0,
+          children: [{ attr: 0, foo: "bar" }],
+        },
+        { attr: 1, children: [{ attr: 0, text: docText2 }] },
       ],
     });
     expect(res[1]).toEqual(sel);

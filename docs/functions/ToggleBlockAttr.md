@@ -6,7 +6,7 @@
 
 > **ToggleBlockAttr**\<`T`, `N`, `K`\>(`editor`, `key`, `onValue`, `offValue`, `offset?`): `void`
 
-Defined in: [commands.ts:188](https://github.com/lofcz/edix/blob/95ab40cc3eb5ef63e0ae1a5780452a54a56f1a37/src/commands.ts#L188)
+Defined in: [commands.ts:190](https://github.com/lofcz/edix/blob/0e357c953ddd75875cd59f2e802f280583301d1c/src/commands.ts#L190)
 
 Toggle attr of block node at the caret or specified position.
 
@@ -18,7 +18,7 @@ Toggle attr of block node at the caret or specified position.
 
 ### N
 
-`N` *extends* `DocNode` & BlockNode & InlineNode
+`N` *extends* `DocNode` \| `object` & `DocNode`
 
 ### K
 
@@ -36,11 +36,11 @@ Toggle attr of block node at the caret or specified position.
 
 ### onValue
 
-`N`\[`K`\]
+`ExtractAttrValue`\<`N`, `K`\>
 
 ### offValue
 
-`N`\[`K`\]
+`ExtractAttrValue`\<`N`, `K`\>
 
 ### offset?
 

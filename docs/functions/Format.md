@@ -6,7 +6,7 @@
 
 > **Format**\<`T`, `N`, `K`\>(`editor`, `key`, `value`, `range?`): `void`
 
-Defined in: [commands.ts:122](https://github.com/lofcz/edix/blob/95ab40cc3eb5ef63e0ae1a5780452a54a56f1a37/src/commands.ts#L122)
+Defined in: [commands.ts:125](https://github.com/lofcz/edix/blob/0e357c953ddd75875cd59f2e802f280583301d1c/src/commands.ts#L125)
 
 Format content in the selection or specified range.
 
@@ -18,7 +18,7 @@ Format content in the selection or specified range.
 
 ### N
 
-`N` *extends* `Omit`\<`InferInlineNode`\<`T`\>, `"text"`\>
+`N` *extends* `Omit`\<[`InferTextNode`](../type-aliases/InferTextNode.md)\<`T`\>, `"text"`\>
 
 ### K
 

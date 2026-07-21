@@ -1,5 +1,13 @@
 import { type TokenType, type Parser, TOKEN_BLOCK } from "./parser.js";
-import type { DomPosition, SelectionSnapshot, Path } from "../doc/types.js";
+import type {
+  DocNode,
+  Selection as JsSelection,
+  DomPosition,
+  DomSelection,
+  Path,
+} from "../doc/types.js";
+import { selectionToDomSelection } from "../doc/node.js";
+import { isCollapsed } from "../doc/position.js";
 import { min } from "../utils.js";
 import { isElementNode } from "./utils.js";
 
@@ -50,54 +58,67 @@ export const getSelectionRangeInEditor = (
   }
 };
 
+export const selectionToRange = (
+  root: Element,
+  parse: Parser,
+  doc: DocNode,
+  sel: JsSelection,
+): Range => {
+  const [anchor, focus] = selectionToDomSelection(doc, sel);
+
+  const document = getCurrentDocument(root);
+  const collapsed = isCollapsed(sel);
+  const backward = sel[0] - sel[1] > 0;
+  const start = backward ? focus : anchor;
+  const end = backward ? anchor : focus;
+
+  const domStart = findPosition(root, parse, start);
+  const domEnd = collapsed ? domStart : findPosition(root, parse, end);
+
+  const range = document.createRange();
+
+  const [startNode, startOffset] = domStart;
+  const [endNode, endOffset] = domEnd;
+
+  // embed or br
+  if (isElementNode(startNode) && root !== startNode) {
+    if (startOffset < 1) {
+      range.setStartBefore(startNode);
+    } else {
+      range.setStartAfter(startNode);
+    }
+  } else {
+    range.setStart(startNode, startOffset);
+  }
+
+  // embed or br
+  if (isElementNode(endNode) && root !== endNode) {
+    if (endOffset < 1) {
+      range.setEndBefore(endNode);
+    } else {
+      range.setEndAfter(endNode);
+    }
+  } else {
+    range.setEnd(endNode, endOffset);
+  }
+  return range;
+};
+
 /**
  * @internal
  */
 export const setSelectionToDOM = (
-  document: Document,
   root: Element,
   parse: Parser,
-  [anchor, focus]: SelectionSnapshot,
-  posDiff: number, // TODO remove
+  doc: DocNode,
+  sel: JsSelection,
   force?: boolean,
 ): void => {
   const selection = getDOMSelection(root);
 
   if (force || getSelectionRangeInEditor(selection, root)) {
-    const isCollapsed = posDiff === 0;
-    const backward = posDiff > 0;
-    const start = backward ? focus : anchor;
-    const end = backward ? anchor : focus;
-
-    const domStart = findPosition(root, parse, start);
-    const domEnd = isCollapsed ? domStart : findPosition(root, parse, end);
-
-    const range = document.createRange();
-
-    const [startNode, startOffset] = domStart;
-    const [endNode, endOffset] = domEnd;
-
-    // embed or br
-    if (isElementNode(startNode) && root !== startNode) {
-      if (startOffset < 1) {
-        range.setStartBefore(startNode);
-      } else {
-        range.setStartAfter(startNode);
-      }
-    } else {
-      range.setStart(startNode, startOffset);
-    }
-
-    // embed or br
-    if (isElementNode(endNode) && root !== endNode) {
-      if (endOffset < 1) {
-        range.setEndBefore(endNode);
-      } else {
-        range.setEndAfter(endNode);
-      }
-    } else {
-      range.setEnd(endNode, endOffset);
-    }
+    const range = selectionToRange(root, parse, doc, sel);
+    const backward = sel[0] - sel[1] > 0;
 
     selection.removeAllRanges();
     selection.addRange(range);
@@ -169,7 +190,7 @@ export const serializePosition = (
   let excludeEnd = true;
   if (root === node && !node.hasChildNodes()) {
     // for placeholder
-    return [[0], 0];
+    return [[], 0];
   }
 
   if (isElementNode(node) && node.hasChildNodes()) {
@@ -215,10 +236,6 @@ export const serializePosition = (
           }
           p.unshift(i);
           parentBlock();
-        }
-
-        if (!p.length) {
-          return [0];
         }
 
         return p;
@@ -268,7 +285,7 @@ export const serializeRange = (
 export const takeSelectionSnapshot = (
   root: Element,
   parse: Parser,
-): SelectionSnapshot => {
+): DomSelection => {
   const selection = getDOMSelection(root);
   const domRange = getSelectionRangeInEditor(selection, root);
   if (!domRange) {

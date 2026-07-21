@@ -24,7 +24,7 @@
   "scripts": {
     "build": "vite build",
     "tsc": "tsc -p . --noEmit",
-    "test": "vitest --run --project=unit",
+    "test": "vitest --run --project=unit --typecheck",
     "test:browser": "vitest --run --project=browser",
     "format": "prettier '**/*.{js,ts,jsx,tsx}' --write --cache",
     "format:ci": "prettier '**/*.{js,ts,jsx,tsx}' -l",
@@ -54,6 +54,7 @@
     "jsdom": "^29.1.1",
     "kuromojin": "^3.0.1",
     "linkifyjs": "^4.3.1",
+    "node-emoji": "^2.2.0",
     "patch-package": "^8.0.0",
     "path-browserify": "^1.0.1",
     "prettier": "^3.8.1",

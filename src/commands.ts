@@ -1,20 +1,20 @@
-import { isCollapsed, toRange } from "./doc/position.js";
+import { toRange } from "./doc/position.js";
 import {
-  getBlockAt,
-  getInlineAt,
+  getLeafBlockAt,
+  getLeafAt,
   getNodeSize,
   isTextNode,
-  sliceFragment,
 } from "./doc/node.js";
 import type { Editor } from "./editor.js";
+import type { DocNode, Range } from "./doc/types.js";
 import type {
-  DocNode,
-  InferBlockNode,
+  ExtractAttrValue,
   InferInlineNode,
-  InlineNode,
-  Range,
-  TextNode,
-} from "./doc/types.js";
+  InferLeafBlockNode,
+  InferTextNode,
+  InferVoidNode,
+} from "./doc/types-infer.js";
+import { LeavesInRange } from "./queries.js";
 
 /**
  * Delete content in the selection or specified range.
@@ -32,9 +32,9 @@ export function Delete(
 export function InsertText(
   editor: Editor,
   text: string,
-  position: number = editor.selection[0],
+  at: number = editor.selection[0],
 ) {
-  editor.apply({ type: "insert_text", at: position, text });
+  editor.apply({ type: "insert_text", at, text });
 }
 
 /**
@@ -42,12 +42,12 @@ export function InsertText(
  */
 export function InsertNode<T extends DocNode>(
   editor: Editor<T>,
-  node: Exclude<InferInlineNode<T>, TextNode>,
-  position: number = editor.selection[0],
+  node: InferVoidNode<T>,
+  at: number = editor.selection[0],
 ) {
   editor.apply({
     type: "insert_node",
-    at: position,
+    at,
     fragment: [{ children: [node] }],
   });
 }
@@ -73,8 +73,11 @@ export function InsertNodes<T extends DocNode>(
 /**
  * Replace text in the selection or specified range.
  */
-export function ReplaceText(editor: Editor, text: string) {
-  const range = toRange(editor.selection);
+export function ReplaceText(
+  editor: Editor,
+  text: string,
+  range: Range = toRange(editor.selection),
+) {
   editor
     .apply({ type: "delete", range })
     .apply({ type: "insert_text", at: range[0], text });
@@ -89,7 +92,7 @@ export function ReplaceDoc<T extends DocNode>(
 ) {
   // TODO revisit
   editor.apply({
-    type: "set_node_attr",
+    type: "patch_node",
     path: [],
     key: "children",
     value: fragment,
@@ -121,7 +124,7 @@ type ToggleableKey<T> = {
  */
 export function Format<
   T extends DocNode,
-  N extends Omit<InferInlineNode<T>, "text">,
+  N extends Omit<InferTextNode<T>, "text">,
   K extends Extract<keyof N, string>,
 >(
   editor: Editor<T>,
@@ -137,32 +140,31 @@ export function Format<
  */
 export function ToggleFormat<T extends DocNode>(
   editor: Editor<T>,
-  key: Extract<ToggleableKey<Omit<InferInlineNode<T>, "text">>, string>,
+  key: Extract<ToggleableKey<Omit<InferTextNode<T>, "text">>, string>,
   range: Range = toRange(editor.selection),
 ) {
-  // TODO improve
-  let inlines: InlineNode[];
-  if (isCollapsed(range)) {
-    const inline = getInlineAt(editor.doc, range[0]);
-    if (inline) {
-      inlines = [inline[0]];
-    } else {
-      return;
+  let shouldFormat = false;
+  let hasText = false;
+  for (const n of editor.exec(LeavesInRange, range)) {
+    if (isTextNode(n)) {
+      hasText = true;
+      if (!n[key as keyof typeof n]) {
+        shouldFormat = true;
+        break;
+      }
     }
-  } else {
-    inlines = sliceFragment(editor.doc, ...range).flatMap((n) => n.children);
   }
 
-  const texts = inlines.filter(isTextNode);
-
-  if (texts.length) {
-    editor.apply({
-      type: "format",
-      range,
-      key,
-      value: texts.some((n) => !n[key as keyof typeof n]) ? true : false,
-    });
+  if (!hasText) {
+    return;
   }
+
+  editor.apply({
+    type: "format",
+    range,
+    key,
+    value: shouldFormat,
+  });
 }
 
 /**
@@ -170,16 +172,16 @@ export function ToggleFormat<T extends DocNode>(
  */
 export function SetBlockAttr<
   T extends DocNode,
-  N extends InferBlockNode<T>,
-  K extends Extract<keyof N, string>,
+  N extends InferLeafBlockNode<T>,
+  K extends string,
 >(
   editor: Editor<T>,
   key: K,
-  value: N[K],
+  value: ExtractAttrValue<N, K>,
   offset: number = editor.selection[0],
 ) {
-  const path = getBlockAt(editor.doc, offset)[2];
-  editor.apply({ type: "set_node_attr", path, key, value });
+  const path = getLeafBlockAt(editor.doc, offset)[2];
+  editor.apply({ type: "patch_node", path, key, value });
 }
 
 /**
@@ -187,20 +189,39 @@ export function SetBlockAttr<
  */
 export function ToggleBlockAttr<
   T extends DocNode,
-  N extends InferBlockNode<T>,
-  K extends Extract<keyof N, string>,
+  N extends InferLeafBlockNode<T>,
+  K extends string,
 >(
   editor: Editor<T>,
   key: K,
-  onValue: N[K],
-  offValue: N[K],
+  onValue: ExtractAttrValue<N, K>,
+  offValue: ExtractAttrValue<N, K>,
   offset: number = editor.selection[0],
 ) {
-  const [block, , path] = getBlockAt(editor.doc, offset);
+  const [block, , path] = getLeafBlockAt(editor.doc, offset);
   editor.apply({
-    type: "set_node_attr",
+    type: "patch_node",
     path,
     key,
-    value: (block as N)[key] === onValue ? offValue : onValue,
+    value: block[key as keyof typeof block] === onValue ? offValue : onValue,
   });
+}
+
+/**
+ * Set attr to a void node at the caret or specified position.
+ */
+export function SetVoidAttr<
+  T extends DocNode,
+  N extends InferVoidNode<T>,
+  K extends string,
+>(
+  editor: Editor<T>,
+  key: K,
+  value: ExtractAttrValue<N, K>,
+  offset: number = editor.selection[0],
+) {
+  const leaf = getLeafAt(editor.doc, offset, true);
+  if (leaf && !isTextNode(leaf[0])) {
+    editor.apply({ type: "patch_node", path: leaf[2], key, value });
+  }
 }

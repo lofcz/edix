@@ -12,8 +12,8 @@ import type { DocNode, Fragment, Selection } from "./doc/types.js";
 import { is, isFunction, isString, microtask } from "./utils.js";
 import {
   domSelectionToSelection,
-  selectionToDomSelection,
   positionToOffset,
+  isBlockNode,
   isTextNode,
 } from "./doc/node.js";
 import {
@@ -225,8 +225,11 @@ export interface Editor<T extends DocNode = DocNode> {
    * @param fn {@link EditorCommandOrPlugin} or {@link EditorQuery}
    * @param args arguments of the function
    */
-  exec<A extends unknown[]>(fn: EditorCommandOrPlugin<A, T>, ...args: A): this;
-  exec<A extends unknown[], V>(fn: EditorQuery<A, V, T>, ...args: A): V;
+  exec<const A extends unknown[]>(
+    fn: EditorCommandOrPlugin<A, T>,
+    ...args: A
+  ): this;
+  exec<const A extends unknown[], V>(fn: EditorQuery<A, V, T>, ...args: A): V;
   /**
    * A function to subscribe editor events.
    * @returns cleanup function
@@ -316,13 +319,18 @@ export const createEditor = <
   };
 
   // O(n) walk over the doc; cached after each commit so `editor.isEmpty`
-  // remains O(1) for callers.
+  // remains O(1) for callers. Supports both block docs and single-line
+  // (inline-children) docs from upstream.
   const computeEmpty = (value: DocNode): boolean => {
-    for (const block of value.children) {
-      for (const node of block.children) {
-        if (!isTextNode(node) || node.text.length > 0) {
-          return false;
+    for (const child of value.children) {
+      if (isBlockNode(child)) {
+        for (const node of child.children) {
+          if (!isTextNode(node) || node.text.length > 0) {
+            return false;
+          }
         }
+      } else if (!isTextNode(child) || child.text.length > 0) {
+        return false;
       }
     }
     return true;
@@ -557,6 +565,8 @@ export const createEditor = <
       let isComposing = false;
       let hasFocus = false;
       let isDragging = false;
+      let domSelection: Selection = selection;
+      let syncDomSelectionTimer: ReturnType<typeof setTimeout> | null = null;
 
       const document = getCurrentDocument(element);
 
@@ -572,15 +582,42 @@ export const createEditor = <
 
       setEditableState();
 
+      const syncFocus = () => {
+        if (!hasFocus) {
+          // Set focus imperatively to return focus to the editor after a command execution via click.
+          // It must be queued after the MO callback because that may cause an additional selectionchange event.
+          element.focus({ preventScroll: true });
+        }
+      };
+      const syncDomSelection = () => {
+        syncDomSelectionTimer = null;
+        if (
+          selection[0] !== domSelection[0] ||
+          selection[1] !== domSelection[1]
+        ) {
+          setSelectionToDOM(element, parser, doc, selection);
+          domSelection = selection;
+        }
+      };
+      const cancelSyncDomSelection = () => {
+        if (syncDomSelectionTimer != null) {
+          clearTimeout(syncDomSelectionTimer);
+        }
+      };
+
       const cleanupOnChange = editor.on("change", () => {
         if (!hasFocus) {
-          requestAnimationFrame(() => {
-            if (!hasFocus) {
-              // Set focus imperatively to return focus to the editor after a command execution via click.
-              // It must be queued after the MO callback because that may cause an additional selectionchange event.
-              element.focus({ preventScroll: true });
-            }
-          });
+          requestAnimationFrame(syncFocus);
+        }
+      });
+      const cleanupOnSelectionChange = editor.on("selectionchange", () => {
+        if (
+          selection[0] !== domSelection[0] ||
+          selection[1] !== domSelection[1]
+        ) {
+          cancelSyncDomSelection();
+          // Use setTimeout to ensure synchronization is done after the mutation caused by re-render, especially on Firefox
+          syncDomSelectionTimer = setTimeout(syncDomSelection, 50);
         }
       });
       const cleanupOnReadonly = editor.on("readonly", setEditableState);
@@ -596,20 +633,18 @@ export const createEditor = <
       };
 
       const observer = createMutationObserver(element, () => {
+        cancelSyncDomSelection();
         // TODO optimize
         // Mutation to selected DOM may change selection, so restore it.
-        setSelectionToDOM(
-          document,
-          element,
-          parser,
-          selectionToDomSelection(doc, selection),
-          selection[0] - selection[1],
-        );
+        setSelectionToDOM(element, parser, doc, selection);
       });
 
       const syncSelection = () => {
         updateSelection(
-          domSelectionToSelection(doc, takeSelectionSnapshot(element, parser)),
+          (domSelection = domSelectionToSelection(
+            doc,
+            takeSelectionSnapshot(element, parser),
+          )),
         );
       };
 
@@ -625,14 +660,7 @@ export const createEditor = <
           // Updating selection may schedule the next selectionchange event
           // It should be ignored especially in firefox not to confuse editor state
           document.removeEventListener("selectionchange", onSelectionChange);
-          setSelectionToDOM(
-            document,
-            element,
-            parser,
-            selectionToDomSelection(doc, selection),
-            selection[0] - selection[1],
-            true,
-          );
+          setSelectionToDOM(element, parser, doc, selection, true);
           document.addEventListener("selectionchange", onSelectionChange);
         }
 
@@ -745,7 +773,7 @@ export const createEditor = <
 
       const onSelectionChange = () => {
         // Safari may dispatch selectionchange event after dragstart
-        if (hasFocus && !isComposing && !isDragging) {
+        if (hasFocus && !isDragging) {
           syncSelection();
         }
       };
@@ -813,6 +841,9 @@ export const createEditor = <
             updateSelection(afterSelection);
           }
         }
+
+        // dragend event may not fire when the drop target node is re-rendered
+        isDragging = false;
       };
       const onDragStart = (e: DragEvent) => {
         isDragging = true;
@@ -850,6 +881,7 @@ export const createEditor = <
         disposed = true;
 
         cleanupOnChange();
+        cleanupOnSelectionChange();
         cleanupOnReadonly();
 
         if (scrollRAF) {

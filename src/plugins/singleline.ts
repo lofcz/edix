@@ -1,3 +1,4 @@
+import { hasBlockChildren } from "../doc/node.js";
 import { joinBlocks } from "../doc/operation.js";
 import type { Editor } from "../editor.js";
 
@@ -15,9 +16,12 @@ export function singlelinePlugin(editor: Editor) {
         text: op.text.replaceAll("\n", ""),
       };
     } else if (op.type === "insert_node") {
+      const fragment = op.fragment;
       op = {
         ...op,
-        fragment: [joinBlocks(...op.fragment)],
+        fragment: hasBlockChildren(fragment)
+          ? [joinBlocks(...fragment)]
+          : fragment,
       };
     }
     next(op);

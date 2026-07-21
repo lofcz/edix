@@ -1,3 +1,9 @@
+import { max, min } from "../utils.js";
+import type {
+  InferInlineNode,
+  InferLeafBlockNode,
+  InferVoidNode,
+} from "./types-infer.js";
 import type {
   BlockNode,
   DocNode,
@@ -6,8 +12,10 @@ import type {
   Path,
   TextNode,
   DomPosition,
-  SelectionSnapshot,
+  DomSelection,
   Selection,
+  Fragment,
+  Range,
 } from "./types.js";
 
 /**
@@ -20,6 +28,15 @@ export const isTextNode = (node: Node): node is TextNode => "text" in node;
  */
 export const isBlockNode = (node: Node): node is BlockNode =>
   "children" in node;
+
+/**
+ * @internal
+ */
+export const hasBlockChildren = (
+  children: Fragment,
+): children is Extract<typeof children, readonly BlockNode[]> => {
+  return children.some(isBlockNode);
+};
 
 const sizeCache = new WeakMap<BlockNode, number>();
 
@@ -52,21 +69,25 @@ export const getNodeSize = (node: Node): number => {
   return isTextNode(node) ? node.text.length : 1;
 };
 
-/**
- * @internal
- */
 export const getChildAt = <T extends BlockNode>(
   { children }: T,
   offset: number,
+  isBackwardAffinity?: boolean,
 ): [node: T["children"][number], offset: number, index: number] | null => {
+  // TODO optimize
   const length = children.length;
   for (let i = 0; i < length; i++) {
     const node = children[i]!;
+    const isBlock = isBlockNode(node);
     let size = getNodeSize(node);
-    if (isBlockNode(node)) {
+    const isEmptyNode = size === 0;
+    if (isBlock) {
       size++;
     }
-    if (size > offset || (size === offset && isTextNode(node) && !node.text)) {
+    if (
+      size > offset ||
+      (size === offset && !isBlock && (isBackwardAffinity || isEmptyNode))
+    ) {
       return [node, offset, i];
     }
     offset -= size;
@@ -74,13 +95,10 @@ export const getChildAt = <T extends BlockNode>(
   return null;
 };
 
-/**
- * @internal
- */
-export const getBlockAt = (
-  node: DocNode | BlockNode,
+export const getLeafBlockAt = <T extends DocNode | BlockNode>(
+  node: T,
   offset: number,
-): [node: BlockNode, offset: number, path: Path] => {
+): [node: InferLeafBlockNode<T>, offset: number, path: Path] => {
   const path: number[] = [];
   while (node) {
     const found = getChildAt(node, offset);
@@ -92,23 +110,22 @@ export const getBlockAt = (
       break;
     }
     offset = found[1];
-    node = nextNode;
+    node = nextNode as T;
     path.push(found[2]);
   }
-  return [node, offset, path];
+  return [node as InferLeafBlockNode<T>, offset, path];
 };
 
-/**
- * @internal
- */
-export const getInlineAt = (
+export const getLeafAt = (
   node: DocNode | BlockNode,
   offset: number,
-): [node: InlineNode, offset: number] | null => {
-  const [blockNode, blockOffset] = getBlockAt(node, offset);
-  const inline = getChildAt(blockNode, blockOffset);
+  isBackwardAffinity?: boolean,
+): [node: InlineNode, offset: number, path: Path] | null => {
+  const [blockNode, blockOffset, path] = getLeafBlockAt(node, offset);
+  const inline = getChildAt(blockNode, blockOffset, isBackwardAffinity);
   if (inline) {
-    return [inline[0], inline[1]];
+    (path as number[]).push(inline[2]);
+    return [inline[0], inline[1], path];
   }
   return null;
 };
@@ -185,7 +202,7 @@ export const offsetToPosition = (
   node: DocNode | BlockNode,
   offset: number,
 ): DomPosition => {
-  const [, blockOffset, path] = getBlockAt(node, offset);
+  const [, blockOffset, path] = getLeafBlockAt(node, offset);
   return [path, blockOffset];
 };
 
@@ -194,7 +211,7 @@ export const offsetToPosition = (
  */
 export const domSelectionToSelection = (
   doc: DocNode,
-  [anchor, focus]: SelectionSnapshot,
+  [anchor, focus]: DomSelection,
 ): Selection => {
   return [positionToOffset(doc, anchor), positionToOffset(doc, focus)];
 };
@@ -205,8 +222,106 @@ export const domSelectionToSelection = (
 export const selectionToDomSelection = (
   doc: DocNode,
   [anchor, focus]: Selection,
-): SelectionSnapshot => {
+): DomSelection => {
   return [offsetToPosition(doc, anchor), offsetToPosition(doc, focus)];
+};
+
+function* iterChildren<T extends Node>(
+  node: T,
+  [start, end]: Range,
+): Generator<[node: Node, offset: number], void, void> {
+  if (start >= end) {
+    return;
+  }
+  if (!isBlockNode(node)) {
+    return;
+  }
+  const res = getChildAt(node, start);
+  if (res) {
+    let offset = start - res[1];
+    let i = res[2];
+    const children = node.children;
+    const length = children.length;
+    while (offset <= end && i < length) {
+      const targetNode = children[i]!;
+      yield [targetNode, offset];
+
+      i++;
+      offset += getNodeSize(targetNode);
+      if (isBlockNode(targetNode)) {
+        offset++;
+      }
+    }
+  }
+}
+
+export function* iterLeafBlocks<T extends Node>(
+  node: T,
+  range: Range,
+): Generator<[node: InferLeafBlockNode<T>, offset: number], void, void> {
+  if (isBlockNode(node) && !hasBlockChildren(node.children)) {
+    yield [node as InferLeafBlockNode<T>, 0];
+    return;
+  }
+  for (const n of iterChildren(node, range)) {
+    const [child, offset] = n;
+    for (const r of iterLeafBlocks(child, [0, getNodeSize(child)])) {
+      r[1] += offset;
+      yield r as [InferLeafBlockNode<T>, number];
+    }
+  }
+}
+
+export function* iterLeaves<T extends Node>(
+  node: T,
+  range: Range,
+): Generator<[node: InferInlineNode<T>, offset: number], void, void> {
+  if (!isBlockNode(node)) {
+    yield [node as InferInlineNode<T>, 0];
+    return;
+  }
+  for (const [child, offset] of iterChildren(node, range)) {
+    for (const leaf of iterLeaves(child, [0, getNodeSize(child)])) {
+      leaf[1] += offset;
+      yield leaf as [InferInlineNode<T>, number];
+    }
+  }
+}
+
+export const sliceText = <T extends Node>(
+  node: T,
+  start: number = 0,
+  end: number = Infinity,
+  voidToString?: (node: InferVoidNode<T>) => string,
+): string => {
+  let str = "";
+  let offset = start;
+  for (const [leaf, leafStart] of iterLeaves(node, [start, end])) {
+    for (let i = leafStart - offset; i > 0; i--) {
+      str += "\n";
+    }
+
+    const size = getNodeSize(leaf);
+    const leafEnd = leafStart + size;
+    if (isTextNode(leaf)) {
+      const textStart = max(leafStart, start) - leafStart;
+      const textEnd = min(leafEnd, end) - leafStart;
+      str +=
+        textStart === 0 && textEnd === size
+          ? leaf.text
+          : leaf.text.slice(textStart, textEnd);
+    } else {
+      if (voidToString) {
+        str += voidToString(leaf as InferVoidNode<T>);
+      }
+    }
+    offset = leafEnd;
+  }
+
+  for (let i = min(end, getNodeSize(node)) - offset; i > 0; i--) {
+    str += "\n";
+  }
+  return str;
 };
 
 /**

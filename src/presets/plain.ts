@@ -1,5 +1,5 @@
-import { docToString, stringToFragment } from "../doc/utils.js";
-import { isTextNode } from "../doc/node.js";
+import { sliceText, isTextNode } from "../doc/node.js";
+import { stringToFragment } from "../doc/utils.js";
 import { createEditor, type Editor, type EditorOptions } from "../editor.js";
 import { plainTransferPlugin, singlelinePlugin } from "../plugins/index.js";
 import type { BlockNode, InlineNode } from "../doc/types.js";
@@ -91,7 +91,7 @@ export const createPlainEditor = ({
 }: PlainEditorOptions): Editor<PlainDoc> => {
   const initialChildren = stringToFragment(text);
   let prevChildren: readonly BlockNode[] = initialChildren;
-  const editor = createEditor({
+  const editor = createEditor<PlainDoc>({
     ...opts,
     doc: { children: initialChildren },
   }).exec(plainTransferPlugin);
@@ -102,7 +102,7 @@ export const createPlainEditor = ({
     const doc = editor.doc;
     const dirtyRange = computeDirtyRange(prevChildren, doc.children);
     prevChildren = doc.children;
-    onChange(docToString(doc), dirtyRange);
+    onChange(sliceText(doc), dirtyRange);
   });
   return editor;
 };

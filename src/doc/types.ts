@@ -13,27 +13,15 @@ export interface BlockNode {
 export type Node = BlockNode | InlineNode;
 
 export interface DocNode {
-  readonly children: readonly BlockNode[];
+  readonly children: readonly BlockNode[] | readonly InlineNode[];
 }
 
 // TODO improve type
 export type Fragment = DocNode["children"];
 
-type InferChild<T> = T extends { children: readonly (infer N)[] }
-  ? InferChild<N>
-  : T;
-type InferBlock<T> = T extends { children: readonly (infer N)[] }
-  ? T & InferBlock<N>
-  : T;
-export type InferInlineNode<T extends DocNode> = InferChild<T>;
-export type InferBlockNode<T extends DocNode> = InferBlock<T>;
-
 export type Path = readonly number[];
-export type DomPosition = readonly [path: Path, offset: number];
 export type Range = readonly [start: number, end: number];
-
 export type Selection = readonly [anchor: number, focus: number];
-export type SelectionSnapshot = readonly [
-  anchor: DomPosition,
-  focus: DomPosition,
-];
+
+export type DomPosition = readonly [path: Path, offset: number];
+export type DomSelection = readonly [anchor: DomPosition, focus: DomPosition];

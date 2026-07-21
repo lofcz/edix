@@ -6,7 +6,7 @@
 
 > **SetBlockAttr**\<`T`, `N`, `K`\>(`editor`, `key`, `value`, `offset?`): `void`
 
-Defined in: [commands.ts:171](https://github.com/lofcz/edix/blob/95ab40cc3eb5ef63e0ae1a5780452a54a56f1a37/src/commands.ts#L171)
+Defined in: [commands.ts:173](https://github.com/lofcz/edix/blob/0e357c953ddd75875cd59f2e802f280583301d1c/src/commands.ts#L173)
 
 Set attr to a block node at the caret or specified position.
 
@@ -18,7 +18,7 @@ Set attr to a block node at the caret or specified position.
 
 ### N
 
-`N` *extends* `DocNode` & BlockNode & InlineNode
+`N` *extends* `DocNode` \| `object` & `DocNode`
 
 ### K
 
@@ -36,7 +36,7 @@ Set attr to a block node at the caret or specified position.
 
 ### value
 
-`N`\[`K`\]
+`ExtractAttrValue`\<`N`, `K`\>
 
 ### offset?
 

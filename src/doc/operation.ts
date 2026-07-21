@@ -1,8 +1,10 @@
 import { is, keys } from "../utils.js";
 import {
-  getBlockAt,
+  getLeafBlockAt,
   getChildAt,
   getNodeSize,
+  hasBlockChildren,
+  isBlockNode,
   isTextNode,
   sliceFragment,
   splitBlock,
@@ -48,9 +50,9 @@ type FormatOperation = Readonly<{
   value: unknown;
 }>;
 
-const OP_SET_NODE_ATTR = "set_node_attr";
-type SetNodeAttrOperation = Readonly<{
-  type: typeof OP_SET_NODE_ATTR;
+const OP_PATCH_NODE = "patch_node";
+type PatchNodeOperation = Readonly<{
+  type: typeof OP_PATCH_NODE;
   path: Path;
   key: string;
   value: unknown;
@@ -61,13 +63,13 @@ export type Operation =
   | InsertTextOperation
   | InsertNodeOperation
   | FormatOperation
-  | SetNodeAttrOperation;
+  | PatchNodeOperation;
 
 /**
  * @internal
  */
 export const isUnsafeOperation = ({ type }: Operation): boolean =>
-  type === OP_INSERT_NODE || type === OP_FORMAT || type === OP_SET_NODE_ATTR;
+  type !== OP_INSERT_TEXT && type !== OP_DELETE;
 
 const isSameNode = (a: InlineNode, b: InlineNode): boolean => {
   const aKeys = keys(a);
@@ -130,17 +132,29 @@ const normalizeBlock = (
   }
 };
 
-const concat = <T extends Node>(
-  a: T[],
-  b: readonly T[],
-  normalize: (array: T[], start: number, end: number) => void,
-): void => {
+const concat = <T extends Node>(a: T[], b: readonly T[]): void => {
   if (b.length) {
     const prevLength = a.length;
     a.push(...b);
     if (prevLength) {
-      normalize(a, prevLength - 1, prevLength);
+      const aLastIndex = prevLength - 1;
+      const aLastNode = a[aLastIndex]!;
+      const bFirstNode = a[prevLength]!;
+      const isALastBlock = isBlockNode(aLastNode);
+      const isBFirstBlock = isBlockNode(bFirstNode);
+      if (isALastBlock) {
+        if (isBFirstBlock) {
+          normalizeBlock(a as BlockNode[], prevLength - 1, prevLength);
+        }
+      } else if (!isALastBlock) {
+        if (!isBFirstBlock) {
+          normalizeInline(a as TextNode[], prevLength - 1, prevLength);
+        }
+      }
     }
+  }
+  if (!a.length) {
+    a.push({ text: "" } as T);
   }
 };
 
@@ -151,7 +165,7 @@ export const joinBlocks = <T extends BlockNode>(...blocks: T[]): T => {
   return {
     ...blocks[0]!,
     children: blocks.reduce((acc, b) => {
-      concat(acc, b.children, normalizeInline);
+      concat(acc, b.children);
       return acc;
     }, []),
   };
@@ -207,9 +221,19 @@ const replaceRange = <T extends DocNode>(
   const [before, maybeAfter] = splitBlock(doc, start);
   const after = start < end ? splitBlock(doc, end)[1] : maybeAfter;
 
+  const isDocBlock = hasBlockChildren(doc.children);
+  if (hasBlockChildren(inserted)) {
+    if (!isDocBlock) {
+      inserted = joinBlocks(...inserted).children;
+    }
+  } else {
+    if (isDocBlock) {
+      inserted = [{ children: inserted }];
+    }
+  }
   const array = before.children.slice();
-  concat(array, inserted, normalizeBlock);
-  concat(array, after.children, normalizeBlock);
+  concat(array, inserted);
+  concat(array, after.children);
 
   return { ...doc, children: array };
 };
@@ -302,8 +326,8 @@ export const applyOperation = <T extends DocNode>(
       const { at, text } = op;
       if (isValidPosition(doc, at) && text) {
         // inherit style from previous block/text node
-        const [block, offset] = getBlockAt(doc, at);
-        const res = getChildAt(block, offset - 1);
+        const [block, offset] = getLeafBlockAt(doc, at);
+        const res = getChildAt(block, offset, true);
         let anchorNode: TextNode | undefined;
         if (res) {
           const node = res[0];
@@ -342,7 +366,7 @@ export const applyOperation = <T extends DocNode>(
         start <= end
       ) {
         if (start === end) {
-          const [{ children }, , path] = getBlockAt(doc, start);
+          const [{ children }, , path] = getLeafBlockAt(doc, start);
           if (children.length === 1) {
             const maybeText = children[0]!;
             if (isTextNode(maybeText) && !maybeText.text) {
@@ -354,22 +378,29 @@ export const applyOperation = <T extends DocNode>(
             }
           }
         } else {
+          const mapNode = <T extends Node>(node: T): T => {
+            if (isBlockNode(node)) {
+              return {
+                ...node,
+                children: node.children.map(mapNode),
+              };
+            } else if (isTextNode(node)) {
+              return { ...node, [key]: value };
+            }
+            return node;
+          };
+
           doc = replaceRange(
             doc,
             start,
             end,
-            sliceFragment(doc, start, end).map((block) => ({
-              ...block,
-              children: block.children.map((node) =>
-                isTextNode(node) ? { ...node, [key]: value } : node,
-              ),
-            })),
+            sliceFragment(doc, start, end).map(mapNode),
           );
         }
       }
       break;
     }
-    case OP_SET_NODE_ATTR: {
+    case OP_PATCH_NODE: {
       const { path, key, value } = op;
       const node = getNodeAtPath(doc, path);
       if (node) {
