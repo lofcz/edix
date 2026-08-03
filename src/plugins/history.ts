@@ -1,8 +1,9 @@
 import { ReplaceDoc } from "../commands.js";
-import { rebase, type Operation } from "../doc/operation.js";
+import { mapPositionWithOps, type Operation } from "../doc/operation.js";
 import type { DocNode, Selection } from "../doc/types.js";
 import type { Editor } from "../editor.js";
 import { keymap } from "../keyboard.js";
+import { keys } from "../utils.js";
 
 const MAX_HISTORY_LENGTH = 500;
 const BATCH_HISTORY_TIME = 500;
@@ -12,6 +13,7 @@ interface HistoryContext {
   redo: () => void;
   undoable: () => boolean;
   redoable: () => boolean;
+  clear: () => void;
 }
 
 /**
@@ -35,13 +37,31 @@ export function historyPlugin<T extends DocNode>(editor: Editor<T>) {
     return index < histories.length - 1;
   };
 
+  const restore = (doc: T) => {
+    editor.exec(ReplaceDoc, doc.children);
+
+    // TODO improve
+    const prev = doc as Record<string, unknown>;
+    const current = editor.doc as Record<string, unknown>;
+    for (const key of keys(prev)) {
+      if (key !== "children" && current[key] !== prev[key]) {
+        editor.apply({ type: "patch_node", path: [], key, value: prev[key] });
+      }
+    }
+    for (const key of keys(current)) {
+      if (key !== "children" && !(key in prev)) {
+        editor.apply({ type: "patch_node", path: [], key, value: undefined });
+      }
+    }
+  };
+
   const undo = () => {
     if (isUndoable()) {
       const sel = get()[1];
       index--;
       const currentDoc = editor.doc;
       undoOrRedoing = true;
-      editor.exec(ReplaceDoc, get()[0].children);
+      restore(get()[0]);
       undoOrRedoing = false;
       if (currentDoc !== editor.doc) {
         editor.selection = sel;
@@ -54,12 +74,22 @@ export function historyPlugin<T extends DocNode>(editor: Editor<T>) {
       const [doc, sel, ops] = get();
       const currentDoc = editor.doc;
       undoOrRedoing = true;
-      editor.exec(ReplaceDoc, doc.children);
+      restore(doc);
       undoOrRedoing = false;
       if (currentDoc !== editor.doc) {
-        editor.selection = [rebase(sel[0], ops), rebase(sel[1], ops)];
+        editor.selection = [
+          mapPositionWithOps(sel[0], ops),
+          mapPositionWithOps(sel[1], ops),
+        ];
       }
     }
+  };
+
+  const clear = () => {
+    histories.length = 0;
+    histories.push([editor.doc, editor.selection, []]);
+    index = 0;
+    prevTime = 0;
   };
 
   editor.hook("apply", (op, next) => {
@@ -101,6 +131,7 @@ export function historyPlugin<T extends DocNode>(editor: Editor<T>) {
     redo,
     undoable: isUndoable,
     redoable: isRedoable,
+    clear,
   });
 }
 
@@ -130,4 +161,11 @@ export function Undoable(editor: Editor): boolean {
  */
 export function Redoable(editor: Editor): boolean {
   return editor.get<HistoryContext>(historyPlugin).redoable();
+}
+
+/**
+ * Clears the history and makes the current document its oldest state.
+ */
+export function ClearHistory(editor: Editor) {
+  editor.get<HistoryContext>(historyPlugin).clear();
 }

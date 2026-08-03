@@ -15,7 +15,7 @@ import {
   InsertNode,
   ToggleBlockAttr,
   keymapPlugin,
-  internalTranferPlugin,
+  internalTransferPlugin,
   htmlTransferPlugin,
   plainTransferPlugin,
   fileTransferPlugin,
@@ -23,10 +23,15 @@ import {
   sliceText,
   Delete,
   type Editor,
+  getLeafAt,
   getLeafBlockAt,
   LeavesInRange,
   SetVoidAttr,
+  getNodeOffset,
   getNodeSize,
+  InsertText,
+  iterLeaves,
+  blockLockPlugin,
 } from "../../src";
 import * as v from "valibot";
 import { createPortal } from "react-dom";
@@ -61,7 +66,7 @@ export const Empty: StoryObj = {
         doc: doc,
         schema: basicSchema,
       })
-        .exec(internalTranferPlugin)
+        .exec(internalTransferPlugin)
         .exec(plainTransferPlugin);
       e.on("change", () => {
         setDoc(e.doc);
@@ -265,7 +270,7 @@ export const RichText: StoryObj = {
             setMenuRect(null);
           }
         })
-        .exec(internalTranferPlugin)
+        .exec(internalTransferPlugin)
         .exec(plainTransferPlugin);
       e.on("change", () => {
         setDoc(e.doc);
@@ -438,6 +443,73 @@ const tagSchema = v.strictObject({
   ),
 });
 
+const TagRemoveButton = ({
+  onClick,
+}: {
+  onClick: (e: React.MouseEvent) => void;
+}) => {
+  const [hover, setHover] = useState(false);
+  return (
+    <span
+      onMouseEnter={() => setHover(true)}
+      onMouseLeave={() => setHover(false)}
+      onClick={onClick}
+      style={{
+        display: "inline-flex",
+        alignItems: "center",
+        justifyContent: "center",
+        width: 14,
+        height: 14,
+        borderRadius: "50%",
+        background: hover ? "#999" : "#c4c4c4",
+        color: "white",
+        fontSize: 9,
+        lineHeight: 1,
+        cursor: "pointer",
+      }}
+    >
+      ✕
+    </span>
+  );
+};
+
+const TagChip = ({
+  label,
+  onLabelClick,
+  onRemove,
+}: {
+  label: string;
+  onLabelClick?: (e: React.MouseEvent) => void;
+  onRemove: (e: React.MouseEvent) => void;
+}) => {
+  return (
+    <span
+      contentEditable={false}
+      style={{
+        display: "inline-flex",
+        alignItems: "center",
+        gap: 4,
+        background: "#f0f0f0",
+        color: "#444",
+        border: "solid 1px #ccc",
+        fontSize: 12,
+        lineHeight: 1.5,
+        padding: "1px 4px 1px 8px",
+        borderRadius: 999,
+        margin: "0 2px",
+      }}
+    >
+      <span
+        style={{ cursor: onLabelClick ? "pointer" : undefined }}
+        onClick={onLabelClick}
+      >
+        {label}
+      </span>
+      <TagRemoveButton onClick={onRemove} />
+    </span>
+  );
+};
+
 export const Tag: StoryObj = {
   render: () => {
     const ref = useRef<HTMLDivElement>(null);
@@ -457,7 +529,7 @@ export const Tag: StoryObj = {
         doc: doc,
         schema: tagSchema,
       })
-        .exec(internalTranferPlugin)
+        .exec(internalTransferPlugin)
         .exec(plainTransferPlugin, {
           voidToString: (node) => node.label,
         })
@@ -509,34 +581,291 @@ export const Tag: StoryObj = {
             "text" in t ? (
               t.text || <br />
             ) : (
-              <span
+              <TagChip
                 key={j}
-                contentEditable={false}
-                onClick={(e) => {
+                label={t.label}
+                onLabelClick={(e) => {
                   e.preventDefault();
-                  const tagIndex = doc.children.indexOf(t);
-                  if (tagIndex === -1) return;
+                  const start = getNodeOffset(doc, t);
+                  if (start == null) return;
                   const value = window.prompt("label:", t.label);
                   if (!value) return;
-                  const offset = doc.children
-                    .slice(0, tagIndex + 1)
-                    .reduce((acc, n) => acc + getNodeSize(n), 0);
-                  editor.exec(SetVoidAttr, "label", value, offset);
+                  editor.exec(
+                    SetVoidAttr,
+                    "label",
+                    value,
+                    start + getNodeSize(t),
+                  );
                 }}
-                style={{
-                  background: "slategray",
-                  color: "white",
-                  cursor: "pointer",
-                  fontSize: 12,
-                  padding: 4,
-                  borderRadius: 8,
+                onRemove={(e) => {
+                  e.preventDefault();
+                  const start = getNodeOffset(doc, t);
+                  if (start == null) return;
+                  editor.exec(Delete, [start, start + getNodeSize(t)]);
                 }}
-              >
-                {t.label}
-              </span>
+              />
             ),
           )}
         </div>
+      </div>
+    );
+  },
+};
+
+const ComboboxMenu = ({
+  items,
+  index,
+  selected,
+  onSelect,
+}: {
+  items: string[];
+  index: number;
+  selected: ReadonlySet<string>;
+  onSelect: (item: string) => void;
+}) => {
+  const ref = useRef<HTMLUListElement>(null);
+  useEffect(() => {
+    if (index === -1) return;
+    ref.current?.children[index]?.scrollIntoView({ block: "nearest" });
+  }, [index]);
+
+  return (
+    <ul
+      ref={ref}
+      style={{
+        position: "absolute",
+        zIndex: 1,
+        top: "100%",
+        left: 0,
+        right: 0,
+        maxHeight: 200,
+        overflowY: "auto",
+        margin: "2px 0 0",
+        padding: 0,
+        listStyleType: "none",
+        fontSize: 12,
+        background: "white",
+        border: "solid 1px #ccc",
+        borderRadius: 4,
+        cursor: "pointer",
+      }}
+    >
+      {items.length ? (
+        items.map((item, i) => (
+          <li
+            key={item}
+            style={{
+              display: "flex",
+              alignItems: "center",
+              gap: 6,
+              padding: "3px 8px",
+              ...(index === i && {
+                color: "white",
+                background: "#2A6AD3",
+              }),
+            }}
+            onMouseDown={(e) => {
+              // keep focus in the editor
+              e.preventDefault();
+              onSelect(item);
+            }}
+          >
+            <span style={{ width: 10 }}>{selected.has(item) ? "✓" : ""}</span>
+            {item}
+          </li>
+        ))
+      ) : (
+        <li style={{ padding: "3px 8px", color: "#999" }}>No results</li>
+      )}
+    </ul>
+  );
+};
+
+// the text just before the caret, which the suggestion is derived from
+const getQuery = (
+  doc: v.InferOutput<typeof tagSchema>,
+  caret: number,
+): string => {
+  const leaf = getLeafAt(doc, caret, true);
+  return leaf && "text" in leaf[0] ? leaf[0].text.slice(0, leaf[1]) : "";
+};
+
+export const Combobox: StoryObj = {
+  render: () => {
+    const ref = useRef<HTMLDivElement>(null);
+
+    type Doc = v.InferOutput<typeof tagSchema>;
+    const [doc, setDoc] = useState<Doc>({
+      children: [
+        { type: "tag", label: "Luke Skywalker", value: "Luke Skywalker" },
+      ],
+    });
+    const [caret, setCaret] = useState(0);
+    const [open, setOpen] = useState(false);
+    const [index, setIndex] = useState(-1);
+
+    const selected = useMemo(
+      (): ReadonlySet<string> =>
+        new Set(doc.children.flatMap((n) => ("text" in n ? [] : [n.value]))),
+      [doc],
+    );
+    const query = useMemo(() => getQuery(doc, caret), [doc, caret]);
+    const filtered = useMemo(() => {
+      const q = query.trim().toLowerCase();
+      return q
+        ? CHARACTERS.filter((c) => c.toLowerCase().includes(q))
+        : CHARACTERS;
+    }, [query]);
+
+    if (index > filtered.length - 1) {
+      setIndex(-1);
+    }
+
+    const toggle = (item: string) => {
+      const tag = doc.children.find((n) => !("text" in n) && n.value === item);
+      const start = tag && getNodeOffset(doc, tag);
+      if (tag && start != null) {
+        // remove the tag if it's already inserted
+        editor.exec(Delete, [start, start + getNodeSize(tag)]);
+      } else {
+        // replace the query with the tag
+        const start = caret - query.length;
+        if (query) {
+          editor.exec(Delete, [start, caret]);
+        }
+        editor.exec(
+          InsertNode,
+          { type: "tag", label: item, value: item },
+          start,
+        );
+      }
+      setOpen(false);
+      setIndex(-1);
+    };
+
+    const onPrev = useEffectEvent(() => {
+      if (!open || !filtered.length) return false;
+      setIndex((prev) => (prev <= 0 ? filtered.length - 1 : prev - 1));
+    });
+    const onNext = useEffectEvent(() => {
+      if (!open || !filtered.length) return false;
+      setIndex((prev) => (prev >= filtered.length - 1 ? 0 : prev + 1));
+    });
+    const onComplete = useEffectEvent(() => {
+      if (!open || index === -1) return false;
+      toggle(filtered[index]!);
+    });
+    const onClose = useEffectEvent(() => {
+      if (!open) return false;
+      setOpen(false);
+      setIndex(-1);
+    });
+
+    const editor = useMemo(() => {
+      const e = createEditor({
+        doc: doc,
+        schema: tagSchema,
+      })
+        .exec(internalTransferPlugin)
+        .exec(plainTransferPlugin, {
+          voidToString: (node) => node.label,
+        })
+        .exec(singlelinePlugin)
+        .exec(keymapPlugin, {
+          ArrowUp: onPrev,
+          ArrowDown: onNext,
+          Enter: onComplete,
+          Escape: onClose,
+        });
+      e.on("change", () => {
+        const at = Math.min(...e.selection);
+        setDoc(e.doc);
+        setCaret(at);
+        setOpen(!!getQuery(e.doc, at).trim());
+        setIndex(-1);
+      });
+      e.on("selectionchange", () => {
+        setCaret(Math.min(...e.selection));
+      });
+      return e;
+    }, []);
+
+    useEffect(() => {
+      if (!ref.current) return;
+      return editor.input(ref.current);
+    }, []);
+
+    return (
+      <div
+        style={{ position: "relative", width: 320, fontSize: 13 }}
+        onBlur={() => {
+          setOpen(false);
+          setIndex(-1);
+        }}
+      >
+        <div
+          style={{
+            display: "flex",
+            alignItems: "flex-start",
+            background: "white",
+            border: "solid 1px darkgray",
+            borderRadius: 4,
+          }}
+        >
+          <div
+            ref={ref}
+            style={{
+              flex: 1,
+              minWidth: 0,
+              padding: 6,
+              lineHeight: 2,
+            }}
+          >
+            {doc.children.map((t, j) =>
+              "text" in t ? (
+                t.text || <br />
+              ) : (
+                <TagChip
+                  key={j}
+                  label={t.label}
+                  onRemove={(e) => {
+                    e.preventDefault();
+                    toggle(t.value);
+                  }}
+                />
+              ),
+            )}
+          </div>
+          <button
+            style={{
+              alignSelf: "stretch",
+              padding: "0 6px",
+              border: "none",
+              borderLeft: "solid 1px #ddd",
+              background: "transparent",
+              cursor: "pointer",
+            }}
+            onMouseDown={(e) => {
+              // keep focus in the editor not to close the menu
+              e.preventDefault();
+            }}
+            onClick={() => {
+              ref.current?.focus();
+              setOpen((prev) => !prev);
+              setIndex(-1);
+            }}
+          >
+            ▾
+          </button>
+        </div>
+        {open && (
+          <ComboboxMenu
+            items={filtered}
+            index={index}
+            selected={selected}
+            onSelect={toggle}
+          />
+        )}
       </div>
     );
   },
@@ -1020,15 +1349,11 @@ export const Mention: StoryObj = {
       children: [
         {
           children: [
-            {
-              text: "Hi, ",
-            },
-            { type: "mention", name: "Captain Gregor" },
-            {
-              text: " and ",
-            },
-            { type: "mention", name: "Jaxxon" },
-            { text: " . Please enter @ to show suggestions." },
+            { text: "Hi " },
+            { type: "mention", name: "Luke Skywalker" },
+            { text: " and " },
+            { type: "mention", name: "Leia Organa" },
+            { text: ", could you check this out? Type @ to mention someone." },
           ],
         },
         { children: [{ text: "" }] },
@@ -1057,7 +1382,8 @@ export const Mention: StoryObj = {
       const end = pos.caret;
       editor
         .exec(Delete, [start, end])
-        .exec(InsertNode, { type: "mention", name: selected }, start);
+        .exec(InsertNode, { type: "mention", name: selected }, start)
+        .exec(InsertText, " ");
       setPos(null);
       setIndex(0);
     };
@@ -1085,6 +1411,7 @@ export const Mention: StoryObj = {
         doc,
         schema: mentionSchema,
       })
+        .exec(plainTransferPlugin, { voidToString: (n) => `@${n.name}` })
         .exec(keymapPlugin, {
           ArrowUp: onUp,
           ArrowDown: onDown,
@@ -1164,6 +1491,192 @@ export const Mention: StoryObj = {
   },
 };
 
+const commentSchema = v.strictObject({
+  children: v.array(
+    v.strictObject({
+      children: v.array(
+        v.strictObject({
+          text: v.string(),
+          comment: v.optional(v.string()),
+        }),
+      ),
+    }),
+  ),
+});
+
+export const Comment: StoryObj = {
+  render: () => {
+    const ref = useRef<HTMLDivElement>(null);
+
+    const commentIdRef = useRef(0);
+    const [comments, setComments] = useState([
+      { id: "0", text: "This is comment." },
+    ]);
+    const [activeId, setActiveId] = useState<string | null>(null);
+    const [hasSelection, setHasSelection] = useState(false);
+    type Doc = v.InferOutput<typeof commentSchema>;
+    const [doc, setDoc] = useState<Doc>({
+      children: [
+        {
+          children: [
+            { text: "Hello " },
+            { text: " world", comment: "0" },
+            { text: "." },
+          ],
+        },
+        { children: [{ text: "Select text and add comments." }] },
+      ],
+    });
+
+    const editor = useMemo(() => {
+      const e = createEditor({
+        doc: doc,
+        schema: commentSchema,
+      })
+        .exec(internalTransferPlugin)
+        .exec(plainTransferPlugin);
+      e.on("change", () => {
+        setDoc(e.doc);
+        const ids = new Set<string>();
+        for (const [leaf] of iterLeaves(e.doc, [0, getNodeSize(e.doc)])) {
+          if (leaf.comment) {
+            ids.add(leaf.comment);
+          }
+        }
+        setComments((prev) => prev.filter((c) => ids.has(c.id)));
+      });
+      e.on("selectionchange", () => {
+        setHasSelection(e.selection[0] !== e.selection[1]);
+        let active: string | null = null;
+        for (const leaf of e.exec(LeavesInRange)) {
+          if (leaf.comment) {
+            active = leaf.comment;
+            break;
+          }
+        }
+        setActiveId(active);
+      });
+      return e;
+    }, []);
+
+    useEffect(() => {
+      if (!ref.current) return;
+      return editor.input(ref.current);
+    }, []);
+
+    const inputRef = useRef<HTMLTextAreaElement>(null);
+
+    return (
+      <div>
+        <div>
+          <textarea
+            ref={inputRef}
+            placeholder="Select text and write comment"
+          />
+          <button
+            disabled={!hasSelection}
+            onClick={() => {
+              const input = inputRef.current;
+              if (!input) return;
+              const value = input.value;
+              if (!value) return;
+              const id = String(++commentIdRef.current);
+              editor.exec(Format, "comment", id);
+              setComments((prev) => [...prev, { id, text: value }]);
+              setActiveId(id);
+              input.value = "";
+            }}
+          >
+            Add comment
+          </button>
+        </div>
+        <div style={{ display: "flex", alignItems: "flex-start" }}>
+          <div
+            ref={ref}
+            style={{
+              backgroundColor: "white",
+              padding: 8,
+              flex: 1,
+              minHeight: 120,
+            }}
+          >
+            {doc.children.map((b, i) => (
+              <div key={i}>
+                {b.children.map((t, j) => (
+                  <span
+                    key={j}
+                    style={{
+                      backgroundColor: t.comment
+                        ? t.comment === activeId
+                          ? "gold"
+                          : "khaki"
+                        : undefined,
+                    }}
+                  >
+                    {t.text || <br />}
+                  </span>
+                ))}
+              </div>
+            ))}
+          </div>
+          <div
+            style={{
+              width: 200,
+              background: "#f5f5f5",
+              padding: 8,
+              display: "flex",
+              flexDirection: "column",
+              gap: 8,
+            }}
+          >
+            {comments.map((c) => (
+              <div
+                key={c.id}
+                style={{
+                  padding: 8,
+                  background: "white",
+                  border:
+                    c.id === activeId
+                      ? "solid 1px orange"
+                      : "solid 1px #e0e0e0",
+                  borderRadius: 6,
+                  cursor: "pointer",
+                  fontSize: 13,
+                }}
+                onClick={() => {
+                  setActiveId(c.id);
+                }}
+              >
+                <div>{c.text}</div>
+                <button
+                  style={{ marginTop: 6, fontSize: 11 }}
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    const ranges: [number, number][] = [];
+                    for (const [leaf, offset] of iterLeaves(editor.doc, [
+                      0,
+                      getNodeSize(editor.doc),
+                    ])) {
+                      if (leaf.comment === c.id) {
+                        ranges.push([offset, offset + getNodeSize(leaf)]);
+                      }
+                    }
+                    for (const range of ranges) {
+                      editor.exec(Format, "comment", undefined, range);
+                    }
+                  }}
+                >
+                  delete
+                </button>
+              </div>
+            ))}
+          </div>
+        </div>
+      </div>
+    );
+  },
+};
+
 const mediaSchema = v.strictObject({
   children: v.array(
     v.strictObject({
@@ -1179,10 +1692,6 @@ const mediaSchema = v.strictObject({
           v.strictObject({
             type: v.literal("video"),
             src: v.string(),
-          }),
-          v.strictObject({
-            type: v.literal("youtube"),
-            id: v.string(),
           }),
         ]),
       ),
@@ -1204,14 +1713,14 @@ export const Media: StoryObj = {
             },
             {
               type: "image",
-              src: "https://loremflickr.com/320/240/cats?lock=1",
+              src: "https://picsum.photos/seed/1/320/240",
             },
             {
               text: " world ",
             },
             {
               type: "image",
-              src: "https://loremflickr.com/320/240/cats?lock=2",
+              src: "https://picsum.photos/seed/2/320/240",
             },
           ],
         },
@@ -1222,24 +1731,10 @@ export const Media: StoryObj = {
             },
             {
               type: "video",
-              src: "https://download.samplelib.com/mp4/sample-5s.mp4",
+              src: "https://mdn.github.io/shared-assets/videos/flower.mp4",
             },
             {
               text: " world ",
-            },
-          ],
-        },
-        {
-          children: [
-            {
-              text: "Hello ",
-            },
-            {
-              type: "youtube",
-              id: "IqKz0SfHaqI",
-            },
-            {
-              text: " Youtube",
             },
           ],
         },
@@ -1251,7 +1746,7 @@ export const Media: StoryObj = {
         doc: doc,
         schema: mediaSchema,
       })
-        .exec(internalTranferPlugin)
+        .exec(internalTransferPlugin)
         .exec(fileTransferPlugin, {
           "image/png": (file) => ({
             type: "image",
@@ -1271,12 +1766,6 @@ export const Media: StoryObj = {
               return {
                 type: "video",
                 src: (e.childNodes[0] as HTMLSourceElement).src,
-              };
-            },
-            iframe: (e) => {
-              return {
-                type: "youtube",
-                id: e.dataset.youtubeId!,
               };
             },
           },
@@ -1314,21 +1803,12 @@ export const Media: StoryObj = {
           >
             insert video
           </button>
-          <button
-            onClick={() => {
-              const value = window.prompt("id:");
-              if (!value) return;
-              editor.exec(InsertNode, { type: "youtube", id: value });
-            }}
-          >
-            insert youtube
-          </button>
         </div>
         <div
           ref={ref}
           style={{
             backgroundColor: "white",
-            padding: 8,
+            padding: 16,
           }}
         >
           {doc.children.map((b, i) => (
@@ -1337,29 +1817,181 @@ export const Media: StoryObj = {
                 "text" in t ? (
                   t.text || <br />
                 ) : t.type === "image" ? (
-                  <img key={j} src={t.src} style={{ maxWidth: 200 }} />
+                  <img
+                    key={j}
+                    src={t.src}
+                    style={{
+                      maxWidth: 240,
+                      borderRadius: 4,
+                      verticalAlign: "middle",
+                    }}
+                  />
                 ) : t.type === "video" ? (
                   // safari needs contentEditable="false"
                   <video
                     key={j}
-                    width={400}
+                    width={320}
                     controls
                     contentEditable="false"
                     suppressContentEditableWarning
+                    style={{
+                      borderRadius: 4,
+                      verticalAlign: "middle",
+                    }}
                   >
                     <source src={t.src} />
                   </video>
-                ) : t.type === "youtube" ? (
-                  <iframe
-                    data-youtube-id={t.id}
-                    width="560"
-                    height="315"
-                    src={"https://www.youtube.com/embed/" + t.id}
-                    frameBorder="0"
-                    allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
-                  />
                 ) : null,
               )}
+            </div>
+          ))}
+        </div>
+      </div>
+    );
+  },
+};
+
+const lockSchema = v.strictObject({
+  children: v.array(
+    v.strictObject({
+      locked: v.optional(v.boolean()),
+      children: v.array(
+        v.strictObject({
+          text: v.string(),
+        }),
+      ),
+    }),
+  ),
+});
+
+export const BlockLock: StoryObj = {
+  render: () => {
+    const ref = useRef<HTMLDivElement>(null);
+
+    type Doc = v.InferOutput<typeof lockSchema>;
+    const [doc, setDoc] = useState<Doc>({
+      children: [
+        { children: [{ text: "You can edit this paragraph." }] },
+        {
+          locked: true,
+          children: [
+            {
+              text: "This paragraph is locked. You can select and copy it, but can't edit it.",
+            },
+          ],
+        },
+        { children: [{ text: "You can edit this paragraph too." }] },
+      ],
+    });
+    const [blockIndex, setBlockIndex] = useState<number | null>(null);
+
+    const editor = useMemo(() => {
+      const e = createEditor({
+        doc: doc,
+        schema: lockSchema,
+      })
+        .exec(internalTransferPlugin)
+        .exec(plainTransferPlugin)
+        .exec(blockLockPlugin, { isLocked: (b) => !!b.locked });
+      e.on("change", () => {
+        setDoc(e.doc);
+      });
+      e.on("selectionchange", () => {
+        setBlockIndex(getLeafBlockAt(e.doc, e.selection[0])[2][0] ?? null);
+      });
+      return e;
+    }, []);
+
+    useEffect(() => {
+      if (!ref.current) return;
+      return editor.input(ref.current);
+    }, []);
+
+    const locked = blockIndex != null && !!doc.children[blockIndex]?.locked;
+
+    return (
+      <div
+        style={{
+          display: "grid",
+          gridTemplateColumns: "26px 1fr",
+          columnGap: 6,
+          rowGap: 8,
+          maxWidth: 640,
+          fontFamily:
+            '-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif',
+          fontSize: 14,
+          color: "#1e1e1e",
+          background: "#fff",
+          border: "1px solid #ddd",
+          borderRadius: 4,
+          padding: 16,
+          boxShadow: "0 1px 2px rgba(0, 0, 0, 0.05)",
+        }}
+      >
+        <style>{`
+          .lock-toggle:not([aria-pressed="true"]):hover { border-color: #757575; }
+        `}</style>
+        {blockIndex != null && (
+          <button
+            className="lock-toggle"
+            style={{
+              gridColumn: 1,
+              gridRow: blockIndex + 1,
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "center",
+              width: 26,
+              height: 26,
+              marginTop: 2,
+              padding: 0,
+              fontSize: 13,
+              background: locked ? "#757575" : "#fff",
+              border: `1px solid ${locked ? "#757575" : "#ccc"}`,
+              borderRadius: 2,
+              cursor: "pointer",
+            }}
+            title={locked ? "Unlock this block" : "Lock this block"}
+            aria-pressed={locked}
+            onMouseDown={(e) => {
+              e.preventDefault();
+            }}
+            onClick={() => {
+              editor.exec(ToggleBlockAttr, "locked", true, undefined);
+            }}
+          >
+            🔒
+          </button>
+        )}
+        <div
+          ref={ref}
+          style={{
+            gridColumn: 2,
+            gridRow: `1 / span ${doc.children.length}`,
+            display: "grid",
+            gridTemplateRows: "subgrid",
+            outline: "none",
+          }}
+        >
+          {doc.children.map((b, i) => (
+            <div
+              key={i}
+              style={{
+                padding: "4px 8px",
+                borderRadius: 2,
+                lineHeight: 1.6,
+                ...(b.locked && {
+                  background: "#f6f7f7",
+                  boxShadow: "inset 0 0 0 1px #ddd",
+                }),
+                ...(i === blockIndex && {
+                  outline: "1.5px solid #007cba",
+                  outlineOffset: 1,
+                }),
+              }}
+            >
+              {b.children.map((n, j) => (
+                <span key={j}>{n.text || <br />}</span>
+              ))}
             </div>
           ))}
         </div>

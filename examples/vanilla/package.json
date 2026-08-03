@@ -9,8 +9,9 @@
     "preview": "vite preview"
   },
   "dependencies": {
-    "edix": "file:../..",
-    "morphdom": "^2.7.4"
+    "morphdom": "^2.7.8",
+    "zod": "^4.4.3",
+    "edix": "file:../.."
   },
   "devDependencies": {
     "typescript": "^6.0.0",

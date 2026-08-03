@@ -21,7 +21,7 @@ import {
   type Operation,
   isUnsafeOperation,
   isValidSelection,
-  rebase,
+  mapPositionWithOps,
 } from "./doc/operation.js";
 import { createParser } from "./dom/index.js";
 import { isCollapsed, toRange } from "./doc/position.js";
@@ -178,14 +178,20 @@ export type KeyboardHook = (keyboard: KeyboardEvent) => boolean | void;
 export type CopyHook = (dataTransfer: DataTransfer) => void;
 
 /**
- * Functions to handle paste / drop events
+ * Functions to handle paste / drop events.
+ *
+ * Return `true` if you want to stop propagation.
  */
 export type PasteHook = (
   dataTransfer: DataTransfer,
-) => string | Fragment | null;
+) => string | Fragment | true | null;
 
 type EditorHookMap = {
-  apply: (op: Operation, next: (op?: Operation) => void) => void;
+  /**
+   * Call `next(op)` to continue applying the operation, or `next()` with a nullish value to cancel it.
+   * If the hook returns without calling `next`, the operation is passed through as is.
+   */
+  apply: (op: Operation, next: (op?: Operation | null) => void) => void;
   mount: (element: HTMLElement, parser: Parser) => void | (() => void);
   keyboard: KeyboardHook;
   copy: CopyHook;
@@ -421,7 +427,7 @@ export const createEditor = <
         const i = index;
         applyHooks[index]!(op, next);
         if (i === index) {
-          next();
+          next(op);
         }
       } else if (index === length) {
         index++;
@@ -439,10 +445,13 @@ export const createEditor = <
       }
     };
 
-    const next = (o?: Operation): void => {
-      if (o) {
-        op = o;
+    const next = (o?: Operation | null): void => {
+      if (o == null) {
+        // cancel
+        index = length + 1;
+        return;
       }
+      op = o;
       index++;
       dispatch();
     };
@@ -626,6 +635,9 @@ export const createEditor = <
         for (const ex of getHook("paste")) {
           const pasted = ex(dataTransfer);
           if (pasted) {
+            if (pasted === true) {
+              return;
+            }
             return pasted;
           }
         }
@@ -773,7 +785,7 @@ export const createEditor = <
 
       const onSelectionChange = () => {
         // Safari may dispatch selectionchange event after dragstart
-        if (hasFocus && !isDragging) {
+        if (hasFocus && !isComposing && !isDragging) {
           syncSelection();
         }
       };
@@ -828,13 +840,13 @@ export const createEditor = <
           const pasted = paste(dataTransfer);
           if (pasted) {
             const offset = positionToOffset(doc, droppedPosition);
-            const pos = rebase(offset, ops);
+            const pos = mapPositionWithOps(offset, ops);
             ops.push(
               isString(pasted)
                 ? { type: "insert_text", at: pos, text: pasted }
                 : { type: "insert_node", at: pos, fragment: pasted },
             );
-            afterSelection = [pos, rebase(offset, ops)];
+            afterSelection = [pos, mapPositionWithOps(offset, ops)];
           }
           apply(ops);
           if (afterSelection) {

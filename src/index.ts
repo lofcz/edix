@@ -2,11 +2,13 @@ export {
   getChildAt,
   getLeafBlockAt,
   getLeafAt,
+  getNodeOffset,
   getNodeSize,
   iterLeafBlocks,
   iterLeaves,
   sliceText,
 } from "./doc/node.js";
+export { mapPosition } from "./doc/operation.js";
 export type { Operation } from "./doc/operation.js";
 export type {
   InferBlockNode,

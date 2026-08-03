@@ -181,22 +181,7 @@ const getNodeAtPath = (
   return node;
 };
 
-const replace = <
-  T extends { readonly children: readonly BlockNode[] | readonly InlineNode[] },
->(
-  node: T,
-  start: number,
-  end: number,
-  lines: Fragment,
-): T => {
-  const sliced = node.children.slice();
-  sliced.splice(start, end - start + 1, ...lines);
-  return { ...node, children: sliced };
-};
-
-const replaceNodeAt = <
-  T extends { readonly children: readonly BlockNode[] | readonly InlineNode[] },
->(
+const replaceNodeAt = <T extends DocNode | BlockNode>(
   node: T,
   path: Path,
   afterNode: Node,
@@ -204,9 +189,14 @@ const replaceNodeAt = <
 ): T => {
   if (i < path.length) {
     const index = path[i]!;
-    return replace(node, index, index, [
-      replaceNodeAt(node.children[index]! as T, path, afterNode, i + 1),
-    ]);
+    const children = node.children;
+    const sliced = children.slice();
+    sliced.splice(
+      index,
+      1,
+      replaceNodeAt(children[index]! as T, path, afterNode, i + 1),
+    );
+    return { ...node, children: sliced };
   }
   // TODO improve type
   return afterNode as T;
@@ -242,11 +232,25 @@ const isValidPosition = (doc: DocNode, offset: number): boolean => {
   return offset >= 0 && offset <= getNodeSize(doc);
 };
 
-export const rebase = (position: number, ops: readonly Operation[]): number => {
-  return ops.reduce((acc, op) => rebasePosition(acc, op), position);
+/**
+ * @internal
+ */
+export const mapPositionWithOps = (
+  position: number,
+  ops: readonly Operation[],
+): number => {
+  return ops.reduce((acc, op) => mapPosition(acc, op), position);
 };
 
-const rebasePosition = (position: number, op: Operation): number => {
+/**
+ * Remap a position through the given operation.
+ * @param stickBefore `true` to keep the position in place when content is inserted at it, instead of moving it after the inserted content.
+ */
+export const mapPosition = (
+  position: number,
+  op: Operation,
+  stickBefore?: boolean,
+): number => {
   switch (op.type) {
     case OP_DELETE: {
       const [start, end] = op.range;
@@ -265,7 +269,7 @@ const rebasePosition = (position: number, op: Operation): number => {
     case OP_INSERT_TEXT: {
       const { at, text } = op;
 
-      if (position >= at) {
+      if (stickBefore ? position > at : position >= at) {
         // at <= position
         return position + text.length;
       }
@@ -274,7 +278,7 @@ const rebasePosition = (position: number, op: Operation): number => {
     case OP_INSERT_NODE: {
       const { at, fragment } = op;
 
-      if (position >= at) {
+      if (stickBefore ? position > at : position >= at) {
         // at <= position
         return position + getNodeSize({ children: fragment });
       }
@@ -288,7 +292,7 @@ const rebaseSelection = (
   [anchor, focus]: Selection,
   op: Operation,
 ): Selection => {
-  return [rebasePosition(anchor, op), rebasePosition(focus, op)];
+  return [mapPosition(anchor, op), mapPosition(focus, op)];
 };
 
 /**

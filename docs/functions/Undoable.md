@@ -6,7 +6,7 @@
 
 > **Undoable**(`editor`): `boolean`
 
-Defined in: [plugins/history.ts:124](https://github.com/lofcz/edix/blob/0e357c953ddd75875cd59f2e802f280583301d1c/src/plugins/history.ts#L124)
+Defined in: [plugins/history.ts:155](https://github.com/lofcz/edix/blob/480372a69e3803fb03d455ffd631e93f7caee210/src/plugins/history.ts#L155)
 
 Check if the history can be undone.
 

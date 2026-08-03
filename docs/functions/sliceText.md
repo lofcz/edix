@@ -6,7 +6,7 @@
 
 > **sliceText**\<`T`\>(`node`, `start?`, `end?`, `voidToString?`): `string`
 
-Defined in: [doc/node.ts:291](https://github.com/lofcz/edix/blob/0e357c953ddd75875cd59f2e802f280583301d1c/src/doc/node.ts#L291)
+Defined in: [doc/node.ts:317](https://github.com/lofcz/edix/blob/480372a69e3803fb03d455ffd631e93f7caee210/src/doc/node.ts#L317)
 
 ## Type Parameters
 
