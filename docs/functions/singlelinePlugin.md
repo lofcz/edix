@@ -6,7 +6,7 @@
 
 > **singlelinePlugin**(`editor`): `void`
 
-Defined in: [plugins/singleline.ts:8](https://github.com/lofcz/edix/blob/480372a69e3803fb03d455ffd631e93f7caee210/src/plugins/singleline.ts#L8)
+Defined in: [plugins/singleline.ts:8](https://github.com/lofcz/edix/blob/36e8457c3653b1968d147b3c83c412bc54a2ee9d/src/plugins/singleline.ts#L8)
 
 A plugin to restrict input to a single line
 

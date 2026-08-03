@@ -6,7 +6,7 @@
 
 > **plainTransferPlugin**\<`T`\>(`editor`, `options?`): `void`
 
-Defined in: [plugins/transfer/plainTransfer.ts:10](https://github.com/lofcz/edix/blob/480372a69e3803fb03d455ffd631e93f7caee210/src/plugins/transfer/plainTransfer.ts#L10)
+Defined in: [plugins/transfer/plainTransfer.ts:10](https://github.com/lofcz/edix/blob/36e8457c3653b1968d147b3c83c412bc54a2ee9d/src/plugins/transfer/plainTransfer.ts#L10)
 
 A plugin to handle copying / pasting plain text.
 

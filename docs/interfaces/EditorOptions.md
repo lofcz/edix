@@ -4,7 +4,7 @@
 
 # Interface: EditorOptions\<T, S\>
 
-Defined in: [editor.ts:103](https://github.com/lofcz/edix/blob/480372a69e3803fb03d455ffd631e93f7caee210/src/editor.ts#L103)
+Defined in: [editor.ts:108](https://github.com/lofcz/edix/blob/36e8457c3653b1968d147b3c83c412bc54a2ee9d/src/editor.ts#L108)
 
 Options of [createEditor](../functions/createEditor.md).
 
@@ -24,7 +24,7 @@ Options of [createEditor](../functions/createEditor.md).
 
 > `optional` **schema?**: `S`
 
-Defined in: [editor.ts:110](https://github.com/lofcz/edix/blob/480372a69e3803fb03d455ffd631e93f7caee210/src/editor.ts#L110)
+Defined in: [editor.ts:115](https://github.com/lofcz/edix/blob/36e8457c3653b1968d147b3c83c412bc54a2ee9d/src/editor.ts#L115)
 
 Optional [Standard Schema](https://github.com/standard-schema/standard-schema) to validate unsafe edits.
 
@@ -34,7 +34,7 @@ Optional [Standard Schema](https://github.com/standard-schema/standard-schema) t
 
 > **doc**: `T`
 
-Defined in: [editor.ts:114](https://github.com/lofcz/edix/blob/480372a69e3803fb03d455ffd631e93f7caee210/src/editor.ts#L114)
+Defined in: [editor.ts:119](https://github.com/lofcz/edix/blob/36e8457c3653b1968d147b3c83c412bc54a2ee9d/src/editor.ts#L119)
 
 Initial document.
 
@@ -44,7 +44,7 @@ Initial document.
 
 > `optional` **readonly?**: `boolean`
 
-Defined in: [editor.ts:118](https://github.com/lofcz/edix/blob/480372a69e3803fb03d455ffd631e93f7caee210/src/editor.ts#L118)
+Defined in: [editor.ts:123](https://github.com/lofcz/edix/blob/36e8457c3653b1968d147b3c83c412bc54a2ee9d/src/editor.ts#L123)
 
 The state editable or not.
 
@@ -54,7 +54,7 @@ The state editable or not.
 
 > `optional` **isBlock?**: (`node`) => `boolean`
 
-Defined in: [editor.ts:122](https://github.com/lofcz/edix/blob/480372a69e3803fb03d455ffd631e93f7caee210/src/editor.ts#L122)
+Defined in: [editor.ts:127](https://github.com/lofcz/edix/blob/36e8457c3653b1968d147b3c83c412bc54a2ee9d/src/editor.ts#L127)
 
 TODO
 
@@ -70,11 +70,39 @@ TODO
 
 ***
 
+### autoScroll?
+
+> `optional` **autoScroll?**: `boolean`
+
+Defined in: [editor.ts:145](https://github.com/lofcz/edix/blob/36e8457c3653b1968d147b3c83c412bc54a2ee9d/src/editor.ts#L145)
+
+Keep the caret visible inside the mounted element after document
+changes, behaving like a native `<textarea>`:
+
+- If the caret is already visible (e.g. typing in the middle of a
+  long doc), nothing scrolls.
+- If the caret falls below the viewport, the element scrolls down
+  just enough to reveal it.
+- If the caret falls above the viewport, the element scrolls up
+  just enough to reveal it.
+
+Scroll work is coalesced via `requestAnimationFrame` and only reads
+the caret's bounding rect, never `scrollHeight`, so it does not
+force a full overflow-layout pass on each input.
+
+#### Default
+
+```ts
+false
+```
+
+***
+
 ### onWarn?
 
 > `optional` **onWarn?**: (`message`) => `void`
 
-Defined in: [editor.ts:128](https://github.com/lofcz/edix/blob/480372a69e3803fb03d455ffd631e93f7caee210/src/editor.ts#L128)
+Defined in: [editor.ts:151](https://github.com/lofcz/edix/blob/36e8457c3653b1968d147b3c83c412bc54a2ee9d/src/editor.ts#L151)
 
 Callback invoked when errors happen.
 
@@ -100,7 +128,7 @@ console.warn
 
 > `optional` **onError?**: (`message`) => `never`
 
-Defined in: [editor.ts:134](https://github.com/lofcz/edix/blob/480372a69e3803fb03d455ffd631e93f7caee210/src/editor.ts#L134)
+Defined in: [editor.ts:157](https://github.com/lofcz/edix/blob/36e8457c3653b1968d147b3c83c412bc54a2ee9d/src/editor.ts#L157)
 
 Callback invoked when errors happen.
 

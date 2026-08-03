@@ -4,7 +4,7 @@
 
 # Interface: Editor\<T\>
 
-Defined in: [editor.ts:181](https://github.com/lofcz/edix/blob/480372a69e3803fb03d455ffd631e93f7caee210/src/editor.ts#L181)
+Defined in: [editor.ts:204](https://github.com/lofcz/edix/blob/36e8457c3653b1968d147b3c83c412bc54a2ee9d/src/editor.ts#L204)
 
 The editor instance.
 
@@ -20,7 +20,7 @@ The editor instance.
 
 > **apply**(`op`): `this`
 
-Defined in: [editor.ts:193](https://github.com/lofcz/edix/blob/480372a69e3803fb03d455ffd631e93f7caee210/src/editor.ts#L193)
+Defined in: [editor.ts:228](https://github.com/lofcz/edix/blob/36e8457c3653b1968d147b3c83c412bc54a2ee9d/src/editor.ts#L228)
 
 Dispatches editing operations.
 
@@ -44,7 +44,7 @@ Dispatches editing operations.
 
 > **exec**\<`A`\>(`fn`, ...`args`): `this`
 
-Defined in: [editor.ts:199](https://github.com/lofcz/edix/blob/480372a69e3803fb03d455ffd631e93f7caee210/src/editor.ts#L199)
+Defined in: [editor.ts:234](https://github.com/lofcz/edix/blob/36e8457c3653b1968d147b3c83c412bc54a2ee9d/src/editor.ts#L234)
 
 Executes a function with editor bound as context.
 
@@ -76,7 +76,7 @@ arguments of the function
 
 > **exec**\<`A`, `V`\>(`fn`, ...`args`): `V`
 
-Defined in: [editor.ts:203](https://github.com/lofcz/edix/blob/480372a69e3803fb03d455ffd631e93f7caee210/src/editor.ts#L203)
+Defined in: [editor.ts:238](https://github.com/lofcz/edix/blob/36e8457c3653b1968d147b3c83c412bc54a2ee9d/src/editor.ts#L238)
 
 ##### Type Parameters
 
@@ -108,7 +108,7 @@ Defined in: [editor.ts:203](https://github.com/lofcz/edix/blob/480372a69e3803fb0
 
 > **on**\<`K`\>(`key`, `callback`): () => `void`
 
-Defined in: [editor.ts:208](https://github.com/lofcz/edix/blob/480372a69e3803fb03d455ffd631e93f7caee210/src/editor.ts#L208)
+Defined in: [editor.ts:243](https://github.com/lofcz/edix/blob/36e8457c3653b1968d147b3c83c412bc54a2ee9d/src/editor.ts#L243)
 
 A function to subscribe editor events.
 
@@ -140,7 +140,7 @@ cleanup function
 
 > **hook**\<`K`\>(`key`, `callback`): () => `void`
 
-Defined in: [editor.ts:216](https://github.com/lofcz/edix/blob/480372a69e3803fb03d455ffd631e93f7caee210/src/editor.ts#L216)
+Defined in: [editor.ts:251](https://github.com/lofcz/edix/blob/36e8457c3653b1968d147b3c83c412bc54a2ee9d/src/editor.ts#L251)
 
 A function to register editor hooks.
 
@@ -172,7 +172,7 @@ cleanup function
 
 > **get**\<`V`\>(`key`): `V`
 
-Defined in: [editor.ts:223](https://github.com/lofcz/edix/blob/480372a69e3803fb03d455ffd631e93f7caee210/src/editor.ts#L223)
+Defined in: [editor.ts:258](https://github.com/lofcz/edix/blob/36e8457c3653b1968d147b3c83c412bc54a2ee9d/src/editor.ts#L258)
 
 Get a value from the context.
 
@@ -198,7 +198,7 @@ Get a value from the context.
 
 > **set**\<`V`\>(`key`, `value`): `this`
 
-Defined in: [editor.ts:227](https://github.com/lofcz/edix/blob/480372a69e3803fb03d455ffd631e93f7caee210/src/editor.ts#L227)
+Defined in: [editor.ts:262](https://github.com/lofcz/edix/blob/36e8457c3653b1968d147b3c83c412bc54a2ee9d/src/editor.ts#L262)
 
 Set a value for the context.
 
@@ -228,7 +228,18 @@ Set a value for the context.
 
 > `readonly` **doc**: `T`
 
-Defined in: [editor.ts:182](https://github.com/lofcz/edix/blob/480372a69e3803fb03d455ffd631e93f7caee210/src/editor.ts#L182)
+Defined in: [editor.ts:205](https://github.com/lofcz/edix/blob/36e8457c3653b1968d147b3c83c412bc54a2ee9d/src/editor.ts#L205)
+
+***
+
+### isEmpty
+
+> `readonly` **isEmpty**: `boolean`
+
+Defined in: [editor.ts:210](https://github.com/lofcz/edix/blob/36e8457c3653b1968d147b3c83c412bc54a2ee9d/src/editor.ts#L210)
+
+Whether the document is empty (no text content, no void nodes).
+Recomputed once per commit so reads stay O(1).
 
 ***
 
@@ -236,7 +247,7 @@ Defined in: [editor.ts:182](https://github.com/lofcz/edix/blob/480372a69e3803fb0
 
 > **selection**: `Selection`
 
-Defined in: [editor.ts:183](https://github.com/lofcz/edix/blob/480372a69e3803fb03d455ffd631e93f7caee210/src/editor.ts#L183)
+Defined in: [editor.ts:211](https://github.com/lofcz/edix/blob/36e8457c3653b1968d147b3c83c412bc54a2ee9d/src/editor.ts#L211)
 
 ***
 
@@ -244,10 +255,25 @@ Defined in: [editor.ts:183](https://github.com/lofcz/edix/blob/480372a69e3803fb0
 
 > **readonly**: `boolean`
 
-Defined in: [editor.ts:188](https://github.com/lofcz/edix/blob/480372a69e3803fb03d455ffd631e93f7caee210/src/editor.ts#L188)
+Defined in: [editor.ts:216](https://github.com/lofcz/edix/blob/36e8457c3653b1968d147b3c83c412bc54a2ee9d/src/editor.ts#L216)
 
 The getter/setter for the editor's read-only state.
 `true` to read-only. `false` to editable.
+
+***
+
+### autoScroll
+
+> **autoScroll**: `boolean`
+
+Defined in: [editor.ts:223](https://github.com/lofcz/edix/blob/36e8457c3653b1968d147b3c83c412bc54a2ee9d/src/editor.ts#L223)
+
+Enable/disable native-textarea-like auto-scroll: scroll the mounted
+element only when needed to keep the caret visible.
+
+#### See
+
+[EditorOptions.autoScroll](EditorOptions.md#autoscroll)
 
 ***
 
@@ -255,7 +281,7 @@ The getter/setter for the editor's read-only state.
 
 > **input**: (`element`) => () => `void`
 
-Defined in: [editor.ts:232](https://github.com/lofcz/edix/blob/480372a69e3803fb03d455ffd631e93f7caee210/src/editor.ts#L232)
+Defined in: [editor.ts:267](https://github.com/lofcz/edix/blob/36e8457c3653b1968d147b3c83c412bc54a2ee9d/src/editor.ts#L267)
 
 A function to make DOM editable.
 

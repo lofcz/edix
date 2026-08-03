@@ -144,6 +144,23 @@ export interface EditorOptions<
    */
   autoScroll?: boolean;
   /**
+   * Revert DOM mutations that are not from IME composition and not inside
+   * {@link Editor.domUpdate}.
+   *
+   * Use with **imperative** view sync (host patches the contenteditable from
+   * `change`). Declarative React/Vue hosts that re-render from state should
+   * leave this `false` — their paint looks like a foreign mutation and would
+   * be undone.
+   *
+   * When enabled, wrap every host-driven DOM write in {@link Editor.domUpdate}
+   * so the paint is accepted. This defends against page translators,
+   * Grammarly-like extensions, and similar tools that rewrite the editable
+   * tree and desync it from the document model.
+   *
+   * @default false
+   */
+  revertForeignMutations?: boolean;
+  /**
    * Callback invoked when errors happen.
    *
    * @default console.warn
@@ -265,6 +282,14 @@ export interface Editor<T extends DocNode = DocNode> {
    * @returns A function to stop subscribing DOM changes and restores previous DOM state.
    */
   input: (element: HTMLElement) => () => void;
+  /**
+   * Run a host-driven DOM paint. Mutations inside are accepted by the
+   * MutationObserver.
+   *
+   * Required when {@link EditorOptions.revertForeignMutations} is `true`.
+   * Safe to call when unmounted (runs `fn` only) or when the option is off.
+   */
+  domUpdate(fn: () => void): this;
 }
 
 /**
@@ -279,12 +304,15 @@ export const createEditor = <
   schema,
   isBlock = defaultIsBlockNode,
   autoScroll: _autoScroll = false,
+  revertForeignMutations = false,
   onWarn = console.warn,
   onError = defaultOnError,
 }: EditorOptions<T, S>): Editor<T> => {
   let selection: Selection = [0, 0];
   let mountedElement: HTMLElement | null = null;
   let scrollRAF = 0;
+  /** Set while `input()` is active — host paints go through here. */
+  let runDomUpdate: ((fn: () => void) => void) | null = null;
 
   const scheduleScroll = () => {
     if (mountedElement && !scrollRAF) {
@@ -544,6 +572,14 @@ export const createEditor = <
       contexts.set(key, value);
       return editor;
     },
+    domUpdate: (fn) => {
+      if (runDomUpdate) {
+        runDomUpdate(fn);
+      } else {
+        fn();
+      }
+      return editor;
+    },
     input: (element) => {
       if (
         !(window.InputEvent && isFunction(InputEvent.prototype.getTargetRanges))
@@ -644,12 +680,28 @@ export const createEditor = <
         onWarn("failed to serialize pasted data");
       };
 
-      const observer = createMutationObserver(element, () => {
+      const restoreDomSelection = () => {
         cancelSyncDomSelection();
         // TODO optimize
         // Mutation to selected DOM may change selection, so restore it.
         setSelectionToDOM(element, parser, doc, selection);
-      });
+      };
+
+      const observer = createMutationObserver(
+        element,
+        restoreDomSelection,
+        revertForeignMutations,
+      );
+
+      runDomUpdate = (fn) => {
+        observer._domUpdate(true);
+        try {
+          fn();
+        } finally {
+          observer._domUpdate(false);
+          restoreDomSelection();
+        }
+      };
 
       const syncSelection = () => {
         updateSelection(
@@ -902,6 +954,9 @@ export const createEditor = <
         }
         if (mountedElement === element) {
           mountedElement = null;
+        }
+        if (runDomUpdate) {
+          runDomUpdate = null;
         }
 
         element.contentEditable = prevContentEditable;

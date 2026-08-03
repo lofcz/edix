@@ -4,7 +4,7 @@
 
 # Interface: PlainEditorOptions
 
-Defined in: [presets/plain.ts:8](https://github.com/lofcz/edix/blob/480372a69e3803fb03d455ffd631e93f7caee210/src/presets/plain.ts#L8)
+Defined in: [presets/plain.ts:21](https://github.com/lofcz/edix/blob/36e8457c3653b1968d147b3c83c412bc54a2ee9d/src/presets/plain.ts#L21)
 
 ## Extends
 
@@ -16,7 +16,7 @@ Defined in: [presets/plain.ts:8](https://github.com/lofcz/edix/blob/480372a69e38
 
 > **text**: `string`
 
-Defined in: [presets/plain.ts:15](https://github.com/lofcz/edix/blob/480372a69e3803fb03d455ffd631e93f7caee210/src/presets/plain.ts#L15)
+Defined in: [presets/plain.ts:28](https://github.com/lofcz/edix/blob/36e8457c3653b1968d147b3c83c412bc54a2ee9d/src/presets/plain.ts#L28)
 
 Initial document text.
 
@@ -26,7 +26,7 @@ Initial document text.
 
 > `optional` **singleline?**: `boolean`
 
-Defined in: [presets/plain.ts:19](https://github.com/lofcz/edix/blob/480372a69e3803fb03d455ffd631e93f7caee210/src/presets/plain.ts#L19)
+Defined in: [presets/plain.ts:32](https://github.com/lofcz/edix/blob/36e8457c3653b1968d147b3c83c412bc54a2ee9d/src/presets/plain.ts#L32)
 
 TODO
 
@@ -34,9 +34,9 @@ TODO
 
 ### onChange
 
-> **onChange**: (`text`) => `void`
+> **onChange**: (`text`, `dirtyRange`) => `void`
 
-Defined in: [presets/plain.ts:23](https://github.com/lofcz/edix/blob/480372a69e3803fb03d455ffd631e93f7caee210/src/presets/plain.ts#L23)
+Defined in: [presets/plain.ts:36](https://github.com/lofcz/edix/blob/36e8457c3653b1968d147b3c83c412bc54a2ee9d/src/presets/plain.ts#L36)
 
 Callback invoked when document changes.
 
@@ -45,6 +45,10 @@ Callback invoked when document changes.
 ##### text
 
 `string`
+
+##### dirtyRange
+
+[`DirtyRange`](DirtyRange.md)
 
 #### Returns
 
@@ -56,7 +60,7 @@ Callback invoked when document changes.
 
 > `optional` **readonly?**: `boolean`
 
-Defined in: [editor.ts:118](https://github.com/lofcz/edix/blob/480372a69e3803fb03d455ffd631e93f7caee210/src/editor.ts#L118)
+Defined in: [editor.ts:123](https://github.com/lofcz/edix/blob/36e8457c3653b1968d147b3c83c412bc54a2ee9d/src/editor.ts#L123)
 
 The state editable or not.
 
@@ -70,7 +74,7 @@ The state editable or not.
 
 > `optional` **isBlock?**: (`node`) => `boolean`
 
-Defined in: [editor.ts:122](https://github.com/lofcz/edix/blob/480372a69e3803fb03d455ffd631e93f7caee210/src/editor.ts#L122)
+Defined in: [editor.ts:127](https://github.com/lofcz/edix/blob/36e8457c3653b1968d147b3c83c412bc54a2ee9d/src/editor.ts#L127)
 
 TODO
 
@@ -90,11 +94,43 @@ TODO
 
 ***
 
+### autoScroll?
+
+> `optional` **autoScroll?**: `boolean`
+
+Defined in: [editor.ts:145](https://github.com/lofcz/edix/blob/36e8457c3653b1968d147b3c83c412bc54a2ee9d/src/editor.ts#L145)
+
+Keep the caret visible inside the mounted element after document
+changes, behaving like a native `<textarea>`:
+
+- If the caret is already visible (e.g. typing in the middle of a
+  long doc), nothing scrolls.
+- If the caret falls below the viewport, the element scrolls down
+  just enough to reveal it.
+- If the caret falls above the viewport, the element scrolls up
+  just enough to reveal it.
+
+Scroll work is coalesced via `requestAnimationFrame` and only reads
+the caret's bounding rect, never `scrollHeight`, so it does not
+force a full overflow-layout pass on each input.
+
+#### Default
+
+```ts
+false
+```
+
+#### Inherited from
+
+`Omit.autoScroll`
+
+***
+
 ### onWarn?
 
 > `optional` **onWarn?**: (`message`) => `void`
 
-Defined in: [editor.ts:128](https://github.com/lofcz/edix/blob/480372a69e3803fb03d455ffd631e93f7caee210/src/editor.ts#L128)
+Defined in: [editor.ts:151](https://github.com/lofcz/edix/blob/36e8457c3653b1968d147b3c83c412bc54a2ee9d/src/editor.ts#L151)
 
 Callback invoked when errors happen.
 
@@ -124,7 +160,7 @@ console.warn
 
 > `optional` **onError?**: (`message`) => `never`
 
-Defined in: [editor.ts:134](https://github.com/lofcz/edix/blob/480372a69e3803fb03d455ffd631e93f7caee210/src/editor.ts#L134)
+Defined in: [editor.ts:157](https://github.com/lofcz/edix/blob/36e8457c3653b1968d147b3c83c412bc54a2ee9d/src/editor.ts#L157)
 
 Callback invoked when errors happen.
 
