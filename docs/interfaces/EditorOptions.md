@@ -4,7 +4,7 @@
 
 # Interface: EditorOptions\<T, S\>
 
-Defined in: [editor.ts:108](https://github.com/lofcz/edix/blob/36e8457c3653b1968d147b3c83c412bc54a2ee9d/src/editor.ts#L108)
+Defined in: [editor.ts:108](https://github.com/lofcz/edix/blob/c107bd4d7da7f42a515b729a576c9e41550b876d/src/editor.ts#L108)
 
 Options of [createEditor](../functions/createEditor.md).
 
@@ -24,7 +24,7 @@ Options of [createEditor](../functions/createEditor.md).
 
 > `optional` **schema?**: `S`
 
-Defined in: [editor.ts:115](https://github.com/lofcz/edix/blob/36e8457c3653b1968d147b3c83c412bc54a2ee9d/src/editor.ts#L115)
+Defined in: [editor.ts:115](https://github.com/lofcz/edix/blob/c107bd4d7da7f42a515b729a576c9e41550b876d/src/editor.ts#L115)
 
 Optional [Standard Schema](https://github.com/standard-schema/standard-schema) to validate unsafe edits.
 
@@ -34,7 +34,7 @@ Optional [Standard Schema](https://github.com/standard-schema/standard-schema) t
 
 > **doc**: `T`
 
-Defined in: [editor.ts:119](https://github.com/lofcz/edix/blob/36e8457c3653b1968d147b3c83c412bc54a2ee9d/src/editor.ts#L119)
+Defined in: [editor.ts:119](https://github.com/lofcz/edix/blob/c107bd4d7da7f42a515b729a576c9e41550b876d/src/editor.ts#L119)
 
 Initial document.
 
@@ -44,7 +44,7 @@ Initial document.
 
 > `optional` **readonly?**: `boolean`
 
-Defined in: [editor.ts:123](https://github.com/lofcz/edix/blob/36e8457c3653b1968d147b3c83c412bc54a2ee9d/src/editor.ts#L123)
+Defined in: [editor.ts:123](https://github.com/lofcz/edix/blob/c107bd4d7da7f42a515b729a576c9e41550b876d/src/editor.ts#L123)
 
 The state editable or not.
 
@@ -54,7 +54,7 @@ The state editable or not.
 
 > `optional` **isBlock?**: (`node`) => `boolean`
 
-Defined in: [editor.ts:127](https://github.com/lofcz/edix/blob/36e8457c3653b1968d147b3c83c412bc54a2ee9d/src/editor.ts#L127)
+Defined in: [editor.ts:127](https://github.com/lofcz/edix/blob/c107bd4d7da7f42a515b729a576c9e41550b876d/src/editor.ts#L127)
 
 TODO
 
@@ -74,7 +74,7 @@ TODO
 
 > `optional` **autoScroll?**: `boolean`
 
-Defined in: [editor.ts:145](https://github.com/lofcz/edix/blob/36e8457c3653b1968d147b3c83c412bc54a2ee9d/src/editor.ts#L145)
+Defined in: [editor.ts:145](https://github.com/lofcz/edix/blob/c107bd4d7da7f42a515b729a576c9e41550b876d/src/editor.ts#L145)
 
 Keep the caret visible inside the mounted element after document
 changes, behaving like a native `<textarea>`:
@@ -98,11 +98,38 @@ false
 
 ***
 
+### revertForeignMutations?
+
+> `optional` **revertForeignMutations?**: `boolean`
+
+Defined in: [editor.ts:162](https://github.com/lofcz/edix/blob/c107bd4d7da7f42a515b729a576c9e41550b876d/src/editor.ts#L162)
+
+Revert DOM mutations that are not from IME composition and not inside
+[Editor.domUpdate](Editor.md#domupdate).
+
+Use with **imperative** view sync (host patches the contenteditable from
+`change`). Declarative React/Vue hosts that re-render from state should
+leave this `false` — their paint looks like a foreign mutation and would
+be undone.
+
+When enabled, wrap every host-driven DOM write in [Editor.domUpdate](Editor.md#domupdate)
+so the paint is accepted. This defends against page translators,
+Grammarly-like extensions, and similar tools that rewrite the editable
+tree and desync it from the document model.
+
+#### Default
+
+```ts
+false
+```
+
+***
+
 ### onWarn?
 
 > `optional` **onWarn?**: (`message`) => `void`
 
-Defined in: [editor.ts:151](https://github.com/lofcz/edix/blob/36e8457c3653b1968d147b3c83c412bc54a2ee9d/src/editor.ts#L151)
+Defined in: [editor.ts:168](https://github.com/lofcz/edix/blob/c107bd4d7da7f42a515b729a576c9e41550b876d/src/editor.ts#L168)
 
 Callback invoked when errors happen.
 
@@ -128,7 +155,7 @@ console.warn
 
 > `optional` **onError?**: (`message`) => `never`
 
-Defined in: [editor.ts:157](https://github.com/lofcz/edix/blob/36e8457c3653b1968d147b3c83c412bc54a2ee9d/src/editor.ts#L157)
+Defined in: [editor.ts:174](https://github.com/lofcz/edix/blob/c107bd4d7da7f42a515b729a576c9e41550b876d/src/editor.ts#L174)
 
 Callback invoked when errors happen.
 

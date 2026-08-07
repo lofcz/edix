@@ -6,7 +6,7 @@
 
 > **blockLockPlugin**\<`T`\>(`editor`, `options`): `void`
 
-Defined in: [plugins/blockLock.ts:23](https://github.com/lofcz/edix/blob/fc2a276691616b582f8904cca31ccbe1682d98e2/src/plugins/blockLock.ts#L23)
+Defined in: [plugins/blockLock.ts:23](https://github.com/lofcz/edix/blob/c107bd4d7da7f42a515b729a576c9e41550b876d/src/plugins/blockLock.ts#L23)
 
 A plugin to make specific blocks read-only.
 

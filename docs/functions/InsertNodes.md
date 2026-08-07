@@ -6,7 +6,7 @@
 
 > **InsertNodes**\<`T`\>(`editor`, `nodes`, `position?`): `void`
 
-Defined in: [commands.ts:61](https://github.com/lofcz/edix/blob/36e8457c3653b1968d147b3c83c412bc54a2ee9d/src/commands.ts#L61)
+Defined in: [commands.ts:61](https://github.com/lofcz/edix/blob/c107bd4d7da7f42a515b729a576c9e41550b876d/src/commands.ts#L61)
 
 Insert multiple inline nodes as a single line fragment in one transaction.
 

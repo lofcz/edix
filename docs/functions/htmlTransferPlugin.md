@@ -6,7 +6,7 @@
 
 > **htmlTransferPlugin**\<`T`\>(`editor`, `options`): `void`
 
-Defined in: [plugins/transfer/htmlTransfer.ts:128](https://github.com/lofcz/edix/blob/fc2a276691616b582f8904cca31ccbe1682d98e2/src/plugins/transfer/htmlTransfer.ts#L128)
+Defined in: [plugins/transfer/htmlTransfer.ts:128](https://github.com/lofcz/edix/blob/c107bd4d7da7f42a515b729a576c9e41550b876d/src/plugins/transfer/htmlTransfer.ts#L128)
 
 A plugin to handle copying / pasting HTML
 

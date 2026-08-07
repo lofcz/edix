@@ -6,7 +6,7 @@
 
 > **ReplaceText**(`editor`, `text`, `range?`): `void`
 
-Defined in: [commands.ts:52](https://github.com/lofcz/edix/blob/fc2a276691616b582f8904cca31ccbe1682d98e2/src/commands.ts#L52)
+Defined in: [commands.ts:76](https://github.com/lofcz/edix/blob/c107bd4d7da7f42a515b729a576c9e41550b876d/src/commands.ts#L76)
 
 Replace text in the selection or specified range.
 

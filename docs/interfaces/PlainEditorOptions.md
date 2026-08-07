@@ -4,7 +4,7 @@
 
 # Interface: PlainEditorOptions
 
-Defined in: [presets/plain.ts:21](https://github.com/lofcz/edix/blob/36e8457c3653b1968d147b3c83c412bc54a2ee9d/src/presets/plain.ts#L21)
+Defined in: [presets/plain.ts:21](https://github.com/lofcz/edix/blob/c107bd4d7da7f42a515b729a576c9e41550b876d/src/presets/plain.ts#L21)
 
 ## Extends
 
@@ -16,7 +16,7 @@ Defined in: [presets/plain.ts:21](https://github.com/lofcz/edix/blob/36e8457c365
 
 > **text**: `string`
 
-Defined in: [presets/plain.ts:28](https://github.com/lofcz/edix/blob/36e8457c3653b1968d147b3c83c412bc54a2ee9d/src/presets/plain.ts#L28)
+Defined in: [presets/plain.ts:28](https://github.com/lofcz/edix/blob/c107bd4d7da7f42a515b729a576c9e41550b876d/src/presets/plain.ts#L28)
 
 Initial document text.
 
@@ -26,7 +26,7 @@ Initial document text.
 
 > `optional` **singleline?**: `boolean`
 
-Defined in: [presets/plain.ts:32](https://github.com/lofcz/edix/blob/36e8457c3653b1968d147b3c83c412bc54a2ee9d/src/presets/plain.ts#L32)
+Defined in: [presets/plain.ts:32](https://github.com/lofcz/edix/blob/c107bd4d7da7f42a515b729a576c9e41550b876d/src/presets/plain.ts#L32)
 
 TODO
 
@@ -36,7 +36,7 @@ TODO
 
 > **onChange**: (`text`, `dirtyRange`) => `void`
 
-Defined in: [presets/plain.ts:36](https://github.com/lofcz/edix/blob/36e8457c3653b1968d147b3c83c412bc54a2ee9d/src/presets/plain.ts#L36)
+Defined in: [presets/plain.ts:36](https://github.com/lofcz/edix/blob/c107bd4d7da7f42a515b729a576c9e41550b876d/src/presets/plain.ts#L36)
 
 Callback invoked when document changes.
 
@@ -60,7 +60,7 @@ Callback invoked when document changes.
 
 > `optional` **readonly?**: `boolean`
 
-Defined in: [editor.ts:123](https://github.com/lofcz/edix/blob/36e8457c3653b1968d147b3c83c412bc54a2ee9d/src/editor.ts#L123)
+Defined in: [editor.ts:123](https://github.com/lofcz/edix/blob/c107bd4d7da7f42a515b729a576c9e41550b876d/src/editor.ts#L123)
 
 The state editable or not.
 
@@ -74,7 +74,7 @@ The state editable or not.
 
 > `optional` **isBlock?**: (`node`) => `boolean`
 
-Defined in: [editor.ts:127](https://github.com/lofcz/edix/blob/36e8457c3653b1968d147b3c83c412bc54a2ee9d/src/editor.ts#L127)
+Defined in: [editor.ts:127](https://github.com/lofcz/edix/blob/c107bd4d7da7f42a515b729a576c9e41550b876d/src/editor.ts#L127)
 
 TODO
 
@@ -98,7 +98,7 @@ TODO
 
 > `optional` **autoScroll?**: `boolean`
 
-Defined in: [editor.ts:145](https://github.com/lofcz/edix/blob/36e8457c3653b1968d147b3c83c412bc54a2ee9d/src/editor.ts#L145)
+Defined in: [editor.ts:145](https://github.com/lofcz/edix/blob/c107bd4d7da7f42a515b729a576c9e41550b876d/src/editor.ts#L145)
 
 Keep the caret visible inside the mounted element after document
 changes, behaving like a native `<textarea>`:
@@ -126,11 +126,42 @@ false
 
 ***
 
+### revertForeignMutations?
+
+> `optional` **revertForeignMutations?**: `boolean`
+
+Defined in: [editor.ts:162](https://github.com/lofcz/edix/blob/c107bd4d7da7f42a515b729a576c9e41550b876d/src/editor.ts#L162)
+
+Revert DOM mutations that are not from IME composition and not inside
+[Editor.domUpdate](Editor.md#domupdate).
+
+Use with **imperative** view sync (host patches the contenteditable from
+`change`). Declarative React/Vue hosts that re-render from state should
+leave this `false` — their paint looks like a foreign mutation and would
+be undone.
+
+When enabled, wrap every host-driven DOM write in [Editor.domUpdate](Editor.md#domupdate)
+so the paint is accepted. This defends against page translators,
+Grammarly-like extensions, and similar tools that rewrite the editable
+tree and desync it from the document model.
+
+#### Default
+
+```ts
+false
+```
+
+#### Inherited from
+
+`Omit.revertForeignMutations`
+
+***
+
 ### onWarn?
 
 > `optional` **onWarn?**: (`message`) => `void`
 
-Defined in: [editor.ts:151](https://github.com/lofcz/edix/blob/36e8457c3653b1968d147b3c83c412bc54a2ee9d/src/editor.ts#L151)
+Defined in: [editor.ts:168](https://github.com/lofcz/edix/blob/c107bd4d7da7f42a515b729a576c9e41550b876d/src/editor.ts#L168)
 
 Callback invoked when errors happen.
 
@@ -160,7 +191,7 @@ console.warn
 
 > `optional` **onError?**: (`message`) => `never`
 
-Defined in: [editor.ts:157](https://github.com/lofcz/edix/blob/36e8457c3653b1968d147b3c83c412bc54a2ee9d/src/editor.ts#L157)
+Defined in: [editor.ts:174](https://github.com/lofcz/edix/blob/c107bd4d7da7f42a515b729a576c9e41550b876d/src/editor.ts#L174)
 
 Callback invoked when errors happen.
 

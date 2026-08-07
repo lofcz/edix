@@ -6,7 +6,7 @@
 
 > **fileTransferPlugin**(`editor`, `handlerByMime`): `void`
 
-Defined in: [plugins/transfer/fileTransfer.ts:7](https://github.com/lofcz/edix/blob/fc2a276691616b582f8904cca31ccbe1682d98e2/src/plugins/transfer/fileTransfer.ts#L7)
+Defined in: [plugins/transfer/fileTransfer.ts:7](https://github.com/lofcz/edix/blob/c107bd4d7da7f42a515b729a576c9e41550b876d/src/plugins/transfer/fileTransfer.ts#L7)
 
 A plugin to handle pasting / dropping from File.
 

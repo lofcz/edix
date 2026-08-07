@@ -6,7 +6,7 @@
 
 > **LeavesInRange**\<`T`\>(`editor`, `range?`): `Generator`\<[`InferInlineNode`](../type-aliases/InferInlineNode.md)\<`T`\>, `void`, `void`\>
 
-Defined in: [queries.ts:10](https://github.com/lofcz/edix/blob/fc2a276691616b582f8904cca31ccbe1682d98e2/src/queries.ts#L10)
+Defined in: [queries.ts:10](https://github.com/lofcz/edix/blob/c107bd4d7da7f42a515b729a576c9e41550b876d/src/queries.ts#L10)
 
 Get leaf nodes that intersect with the selection or specified range.
 

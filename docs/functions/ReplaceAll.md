@@ -6,7 +6,7 @@
 
 > **ReplaceAll**(`editor`, `text`): `void`
 
-Defined in: [commands.ts:112](https://github.com/lofcz/edix/blob/36e8457c3653b1968d147b3c83c412bc54a2ee9d/src/commands.ts#L112)
+Defined in: [commands.ts:112](https://github.com/lofcz/edix/blob/c107bd4d7da7f42a515b729a576c9e41550b876d/src/commands.ts#L112)
 
 Replace the whole document content with a plain text string.
 

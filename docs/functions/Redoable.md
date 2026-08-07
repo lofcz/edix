@@ -6,7 +6,7 @@
 
 > **Redoable**(`editor`): `boolean`
 
-Defined in: [plugins/history.ts:162](https://github.com/lofcz/edix/blob/fc2a276691616b582f8904cca31ccbe1682d98e2/src/plugins/history.ts#L162)
+Defined in: [plugins/history.ts:162](https://github.com/lofcz/edix/blob/c107bd4d7da7f42a515b729a576c9e41550b876d/src/plugins/history.ts#L162)
 
 Check if the history can be redone.
 
