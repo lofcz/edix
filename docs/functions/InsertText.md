@@ -6,7 +6,7 @@
 
 > **InsertText**(`editor`, `text`, `at?`): `void`
 
-Defined in: [commands.ts:32](https://github.com/lofcz/edix/blob/36e8457c3653b1968d147b3c83c412bc54a2ee9d/src/commands.ts#L32)
+Defined in: [commands.ts:26](https://github.com/lofcz/edix/blob/fc2a276691616b582f8904cca31ccbe1682d98e2/src/commands.ts#L26)
 
 Insert text at the caret or specified position.
 

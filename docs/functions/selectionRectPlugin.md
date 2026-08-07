@@ -6,7 +6,7 @@
 
 > **selectionRectPlugin**(`editor`, `onSelectionChange`): `void`
 
-Defined in: [plugins/selectionRect.ts:7](https://github.com/lofcz/edix/blob/36e8457c3653b1968d147b3c83c412bc54a2ee9d/src/plugins/selectionRect.ts#L7)
+Defined in: [plugins/selectionRect.ts:7](https://github.com/lofcz/edix/blob/fc2a276691616b582f8904cca31ccbe1682d98e2/src/plugins/selectionRect.ts#L7)
 
 A plugin to get the bounding rect of selection on selection change
 

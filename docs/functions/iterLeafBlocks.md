@@ -6,7 +6,7 @@
 
 > **iterLeafBlocks**\<`T`\>(`node`, `range`): `Generator`\<\[[`InferLeafBlockNode`](../type-aliases/InferLeafBlockNode.md)\<`T`\>, `number`\], `void`, `void`\>
 
-Defined in: [doc/node.ts:284](https://github.com/lofcz/edix/blob/36e8457c3653b1968d147b3c83c412bc54a2ee9d/src/doc/node.ts#L284)
+Defined in: [doc/node.ts:284](https://github.com/lofcz/edix/blob/fc2a276691616b582f8904cca31ccbe1682d98e2/src/doc/node.ts#L284)
 
 ## Type Parameters
 

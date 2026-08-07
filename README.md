@@ -229,6 +229,7 @@ export const App = () => {
 - Preact ([Demo](https://lofcz.github.io/edix/preact), [Source](./examples/preact))
 - Alpine ([Demo](https://lofcz.github.io/edix/alpine), [Source](./examples/alpine))
 - Marko ([Demo](https://lofcz.github.io/edix/marko), [Source](./examples/marko))
+- Octane ([Demo](https://lofcz.github.io/edix/octane), [Source](./examples/octane))
 - Vanilla ([Demo](https://lofcz.github.io/edix/vanilla), [Source](./examples/vanilla))
 ...and more! Contribution welcome!
 

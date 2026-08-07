@@ -61,11 +61,7 @@ jobs:
         run: (cd examples/alpine && npm ci && npm install --no-save edix@file:../..) && FRAMEWORK_DIR=examples/alpine npm run e2e
       - name: Smoke marko
         run: (cd examples/marko && npm ci && npm install --no-save edix@file:../..) && FRAMEWORK_DIR=examples/marko npm run e2e
+      - name: Smoke octane
+        run: (cd examples/octane && npm ci && npm install --no-save edix@file:../..) && FRAMEWORK_DIR=examples/octane npm run e2e
       - name: Smoke vanilla
         run: (cd examples/vanilla && npm ci && npm install --no-save edix@file:../..) && FRAMEWORK_DIR=examples/vanilla npm run e2e
-      # - uses: actions/upload-artifact@v3
-      #   if: always()
-      #   with:
-      #     name: playwright-report
-      #     path: playwright-report/
-      #     retention-days: 30

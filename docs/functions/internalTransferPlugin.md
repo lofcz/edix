@@ -6,7 +6,7 @@
 
 > **internalTransferPlugin**(`editor`, `options?`): `void`
 
-Defined in: [plugins/transfer/internalTransfer.ts:11](https://github.com/lofcz/edix/blob/36e8457c3653b1968d147b3c83c412bc54a2ee9d/src/plugins/transfer/internalTransfer.ts#L11)
+Defined in: [plugins/transfer/internalTransfer.ts:11](https://github.com/lofcz/edix/blob/fc2a276691616b582f8904cca31ccbe1682d98e2/src/plugins/transfer/internalTransfer.ts#L11)
 
 A plugin to handle copying / pasting between editor instances
 
