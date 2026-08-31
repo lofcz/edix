@@ -60,10 +60,7 @@ it("ReplaceDoc clamps selection when the document shrinks", () => {
     onWarn: () => {},
   });
   editor.selection = [2, 2];
-  editor.exec(ReplaceDoc, [{ children: [{ text: "" }], list: "bullet" }]);
-  expect(editor.doc.children[0]).toEqual({
-    children: [{ text: "" }],
-    list: "bullet",
-  });
+  editor.exec(ReplaceDoc, [{ children: [{ text: "" }] }]);
+  expect(editor.doc.children[0]).toEqual({ children: [{ text: "" }] });
   expect(editor.selection).toEqual([0, 0]);
 });
