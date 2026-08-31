@@ -1,4 +1,5 @@
 import { expect, it } from "vitest";
+import { ReplaceDoc } from "./commands.js";
 import type { DocNode } from "./doc/types.js";
 import { createEditor } from "./editor.js";
 
@@ -52,3 +53,17 @@ it.each([null, undefined])(
     expect(changed).toBe(false);
   },
 );
+
+it("ReplaceDoc clamps selection when the document shrinks", () => {
+  const editor = createEditor({
+    doc: { children: [{ children: [{ text: "- " }] }] },
+    onWarn: () => {},
+  });
+  editor.selection = [2, 2];
+  editor.exec(ReplaceDoc, [{ children: [{ text: "" }], list: "bullet" }]);
+  expect(editor.doc.children[0]).toEqual({
+    children: [{ text: "" }],
+    list: "bullet",
+  });
+  expect(editor.selection).toEqual([0, 0]);
+});

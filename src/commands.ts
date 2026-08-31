@@ -85,12 +85,14 @@ export function ReplaceText(
 
 /**
  * Replace document in the editor.
+ *
+ * Selection is clamped to the new document size (see `applyOperation` for
+ * `patch_node`). Safe to shrink the doc — e.g. `- ` (2) → empty list item (0).
  */
 export function ReplaceDoc<T extends DocNode>(
   editor: Editor<T>,
   fragment: T["children"],
 ) {
-  // TODO revisit
   editor.apply({
     type: "patch_node",
     path: [],

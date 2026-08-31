@@ -3179,6 +3179,25 @@ describe("patch node", () => {
     expect(res[1]).toEqual(sel);
   });
 
+  it("replacing root children clamps selection to the new size", () => {
+    const doc: Doc = {
+      children: [{ attr: 0, children: [{ attr: 0, text: "- " }] }],
+    };
+    const res = applyOperation(doc, [2, 2], {
+      type: "patch_node",
+      path: [],
+      key: "children",
+      value: [{ attr: 0, list: "bullet", children: [{ attr: 0, text: "" }] }],
+    });
+
+    expect(res[0]).toEqual({
+      children: [
+        { attr: 0, list: "bullet", children: [{ attr: 0, text: "" }] },
+      ],
+    });
+    expect(res[1]).toEqual([0, 0]);
+  });
+
   it("update block node at start", () => {
     const docText = "abcde";
     const docText2 = "fghij";

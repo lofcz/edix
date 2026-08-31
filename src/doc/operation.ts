@@ -1,4 +1,4 @@
-import { is, keys } from "../utils.js";
+import { is, keys, max, min } from "../utils.js";
 import {
   getLeafBlockAt,
   getChildAt,
@@ -409,6 +409,14 @@ export const applyOperation = <T extends DocNode>(
       const node = getNodeAtPath(doc, path);
       if (node) {
         doc = replaceNodeAt(doc, path, { ...node, [key]: value });
+        // patch_node does not go through mapPosition. Replacing `children`
+        // (ReplaceDoc) can shrink the doc; clamp so the caret cannot sit past
+        // the end (hosts then desync on the next DOM write).
+        const size = getNodeSize(doc);
+        selection = [
+          min(max(0, selection[0]), size),
+          min(max(0, selection[1]), size),
+        ];
       }
       break;
     }
