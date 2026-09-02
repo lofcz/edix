@@ -7,6 +7,7 @@ import {
   defaultIsBlockNode,
   serializeRange,
 } from "./dom/index.js";
+import { isCompositionInput } from "./dom/composition.js";
 import { createMutationObserver } from "./dom/mutation.js";
 import type { DocNode, Fragment, Selection } from "./doc/types.js";
 import { is, isFunction, isString, microtask } from "./utils.js";
@@ -752,7 +753,15 @@ export const createEditor = <
         }
       };
 
-      const onInput = () => {
+      const onInput = (e: Event) => {
+        const composingEvent =
+          e instanceof InputEvent && isCompositionInput(e);
+        if (isComposing && !composingEvent) {
+          // Chrome Android may skip compositionend; commit on the first
+          // non-composition input (space / hardware key / suggestion accept).
+          flushInput();
+          return;
+        }
         if (!isComposing) {
           flushInput();
         }
@@ -761,6 +770,7 @@ export const createEditor = <
         e.preventDefault();
 
         const inputType = e.inputType as InputType;
+        const composingEvent = isCompositionInput(e);
 
         if (inputType.startsWith("format")) {
           // Ignore format inputs from document.execCommand() or shortcuts like mod+b.
@@ -769,6 +779,16 @@ export const createEditor = <
         if (inputType === "historyUndo" || inputType === "historyRedo") {
           // Cancel for now.
           return;
+        }
+
+        if (isComposing && !composingEvent) {
+          flushInput();
+        }
+        if (!isComposing && composingEvent) {
+          // compositionstart was skipped (Chrome Android). Capture the caret
+          // the same way onCompositionStart would, then record IME mutations.
+          syncSelection();
+          isComposing = true;
         }
 
         if (isComposing) {
