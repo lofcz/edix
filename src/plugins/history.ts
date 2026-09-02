@@ -3,7 +3,7 @@ import { mapPositionWithOps, type Operation } from "../doc/operation.js";
 import type { DocNode, Selection } from "../doc/types.js";
 import type { Editor } from "../editor.js";
 import { keymap } from "../keyboard.js";
-import { keys } from "../utils.js";
+import { keys, microtask } from "../utils.js";
 
 const MAX_HISTORY_LENGTH = 500;
 const BATCH_HISTORY_TIME = 500;
@@ -13,6 +13,7 @@ interface HistoryContext {
   redo: () => void;
   undoable: () => boolean;
   redoable: () => boolean;
+  restoring: () => boolean;
   clear: () => void;
 }
 
@@ -55,6 +56,15 @@ export function historyPlugin<T extends DocNode>(editor: Editor<T>) {
     }
   };
 
+  // `change` is coalesced on a microtask. Stay restoring until that flush
+  // so hosts can skip auto-transforms (lists, chips, …) without guessing
+  // which apply op types are "user input".
+  const endRestore = () => {
+    microtask(() => {
+      undoOrRedoing = false;
+    });
+  };
+
   const undo = () => {
     if (isUndoable()) {
       const sel = get()[1];
@@ -62,10 +72,10 @@ export function historyPlugin<T extends DocNode>(editor: Editor<T>) {
       const currentDoc = editor.doc;
       undoOrRedoing = true;
       restore(get()[0]);
-      undoOrRedoing = false;
       if (currentDoc !== editor.doc) {
         editor.selection = sel;
       }
+      endRestore();
     }
   };
   const redo = () => {
@@ -75,13 +85,13 @@ export function historyPlugin<T extends DocNode>(editor: Editor<T>) {
       const currentDoc = editor.doc;
       undoOrRedoing = true;
       restore(doc);
-      undoOrRedoing = false;
       if (currentDoc !== editor.doc) {
         editor.selection = [
           mapPositionWithOps(sel[0], ops),
           mapPositionWithOps(sel[1], ops),
         ];
       }
+      endRestore();
     }
   };
 
@@ -131,6 +141,7 @@ export function historyPlugin<T extends DocNode>(editor: Editor<T>) {
     redo,
     undoable: isUndoable,
     redoable: isRedoable,
+    restoring: () => undoOrRedoing,
     clear,
   });
 }
@@ -161,6 +172,17 @@ export function Undoable(editor: Editor): boolean {
  */
 export function Redoable(editor: Editor): boolean {
   return editor.get<HistoryContext>(historyPlugin).redoable();
+}
+
+/**
+ * Whether the current `change` is from {@link Undo} / {@link Redo}.
+ *
+ * `change` is flushed on a microtask after restore. This stays `true` until
+ * that flush finishes so hosts can skip auto-transforms instead of
+ * inferring intent from operation types.
+ */
+export function HistoryRestoring(editor: Editor): boolean {
+  return editor.get<HistoryContext>(historyPlugin).restoring();
 }
 
 /**

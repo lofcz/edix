@@ -1,7 +1,14 @@
 import { expect, it } from "vitest";
 import type { DocNode, Selection } from "../doc/types.js";
 import { createEditor } from "../editor.js";
-import { ClearHistory, Redo, Redoable, Undo, Undoable } from "./history.js";
+import {
+  ClearHistory,
+  HistoryRestoring,
+  Redo,
+  Redoable,
+  Undo,
+  Undoable,
+} from "./history.js";
 import { getNodeSize } from "../doc/node.js";
 
 it("empty history", () => {
@@ -573,6 +580,31 @@ it("undo set root attr", () => {
   editor.exec(Redo);
   expect(editor.doc).toEqual(updatedDoc);
   expect(editor.selection).toEqual(selection);
+});
+
+it("HistoryRestoring is true inside change during undo/redo", async () => {
+  const doc: DocNode = {
+    children: [{ children: [{ text: "abcde" }] }],
+  };
+  const editor = createEditor({ doc });
+  editor.apply({ type: "insert_text", at: 1, text: "x" });
+
+  const seen: boolean[] = [];
+  editor.on("change", () => {
+    seen.push(editor.exec(HistoryRestoring));
+  });
+
+  expect(editor.exec(HistoryRestoring)).toBe(false);
+  editor.exec(Undo);
+  await Promise.resolve();
+  expect(seen).toEqual([true]);
+  expect(editor.exec(HistoryRestoring)).toBe(false);
+
+  seen.length = 0;
+  editor.exec(Redo);
+  await Promise.resolve();
+  expect(seen).toEqual([true]);
+  expect(editor.exec(HistoryRestoring)).toBe(false);
 });
 
 it("clear history", () => {
