@@ -40,7 +40,7 @@
     "@standard-schema/spec": "^1.0.0"
   },
   "devDependencies": {
-    "@chenglou/pretext": "^0.0.8",
+    "@chenglou/pretext": "^1.0.0",
     "@dnd-kit/helpers": "^0.5.0",
     "@dnd-kit/react": "^0.5.0",
     "@playwright/test": "^1.60.0",
