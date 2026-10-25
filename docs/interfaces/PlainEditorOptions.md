@@ -4,7 +4,7 @@
 
 # Interface: PlainEditorOptions
 
-Defined in: [presets/plain.ts:21](https://github.com/lofcz/edix/blob/c107bd4d7da7f42a515b729a576c9e41550b876d/src/presets/plain.ts#L21)
+Defined in: [presets/plain.ts:8](https://github.com/inokawa/editate/blob/f40074584f982d89983e034df674fd6e901e116f/src/presets/plain.ts#L8)
 
 ## Extends
 
@@ -16,7 +16,7 @@ Defined in: [presets/plain.ts:21](https://github.com/lofcz/edix/blob/c107bd4d7da
 
 > **text**: `string`
 
-Defined in: [presets/plain.ts:28](https://github.com/lofcz/edix/blob/c107bd4d7da7f42a515b729a576c9e41550b876d/src/presets/plain.ts#L28)
+Defined in: [presets/plain.ts:15](https://github.com/inokawa/editate/blob/f40074584f982d89983e034df674fd6e901e116f/src/presets/plain.ts#L15)
 
 Initial document text.
 
@@ -26,7 +26,7 @@ Initial document text.
 
 > `optional` **singleline?**: `boolean`
 
-Defined in: [presets/plain.ts:32](https://github.com/lofcz/edix/blob/c107bd4d7da7f42a515b729a576c9e41550b876d/src/presets/plain.ts#L32)
+Defined in: [presets/plain.ts:19](https://github.com/inokawa/editate/blob/f40074584f982d89983e034df674fd6e901e116f/src/presets/plain.ts#L19)
 
 TODO
 
@@ -34,9 +34,9 @@ TODO
 
 ### onChange
 
-> **onChange**: (`text`, `dirtyRange`) => `void`
+> **onChange**: (`text`) => `void`
 
-Defined in: [presets/plain.ts:36](https://github.com/lofcz/edix/blob/c107bd4d7da7f42a515b729a576c9e41550b876d/src/presets/plain.ts#L36)
+Defined in: [presets/plain.ts:23](https://github.com/inokawa/editate/blob/f40074584f982d89983e034df674fd6e901e116f/src/presets/plain.ts#L23)
 
 Callback invoked when document changes.
 
@@ -45,10 +45,6 @@ Callback invoked when document changes.
 ##### text
 
 `string`
-
-##### dirtyRange
-
-[`DirtyRange`](DirtyRange.md)
 
 #### Returns
 
@@ -60,7 +56,7 @@ Callback invoked when document changes.
 
 > `optional` **readonly?**: `boolean`
 
-Defined in: [editor.ts:123](https://github.com/lofcz/edix/blob/c107bd4d7da7f42a515b729a576c9e41550b876d/src/editor.ts#L123)
+Defined in: [editor.ts:118](https://github.com/inokawa/editate/blob/f40074584f982d89983e034df674fd6e901e116f/src/editor.ts#L118)
 
 The state editable or not.
 
@@ -74,7 +70,7 @@ The state editable or not.
 
 > `optional` **isBlock?**: (`node`) => `boolean`
 
-Defined in: [editor.ts:127](https://github.com/lofcz/edix/blob/c107bd4d7da7f42a515b729a576c9e41550b876d/src/editor.ts#L127)
+Defined in: [editor.ts:122](https://github.com/inokawa/editate/blob/f40074584f982d89983e034df674fd6e901e116f/src/editor.ts#L122)
 
 TODO
 
@@ -94,74 +90,11 @@ TODO
 
 ***
 
-### autoScroll?
-
-> `optional` **autoScroll?**: `boolean`
-
-Defined in: [editor.ts:145](https://github.com/lofcz/edix/blob/c107bd4d7da7f42a515b729a576c9e41550b876d/src/editor.ts#L145)
-
-Keep the caret visible inside the mounted element after document
-changes, behaving like a native `<textarea>`:
-
-- If the caret is already visible (e.g. typing in the middle of a
-  long doc), nothing scrolls.
-- If the caret falls below the viewport, the element scrolls down
-  just enough to reveal it.
-- If the caret falls above the viewport, the element scrolls up
-  just enough to reveal it.
-
-Scroll work is coalesced via `requestAnimationFrame` and only reads
-the caret's bounding rect, never `scrollHeight`, so it does not
-force a full overflow-layout pass on each input.
-
-#### Default
-
-```ts
-false
-```
-
-#### Inherited from
-
-`Omit.autoScroll`
-
-***
-
-### revertForeignMutations?
-
-> `optional` **revertForeignMutations?**: `boolean`
-
-Defined in: [editor.ts:162](https://github.com/lofcz/edix/blob/c107bd4d7da7f42a515b729a576c9e41550b876d/src/editor.ts#L162)
-
-Revert DOM mutations that are not from IME composition and not inside
-[Editor.domUpdate](Editor.md#domupdate).
-
-Use with **imperative** view sync (host patches the contenteditable from
-`change`). Declarative React/Vue hosts that re-render from state should
-leave this `false` — their paint looks like a foreign mutation and would
-be undone.
-
-When enabled, wrap every host-driven DOM write in [Editor.domUpdate](Editor.md#domupdate)
-so the paint is accepted. This defends against page translators,
-Grammarly-like extensions, and similar tools that rewrite the editable
-tree and desync it from the document model.
-
-#### Default
-
-```ts
-false
-```
-
-#### Inherited from
-
-`Omit.revertForeignMutations`
-
-***
-
 ### onWarn?
 
 > `optional` **onWarn?**: (`message`) => `void`
 
-Defined in: [editor.ts:168](https://github.com/lofcz/edix/blob/c107bd4d7da7f42a515b729a576c9e41550b876d/src/editor.ts#L168)
+Defined in: [editor.ts:128](https://github.com/inokawa/editate/blob/f40074584f982d89983e034df674fd6e901e116f/src/editor.ts#L128)
 
 Callback invoked when errors happen.
 
@@ -191,7 +124,7 @@ console.warn
 
 > `optional` **onError?**: (`message`) => `never`
 
-Defined in: [editor.ts:174](https://github.com/lofcz/edix/blob/c107bd4d7da7f42a515b729a576c9e41550b876d/src/editor.ts#L174)
+Defined in: [editor.ts:134](https://github.com/inokawa/editate/blob/f40074584f982d89983e034df674fd6e901e116f/src/editor.ts#L134)
 
 Callback invoked when errors happen.
 

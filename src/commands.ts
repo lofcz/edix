@@ -1,10 +1,5 @@
-import { toRange } from "./doc/position.js";
-import {
-  getLeafBlockAt,
-  getLeafAt,
-  getNodeSize,
-  isTextNode,
-} from "./doc/node.js";
+import { isCovered, toRange } from "./doc/position.js";
+import { getLeafAt, getNodeSize, isTextNode, iterLeaves } from "./doc/node.js";
 import type { Editor } from "./editor.js";
 import type { DocNode, Range } from "./doc/types.js";
 import type {
@@ -14,7 +9,7 @@ import type {
   InferTextNode,
   InferVoidNode,
 } from "./doc/types-infer.js";
-import { LeavesInRange } from "./queries.js";
+import { BlocksInRange, LeavesInRange } from "./queries.js";
 
 /**
  * Delete content in the selection or specified range.
@@ -52,12 +47,7 @@ export function InsertNode<T extends DocNode>(
   });
 }
 
-/**
- * Insert multiple inline nodes as a single line fragment in one transaction.
- *
- * Fork-only command. Useful when a single insert needs to interleave text and
- * void nodes (e.g. mention chips) without splitting blocks.
- */
+/** Insert multiple inline nodes as one fragment. */
 export function InsertNodes<T extends DocNode>(
   editor: Editor<T>,
   nodes: InferInlineNode<T>[],
@@ -85,32 +75,21 @@ export function ReplaceText(
 
 /**
  * Replace document in the editor.
- *
- * Selection is clamped to the new document size (see `applyOperation` for
- * `patch_node`). Safe to shrink the doc — e.g. `- ` (2) → empty list item (0).
  */
 export function ReplaceDoc<T extends DocNode>(
   editor: Editor<T>,
   fragment: T["children"],
 ) {
   editor.apply({
-    type: "patch_node",
-    path: [],
+    type: "format",
+    range: [0, 0],
     key: "children",
     value: fragment,
+    depth: 0,
   });
 }
 
-/**
- * Replace the whole document content with a plain text string.
- *
- * Fork-only convenience command — splits on `\n` into one block per line
- * (matching how plain editors render). Equivalent to:
- *
- * ```ts
- * editor.exec(ReplaceDoc, text.split("\n").map((t) => ({ children: [{ text: t }] })));
- * ```
- */
+/** Replace the whole document with plain text, splitting lines into blocks. */
 export function ReplaceAll(editor: Editor, text: string) {
   editor
     .apply({ type: "delete", range: [0, getNodeSize(editor.doc)] })
@@ -120,6 +99,28 @@ export function ReplaceAll(editor: Editor, text: string) {
 type ToggleableKey<T> = {
   [K in keyof T]-?: T[K] extends boolean | undefined ? K : never;
 }[keyof T];
+
+function* textRangesIn(
+  editor: Editor,
+  [start, end]: Range,
+): Generator<Range, void, void> {
+  if (start >= end) {
+    yield [start, end];
+    return;
+  }
+  let cursor = start;
+  for (const [n, o, r] of iterLeaves(editor.doc, [start, end])) {
+    if (!isTextNode(n) && isCovered(r, getNodeSize(n))) {
+      if (cursor < o) {
+        yield [cursor, o];
+      }
+      cursor = o + 1;
+    }
+  }
+  if (cursor < end) {
+    yield [cursor, end];
+  }
+}
 
 /**
  * Format content in the selection or specified range.
@@ -134,7 +135,9 @@ export function Format<
   value: N[K],
   range: Range = toRange(editor.selection),
 ) {
-  editor.apply({ type: "format", range, key, value });
+  for (const r of textRangesIn(editor, range)) {
+    editor.apply({ type: "format", range: r, key, value });
+  }
 }
 
 /**
@@ -161,16 +164,13 @@ export function ToggleFormat<T extends DocNode>(
     return;
   }
 
-  editor.apply({
-    type: "format",
-    range,
-    key,
-    value: shouldFormat,
-  });
+  for (const r of textRangesIn(editor, range)) {
+    editor.apply({ type: "format", range: r, key, value: shouldFormat });
+  }
 }
 
 /**
- * Set attr to a block node at the caret or specified position.
+ * Set attr to block nodes in the selection or specified range.
  */
 export function SetBlockAttr<
   T extends DocNode,
@@ -180,14 +180,13 @@ export function SetBlockAttr<
   editor: Editor<T>,
   key: K,
   value: ExtractAttrValue<N, K>,
-  offset: number = editor.selection[0],
+  range: Range = toRange(editor.selection),
 ) {
-  const path = getLeafBlockAt(editor.doc, offset)[2];
-  editor.apply({ type: "patch_node", path, key, value });
+  editor.apply({ type: "format", range, key, value, depth: -2 });
 }
 
 /**
- * Toggle attr of block node at the caret or specified position.
+ * Toggle attr of block nodes in the selection or specified range.
  */
 export function ToggleBlockAttr<
   T extends DocNode,
@@ -198,14 +197,22 @@ export function ToggleBlockAttr<
   key: K,
   onValue: ExtractAttrValue<N, K>,
   offValue: ExtractAttrValue<N, K>,
-  offset: number = editor.selection[0],
+  range: Range = toRange(editor.selection),
 ) {
-  const [block, , path] = getLeafBlockAt(editor.doc, offset);
+  let shouldSet = false;
+  for (const [block] of editor.exec(BlocksInRange, range)) {
+    if (block[key as keyof typeof block] !== onValue) {
+      shouldSet = true;
+      break;
+    }
+  }
+
   editor.apply({
-    type: "patch_node",
-    path,
+    type: "format",
+    range,
     key,
-    value: block[key as keyof typeof block] === onValue ? offValue : onValue,
+    value: shouldSet ? onValue : offValue,
+    depth: -2,
   });
 }
 
@@ -224,6 +231,7 @@ export function SetVoidAttr<
 ) {
   const leaf = getLeafAt(editor.doc, offset, true);
   if (leaf && !isTextNode(leaf[0])) {
-    editor.apply({ type: "patch_node", path: leaf[2], key, value });
+    const start = offset - leaf[1];
+    editor.apply({ type: "format", range: [start, start + 1], key, value });
   }
 }

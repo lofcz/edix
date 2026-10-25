@@ -4,7 +4,7 @@
 
 # Interface: EditorOptions\<T, S\>
 
-Defined in: [editor.ts:108](https://github.com/lofcz/edix/blob/c107bd4d7da7f42a515b729a576c9e41550b876d/src/editor.ts#L108)
+Defined in: [editor.ts:103](https://github.com/inokawa/editate/blob/f40074584f982d89983e034df674fd6e901e116f/src/editor.ts#L103)
 
 Options of [createEditor](../functions/createEditor.md).
 
@@ -24,7 +24,7 @@ Options of [createEditor](../functions/createEditor.md).
 
 > `optional` **schema?**: `S`
 
-Defined in: [editor.ts:115](https://github.com/lofcz/edix/blob/c107bd4d7da7f42a515b729a576c9e41550b876d/src/editor.ts#L115)
+Defined in: [editor.ts:110](https://github.com/inokawa/editate/blob/f40074584f982d89983e034df674fd6e901e116f/src/editor.ts#L110)
 
 Optional [Standard Schema](https://github.com/standard-schema/standard-schema) to validate unsafe edits.
 
@@ -34,7 +34,7 @@ Optional [Standard Schema](https://github.com/standard-schema/standard-schema) t
 
 > **doc**: `T`
 
-Defined in: [editor.ts:119](https://github.com/lofcz/edix/blob/c107bd4d7da7f42a515b729a576c9e41550b876d/src/editor.ts#L119)
+Defined in: [editor.ts:114](https://github.com/inokawa/editate/blob/f40074584f982d89983e034df674fd6e901e116f/src/editor.ts#L114)
 
 Initial document.
 
@@ -44,7 +44,7 @@ Initial document.
 
 > `optional` **readonly?**: `boolean`
 
-Defined in: [editor.ts:123](https://github.com/lofcz/edix/blob/c107bd4d7da7f42a515b729a576c9e41550b876d/src/editor.ts#L123)
+Defined in: [editor.ts:118](https://github.com/inokawa/editate/blob/f40074584f982d89983e034df674fd6e901e116f/src/editor.ts#L118)
 
 The state editable or not.
 
@@ -54,7 +54,7 @@ The state editable or not.
 
 > `optional` **isBlock?**: (`node`) => `boolean`
 
-Defined in: [editor.ts:127](https://github.com/lofcz/edix/blob/c107bd4d7da7f42a515b729a576c9e41550b876d/src/editor.ts#L127)
+Defined in: [editor.ts:122](https://github.com/inokawa/editate/blob/f40074584f982d89983e034df674fd6e901e116f/src/editor.ts#L122)
 
 TODO
 
@@ -70,66 +70,11 @@ TODO
 
 ***
 
-### autoScroll?
-
-> `optional` **autoScroll?**: `boolean`
-
-Defined in: [editor.ts:145](https://github.com/lofcz/edix/blob/c107bd4d7da7f42a515b729a576c9e41550b876d/src/editor.ts#L145)
-
-Keep the caret visible inside the mounted element after document
-changes, behaving like a native `<textarea>`:
-
-- If the caret is already visible (e.g. typing in the middle of a
-  long doc), nothing scrolls.
-- If the caret falls below the viewport, the element scrolls down
-  just enough to reveal it.
-- If the caret falls above the viewport, the element scrolls up
-  just enough to reveal it.
-
-Scroll work is coalesced via `requestAnimationFrame` and only reads
-the caret's bounding rect, never `scrollHeight`, so it does not
-force a full overflow-layout pass on each input.
-
-#### Default
-
-```ts
-false
-```
-
-***
-
-### revertForeignMutations?
-
-> `optional` **revertForeignMutations?**: `boolean`
-
-Defined in: [editor.ts:162](https://github.com/lofcz/edix/blob/c107bd4d7da7f42a515b729a576c9e41550b876d/src/editor.ts#L162)
-
-Revert DOM mutations that are not from IME composition and not inside
-[Editor.domUpdate](Editor.md#domupdate).
-
-Use with **imperative** view sync (host patches the contenteditable from
-`change`). Declarative React/Vue hosts that re-render from state should
-leave this `false` — their paint looks like a foreign mutation and would
-be undone.
-
-When enabled, wrap every host-driven DOM write in [Editor.domUpdate](Editor.md#domupdate)
-so the paint is accepted. This defends against page translators,
-Grammarly-like extensions, and similar tools that rewrite the editable
-tree and desync it from the document model.
-
-#### Default
-
-```ts
-false
-```
-
-***
-
 ### onWarn?
 
 > `optional` **onWarn?**: (`message`) => `void`
 
-Defined in: [editor.ts:168](https://github.com/lofcz/edix/blob/c107bd4d7da7f42a515b729a576c9e41550b876d/src/editor.ts#L168)
+Defined in: [editor.ts:128](https://github.com/inokawa/editate/blob/f40074584f982d89983e034df674fd6e901e116f/src/editor.ts#L128)
 
 Callback invoked when errors happen.
 
@@ -155,7 +100,7 @@ console.warn
 
 > `optional` **onError?**: (`message`) => `never`
 
-Defined in: [editor.ts:174](https://github.com/lofcz/edix/blob/c107bd4d7da7f42a515b729a576c9e41550b876d/src/editor.ts#L174)
+Defined in: [editor.ts:134](https://github.com/inokawa/editate/blob/f40074584f982d89983e034df674fd6e901e116f/src/editor.ts#L134)
 
 Callback invoked when errors happen.
 

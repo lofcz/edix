@@ -6,7 +6,7 @@
 
 > **EditorContext**\<`_`\> = `object`
 
-Defined in: [editor.ts:177](https://github.com/lofcz/edix/blob/c107bd4d7da7f42a515b729a576c9e41550b876d/src/editor.ts#L177)
+Defined in: [editor.ts:137](https://github.com/inokawa/editate/blob/f40074584f982d89983e034df674fd6e901e116f/src/editor.ts#L137)
 
 ## Type Parameters
 

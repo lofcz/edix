@@ -10,13 +10,13 @@ export default defineConfig({
         test: {
           name: "unit",
           environment: "node",
-          exclude: ["**/*.browser.{test,spec}.ts"],
+          exclude: ["**/*.browser.{test,spec}.{ts,tsx}"],
         },
       },
       {
         test: {
           name: "browser",
-          include: ["**/*.browser.{test,spec}.ts"],
+          include: ["**/*.browser.{test,spec}.{ts,tsx}"],
           browser: {
             enabled: true,
             headless: true,

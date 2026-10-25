@@ -11,5 +11,6 @@ export {
   ClearHistory,
 } from "./history.js";
 export { scrollToSelectionPlugin } from "./scrollToSelection.js";
+export { nodeIdPlugin, NodeId } from "./nodeId.js";
 export { selectionRectPlugin } from "./selectionRect.js";
 export { singlelinePlugin } from "./singleline.js";

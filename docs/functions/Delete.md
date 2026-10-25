@@ -6,7 +6,7 @@
 
 > **Delete**(`editor`, `range?`): `void`
 
-Defined in: [commands.ts:22](https://github.com/lofcz/edix/blob/c107bd4d7da7f42a515b729a576c9e41550b876d/src/commands.ts#L22)
+Defined in: [commands.ts:16](https://github.com/inokawa/editate/blob/f40074584f982d89983e034df674fd6e901e116f/src/commands.ts#L16)
 
 Delete content in the selection or specified range.
 

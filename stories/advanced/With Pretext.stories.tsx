@@ -7,6 +7,8 @@ import {
   internalTransferPlugin,
   plainTransferPlugin,
   scrollToSelectionPlugin,
+  nodeIdPlugin,
+  NodeId,
   type Editor,
 } from "../../src";
 
@@ -44,16 +46,29 @@ type Doc = v.InferOutput<typeof pagedSchema>;
 
 function SetPageSize(editor: Editor<Doc>, width: number, height: number) {
   editor
-    .apply({ type: "patch_node", path: [], key: "pageWidth", value: width })
-    .apply({ type: "patch_node", path: [], key: "pageHeight", value: height });
+    .apply({
+      type: "format",
+      range: [0, 0],
+      key: "pageWidth",
+      value: width,
+      depth: 0,
+    })
+    .apply({
+      type: "format",
+      range: [0, 0],
+      key: "pageHeight",
+      value: height,
+      depth: 0,
+    });
 }
 
 function SetPageMargin(editor: Editor<Doc>, margin: number) {
   editor.apply({
-    type: "patch_node",
-    path: [],
+    type: "format",
+    range: [0, 0],
     key: "pageMargin",
     value: margin,
+    depth: 0,
   });
 }
 
@@ -199,7 +214,8 @@ export const WithPretext: StoryObj = {
       })
         .exec(scrollToSelectionPlugin)
         .exec(internalTransferPlugin)
-        .exec(plainTransferPlugin);
+        .exec(plainTransferPlugin)
+        .exec(nodeIdPlugin);
       e.on("change", () => {
         setDoc(e.doc);
       });
@@ -351,8 +367,8 @@ export const WithPretext: StoryObj = {
                   lineHeight: `${LINE_HEIGHT}px`,
                 }}
               >
-                {doc.children.map((_, i) => (
-                  <div key={i} data-block>
+                {doc.children.map((b, i) => (
+                  <div key={NodeId(editor, b)} data-block>
                     {blocks[i]!.map((c, j) => (
                       <span
                         key={j}

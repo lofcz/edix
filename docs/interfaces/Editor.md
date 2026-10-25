@@ -4,7 +4,7 @@
 
 # Interface: Editor\<T\>
 
-Defined in: [editor.ts:221](https://github.com/lofcz/edix/blob/c107bd4d7da7f42a515b729a576c9e41550b876d/src/editor.ts#L221)
+Defined in: [editor.ts:181](https://github.com/inokawa/editate/blob/f40074584f982d89983e034df674fd6e901e116f/src/editor.ts#L181)
 
 The editor instance.
 
@@ -20,7 +20,7 @@ The editor instance.
 
 > **apply**(`op`): `this`
 
-Defined in: [editor.ts:245](https://github.com/lofcz/edix/blob/c107bd4d7da7f42a515b729a576c9e41550b876d/src/editor.ts#L245)
+Defined in: [editor.ts:193](https://github.com/inokawa/editate/blob/f40074584f982d89983e034df674fd6e901e116f/src/editor.ts#L193)
 
 Dispatches editing operations.
 
@@ -44,7 +44,7 @@ Dispatches editing operations.
 
 > **exec**\<`A`\>(`fn`, ...`args`): `this`
 
-Defined in: [editor.ts:251](https://github.com/lofcz/edix/blob/c107bd4d7da7f42a515b729a576c9e41550b876d/src/editor.ts#L251)
+Defined in: [editor.ts:199](https://github.com/inokawa/editate/blob/f40074584f982d89983e034df674fd6e901e116f/src/editor.ts#L199)
 
 Executes a function with editor bound as context.
 
@@ -76,7 +76,7 @@ arguments of the function
 
 > **exec**\<`A`, `V`\>(`fn`, ...`args`): `V`
 
-Defined in: [editor.ts:255](https://github.com/lofcz/edix/blob/c107bd4d7da7f42a515b729a576c9e41550b876d/src/editor.ts#L255)
+Defined in: [editor.ts:203](https://github.com/inokawa/editate/blob/f40074584f982d89983e034df674fd6e901e116f/src/editor.ts#L203)
 
 ##### Type Parameters
 
@@ -108,7 +108,7 @@ Defined in: [editor.ts:255](https://github.com/lofcz/edix/blob/c107bd4d7da7f42a5
 
 > **on**\<`K`\>(`key`, `callback`): () => `void`
 
-Defined in: [editor.ts:260](https://github.com/lofcz/edix/blob/c107bd4d7da7f42a515b729a576c9e41550b876d/src/editor.ts#L260)
+Defined in: [editor.ts:208](https://github.com/inokawa/editate/blob/f40074584f982d89983e034df674fd6e901e116f/src/editor.ts#L208)
 
 A function to subscribe editor events.
 
@@ -140,7 +140,7 @@ cleanup function
 
 > **hook**\<`K`\>(`key`, `callback`): () => `void`
 
-Defined in: [editor.ts:268](https://github.com/lofcz/edix/blob/c107bd4d7da7f42a515b729a576c9e41550b876d/src/editor.ts#L268)
+Defined in: [editor.ts:216](https://github.com/inokawa/editate/blob/f40074584f982d89983e034df674fd6e901e116f/src/editor.ts#L216)
 
 A function to register editor hooks.
 
@@ -172,7 +172,7 @@ cleanup function
 
 > **get**\<`V`\>(`key`): `V`
 
-Defined in: [editor.ts:275](https://github.com/lofcz/edix/blob/c107bd4d7da7f42a515b729a576c9e41550b876d/src/editor.ts#L275)
+Defined in: [editor.ts:223](https://github.com/inokawa/editate/blob/f40074584f982d89983e034df674fd6e901e116f/src/editor.ts#L223)
 
 Get a value from the context.
 
@@ -198,7 +198,7 @@ Get a value from the context.
 
 > **set**\<`V`\>(`key`, `value`): `this`
 
-Defined in: [editor.ts:279](https://github.com/lofcz/edix/blob/c107bd4d7da7f42a515b729a576c9e41550b876d/src/editor.ts#L279)
+Defined in: [editor.ts:227](https://github.com/inokawa/editate/blob/f40074584f982d89983e034df674fd6e901e116f/src/editor.ts#L227)
 
 Set a value for the context.
 
@@ -222,48 +222,13 @@ Set a value for the context.
 
 `this`
 
-***
-
-### domUpdate()
-
-> **domUpdate**(`fn`): `this`
-
-Defined in: [editor.ts:292](https://github.com/lofcz/edix/blob/c107bd4d7da7f42a515b729a576c9e41550b876d/src/editor.ts#L292)
-
-Run a host-driven DOM paint. Mutations inside are accepted by the
-MutationObserver.
-
-Required when [EditorOptions.revertForeignMutations](EditorOptions.md#revertforeignmutations) is `true`.
-Safe to call when unmounted (runs `fn` only) or when the option is off.
-
-#### Parameters
-
-##### fn
-
-() => `void`
-
-#### Returns
-
-`this`
-
 ## Properties
 
 ### doc
 
 > `readonly` **doc**: `T`
 
-Defined in: [editor.ts:222](https://github.com/lofcz/edix/blob/c107bd4d7da7f42a515b729a576c9e41550b876d/src/editor.ts#L222)
-
-***
-
-### isEmpty
-
-> `readonly` **isEmpty**: `boolean`
-
-Defined in: [editor.ts:227](https://github.com/lofcz/edix/blob/c107bd4d7da7f42a515b729a576c9e41550b876d/src/editor.ts#L227)
-
-Whether the document is empty (no text content, no void nodes).
-Recomputed once per commit so reads stay O(1).
+Defined in: [editor.ts:182](https://github.com/inokawa/editate/blob/f40074584f982d89983e034df674fd6e901e116f/src/editor.ts#L182)
 
 ***
 
@@ -271,7 +236,7 @@ Recomputed once per commit so reads stay O(1).
 
 > **selection**: `Selection`
 
-Defined in: [editor.ts:228](https://github.com/lofcz/edix/blob/c107bd4d7da7f42a515b729a576c9e41550b876d/src/editor.ts#L228)
+Defined in: [editor.ts:183](https://github.com/inokawa/editate/blob/f40074584f982d89983e034df674fd6e901e116f/src/editor.ts#L183)
 
 ***
 
@@ -279,25 +244,10 @@ Defined in: [editor.ts:228](https://github.com/lofcz/edix/blob/c107bd4d7da7f42a5
 
 > **readonly**: `boolean`
 
-Defined in: [editor.ts:233](https://github.com/lofcz/edix/blob/c107bd4d7da7f42a515b729a576c9e41550b876d/src/editor.ts#L233)
+Defined in: [editor.ts:188](https://github.com/inokawa/editate/blob/f40074584f982d89983e034df674fd6e901e116f/src/editor.ts#L188)
 
 The getter/setter for the editor's read-only state.
 `true` to read-only. `false` to editable.
-
-***
-
-### autoScroll
-
-> **autoScroll**: `boolean`
-
-Defined in: [editor.ts:240](https://github.com/lofcz/edix/blob/c107bd4d7da7f42a515b729a576c9e41550b876d/src/editor.ts#L240)
-
-Enable/disable native-textarea-like auto-scroll: scroll the mounted
-element only when needed to keep the caret visible.
-
-#### See
-
-[EditorOptions.autoScroll](EditorOptions.md#autoscroll)
 
 ***
 
@@ -305,7 +255,7 @@ element only when needed to keep the caret visible.
 
 > **input**: (`element`) => () => `void`
 
-Defined in: [editor.ts:284](https://github.com/lofcz/edix/blob/c107bd4d7da7f42a515b729a576c9e41550b876d/src/editor.ts#L284)
+Defined in: [editor.ts:232](https://github.com/inokawa/editate/blob/f40074584f982d89983e034df674fd6e901e116f/src/editor.ts#L232)
 
 A function to make DOM editable.
 

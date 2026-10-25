@@ -1,74 +1,26 @@
 import { defineConfig, devices } from "@playwright/test";
+import { existsSync, readdirSync } from "node:fs";
 
-const FRAMEWORK_DIR = process.env.FRAMEWORK_DIR;
+const examples = readdirSync("examples", { withFileTypes: true })
+  .filter((d) => existsSync(`examples/${d.name}/package.json`))
+  .map((d, i) => ({ name: d.name, port: 6006 + i }));
 
-const FRAMEWORK_SPEC = "framework.spec.ts";
-
-/**
- * See https://playwright.dev/docs/test-configuration.
- */
 export default defineConfig({
   testDir: "./e2e",
-  /* Run tests in files in parallel */
-  fullyParallel: true,
-  /* Fail the build on CI if you accidentally left test.only in the source code. */
   forbidOnly: !!process.env.CI,
-  /* Retry on CI only */
   retries: process.env.CI ? 2 : 0,
-  /* Opt out of parallel tests on CI. */
-  workers: process.env.CI ? 1 : undefined,
-  /* Reporter to use. See https://playwright.dev/docs/test-reporters */
   reporter: "list",
-  /* Shared settings for all the projects below. See https://playwright.dev/docs/api/class-testoptions. */
   use: {
-    /* Base URL to use in actions like `await page.goto('/')`. */
-    // baseURL: 'http://127.0.0.1:3000',
-
-    /* Collect trace when retrying the failed test. See https://playwright.dev/docs/trace-viewer */
+    ...devices["Desktop Chrome"],
     trace: "on-first-retry",
-
-    // video: "retain-on-failure"
   },
-
-  /* Configure projects for major browsers */
-  projects: FRAMEWORK_DIR
-    ? [
-        {
-          name: "framework",
-          use: { ...devices["Desktop Chrome"] },
-          testMatch: FRAMEWORK_SPEC,
-        },
-      ]
-    : [
-        {
-          name: "chromium",
-          use: {
-            ...devices["Desktop Chrome"],
-            // https://github.com/microsoft/playwright/issues/13037#issuecomment-1078208810
-            permissions: ["clipboard-read", "clipboard-write"],
-          },
-          testIgnore: FRAMEWORK_SPEC,
-        },
-        {
-          name: "firefox",
-          use: { ...devices["Desktop Firefox"] },
-          testIgnore: FRAMEWORK_SPEC,
-        },
-        {
-          name: "webkit",
-          use: { ...devices["Desktop Safari"] },
-          testIgnore: FRAMEWORK_SPEC,
-        },
-      ],
-
-  /* Run your local dev server before starting the tests */
-  webServer: [
-    {
-      command: FRAMEWORK_DIR
-        ? `(cd ${FRAMEWORK_DIR} && npm run build && npx http-server dist -p 6006)`
-        : "npm run storybook",
-      url: "http://127.0.0.1:6006",
-      reuseExistingServer: !process.env.CI,
-    },
-  ],
+  projects: examples.map(({ name, port }) => ({
+    name,
+    use: { baseURL: `http://127.0.0.1:${port}` },
+  })),
+  webServer: examples.map(({ name, port }) => ({
+    command: `(cd examples/${name} && npm run build && npx http-server dist -p ${port})`,
+    url: `http://127.0.0.1:${port}`,
+    reuseExistingServer: !process.env.CI,
+  })),
 });

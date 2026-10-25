@@ -45,14 +45,12 @@ const calcBlockSize = (
   end: number = children.length,
 ): number => {
   let size = 0;
-  let count = 0;
   for (let i = start; i < end; i++) {
     const n = children[i]!;
     size += getNodeSize(n);
-    if (count !== 0 && isBlockNode(n)) {
+    if (i !== start && isBlockNode(n)) {
       size++;
     }
-    count++;
   }
   return size;
 };
@@ -99,17 +97,10 @@ export const getLeafBlockAt = <T extends DocNode | BlockNode>(
   offset: number,
 ): [node: InferLeafBlockNode<T>, offset: number, path: Path] => {
   const path: number[] = [];
-  while (node) {
-    const found = getChildAt(node, offset);
-    if (!found) {
-      break;
-    }
-    const nextNode = found[0];
-    if (!isBlockNode(nextNode)) {
-      break;
-    }
+  let found;
+  while ((found = getChildAt(node, offset)) && isBlockNode(found[0])) {
     offset = found[1];
-    node = nextNode as T;
+    node = found[0] as T;
     path.push(found[2]);
   }
   return [node as InferLeafBlockNode<T>, offset, path];
@@ -165,44 +156,36 @@ export const splitBlock = <T extends DocNode | BlockNode>(
 ): [T, T] => {
   const children = node.children;
   const target = getChildAt(node, pos);
-  if (target) {
-    const [child, offsetAtChild, i] = target;
-    if (isBlockNode(child)) {
-      const [childBefore, childAfter] = splitBlock(child, offsetAtChild);
-      const before = children.slice(0, i);
-      const after = children.slice(i + 1);
-      before.push(childBefore);
-      after.unshift(childAfter);
-      return [
-        { ...node, children: before },
-        { ...node, children: after },
-      ];
-    } else {
-      const before = children.slice(0, i);
-      const after = children.slice(i + 1);
-      if (isTextNode(child)) {
-        const beforeText = child.text.slice(0, offsetAtChild);
-        const afterText = child.text.slice(offsetAtChild);
-        if (beforeText || !before.length) {
-          before.push({ ...child, text: beforeText });
-        }
-        if (afterText || !after.length) {
-          after.unshift({ ...child, text: afterText });
-        }
-      } else {
-        // node size must be 1
-        after.unshift(child);
-      }
-      return [
-        { ...node, children: before },
-        { ...node, children: after },
-      ];
-    }
+  if (!target) {
+    const last = children[children.length - 1]!;
+    return [
+      node,
+      { ...node, children: isTextNode(last) ? [{ ...last, text: "" }] : [] },
+    ];
   }
-  const last = children[children.length - 1]!;
+  const [child, offsetAtChild, i] = target;
+  const before: Node[] = children.slice(0, i);
+  const after: Node[] = children.slice(i + 1);
+  if (isBlockNode(child)) {
+    const [childBefore, childAfter] = splitBlock(child, offsetAtChild);
+    before.push(childBefore);
+    after.unshift(childAfter);
+  } else if (isTextNode(child)) {
+    const beforeText = child.text.slice(0, offsetAtChild);
+    const afterText = child.text.slice(offsetAtChild);
+    if (beforeText || !before.length) {
+      before.push({ ...child, text: beforeText });
+    }
+    if (afterText || !after.length) {
+      after.unshift({ ...child, text: afterText });
+    }
+  } else {
+    // node size must be 1
+    after.unshift(child);
+  }
   return [
-    node,
-    { ...node, children: isTextNode(last) ? [{ ...last, text: "" }] : [] },
+    { ...node, children: before },
+    { ...node, children: after },
   ];
 };
 
@@ -252,17 +235,21 @@ export const selectionToDomSelection = (
   return [offsetToPosition(doc, anchor), offsetToPosition(doc, focus)];
 };
 
-function* iterChildren<T extends Node>(
+/**
+ * @internal
+ */
+export function* iterChildren<T extends Node>(
   node: T,
   [start, end]: Range,
-): Generator<[node: Node, offset: number], void, void> {
-  if (start >= end) {
+): Generator<
+  [node: Node, offset: number, index: number, range: Range],
+  void,
+  void
+> {
+  if (start > end || !isBlockNode(node)) {
     return;
   }
-  if (!isBlockNode(node)) {
-    return;
-  }
-  const res = getChildAt(node, start);
+  const res = getChildAt(node, start) || getChildAt(node, start, true);
   if (res) {
     let offset = start - res[1];
     let i = res[2];
@@ -270,10 +257,16 @@ function* iterChildren<T extends Node>(
     const length = children.length;
     while (offset <= end && i < length) {
       const targetNode = children[i]!;
-      yield [targetNode, offset];
+      const size = getNodeSize(targetNode);
+      yield [
+        targetNode,
+        offset,
+        i,
+        [max(start, offset) - offset, min(end, offset + size) - offset],
+      ];
 
       i++;
-      offset += getNodeSize(targetNode);
+      offset += size;
       if (isBlockNode(targetNode)) {
         offset++;
       }
@@ -284,16 +277,19 @@ function* iterChildren<T extends Node>(
 export function* iterLeafBlocks<T extends Node>(
   node: T,
   range: Range,
-): Generator<[node: InferLeafBlockNode<T>, offset: number], void, void> {
+): Generator<
+  [node: InferLeafBlockNode<T>, offset: number, range: Range],
+  void,
+  void
+> {
   if (isBlockNode(node) && !hasBlockChildren(node.children)) {
-    yield [node as InferLeafBlockNode<T>, 0];
+    yield [node as InferLeafBlockNode<T>, 0, range];
     return;
   }
-  for (const n of iterChildren(node, range)) {
-    const [child, offset] = n;
-    for (const r of iterLeafBlocks(child, [0, getNodeSize(child)])) {
+  for (const [child, offset, , childRange] of iterChildren(node, range)) {
+    for (const r of iterLeafBlocks(child, childRange)) {
       r[1] += offset;
-      yield r as [InferLeafBlockNode<T>, number];
+      yield r as [InferLeafBlockNode<T>, number, Range];
     }
   }
 }
@@ -301,15 +297,19 @@ export function* iterLeafBlocks<T extends Node>(
 export function* iterLeaves<T extends Node>(
   node: T,
   range: Range,
-): Generator<[node: InferInlineNode<T>, offset: number], void, void> {
+): Generator<
+  [node: InferInlineNode<T>, offset: number, range: Range],
+  void,
+  void
+> {
   if (!isBlockNode(node)) {
-    yield [node as InferInlineNode<T>, 0];
+    yield [node as InferInlineNode<T>, 0, range];
     return;
   }
-  for (const [child, offset] of iterChildren(node, range)) {
-    for (const leaf of iterLeaves(child, [0, getNodeSize(child)])) {
+  for (const [child, offset, , childRange] of iterChildren(node, range)) {
+    for (const leaf of iterLeaves(child, childRange)) {
       leaf[1] += offset;
-      yield leaf as [InferInlineNode<T>, number];
+      yield leaf as [InferInlineNode<T>, number, Range];
     }
   }
 }
@@ -322,7 +322,10 @@ export const sliceText = <T extends Node>(
 ): string => {
   let str = "";
   let offset = start;
-  for (const [leaf, leafStart] of iterLeaves(node, [start, end])) {
+  for (const [leaf, leafStart, [textStart, textEnd]] of iterLeaves(node, [
+    start,
+    end,
+  ])) {
     for (let i = leafStart - offset; i > 0; i--) {
       str += "\n";
     }
@@ -330,14 +333,12 @@ export const sliceText = <T extends Node>(
     const size = getNodeSize(leaf);
     const leafEnd = leafStart + size;
     if (isTextNode(leaf)) {
-      const textStart = max(leafStart, start) - leafStart;
-      const textEnd = min(leafEnd, end) - leafStart;
       str +=
         textStart === 0 && textEnd === size
           ? leaf.text
           : leaf.text.slice(textStart, textEnd);
     } else {
-      if (voidToString) {
+      if (voidToString && textStart < textEnd) {
         str += voidToString(leaf as InferVoidNode<T>);
       }
     }

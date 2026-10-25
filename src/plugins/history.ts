@@ -41,17 +41,17 @@ export function historyPlugin<T extends DocNode>(editor: Editor<T>) {
   const restore = (doc: T) => {
     editor.exec(ReplaceDoc, doc.children);
 
-    // TODO improve
     const prev = doc as Record<string, unknown>;
     const current = editor.doc as Record<string, unknown>;
-    for (const key of keys(prev)) {
+    for (const key of keys({ ...current, ...prev })) {
       if (key !== "children" && current[key] !== prev[key]) {
-        editor.apply({ type: "patch_node", path: [], key, value: prev[key] });
-      }
-    }
-    for (const key of keys(current)) {
-      if (key !== "children" && !(key in prev)) {
-        editor.apply({ type: "patch_node", path: [], key, value: undefined });
+        editor.apply({
+          type: "format",
+          range: [0, 0],
+          key,
+          value: prev[key],
+          depth: 0,
+        });
       }
     }
   };
@@ -106,10 +106,10 @@ export function historyPlugin<T extends DocNode>(editor: Editor<T>) {
     if (undoOrRedoing) return;
     const doc = editor.doc;
     const selection = editor.selection;
-    next(op);
+    const applied = next(op);
     const newDoc = editor.doc;
 
-    if (doc !== newDoc) {
+    if (applied && doc !== newDoc) {
       const time = now();
       if (index === 0 || time - prevTime >= BATCH_HISTORY_TIME) {
         index++;
@@ -122,7 +122,7 @@ export function historyPlugin<T extends DocNode>(editor: Editor<T>) {
       }
       prevTime = time;
       histories[index]![0] = newDoc;
-      histories[index]![2].push(op);
+      histories[index]![2].push(applied);
       if (histories.length > index + 1) {
         histories.length = index + 1;
       }

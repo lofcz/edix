@@ -25,6 +25,7 @@ import {
   type Editor,
   getLeafAt,
   getLeafBlockAt,
+  BlocksInRange,
   LeavesInRange,
   SetVoidAttr,
   getNodeOffset,
@@ -32,6 +33,8 @@ import {
   InsertText,
   iterLeaves,
   blockLockPlugin,
+  nodeIdPlugin,
+  NodeId,
 } from "../../src";
 import * as v from "valibot";
 import { createPortal } from "react-dom";
@@ -67,7 +70,8 @@ export const Empty: StoryObj = {
         schema: basicSchema,
       })
         .exec(internalTransferPlugin)
-        .exec(plainTransferPlugin);
+        .exec(plainTransferPlugin)
+        .exec(nodeIdPlugin);
       e.on("change", () => {
         setDoc(e.doc);
       });
@@ -88,10 +92,10 @@ export const Empty: StoryObj = {
           padding: 8,
         }}
       >
-        {doc.children.map((b, i) => (
-          <div key={i}>
-            {b.children.map((n, j) => (
-              <span key={j}>{n.text || <br />}</span>
+        {doc.children.map((b) => (
+          <div key={NodeId(editor, b)}>
+            {b.children.map((n) => (
+              <span key={NodeId(editor, n)}>{n.text || <br />}</span>
             ))}
           </div>
         ))}
@@ -121,27 +125,54 @@ const richSchema = v.strictObject({
 
 type RichDoc = v.InferOutput<typeof richSchema>;
 
-function Indent(editor: Editor<RichDoc>, offset: number = editor.selection[0]) {
-  const [block, , path] = getLeafBlockAt(editor.doc, offset);
-  editor.apply({
-    type: "patch_node",
-    path,
-    key: "indent",
-    value: (block.indent ?? 0) + 1,
-  });
+function Indent(editor: Editor<RichDoc>) {
+  // group consecutive blocks sharing an indent into one operation
+  const runs: [indent: number, start: number, end: number][] = [];
+  for (const [block, offset] of editor.exec(BlocksInRange)) {
+    const indent = block.indent ?? 0;
+    const end = offset + getNodeSize(block);
+    const last = runs[runs.length - 1];
+    if (last && last[0] === indent) {
+      last[2] = end;
+    } else {
+      runs.push([indent, offset, end]);
+    }
+  }
+
+  for (const [indent, start, end] of runs) {
+    editor.apply({
+      type: "format",
+      range: [start, end],
+      key: "indent",
+      value: indent + 1,
+      depth: -2,
+    });
+  }
 }
 
-function Outdent(
-  editor: Editor<RichDoc>,
-  offset: number = editor.selection[0],
-) {
-  const [block, , path] = getLeafBlockAt(editor.doc, offset);
-  editor.apply({
-    type: "patch_node",
-    path,
-    key: "indent",
-    value: Math.max((block.indent ?? 0) - 1, 0),
-  });
+function Outdent(editor: Editor<RichDoc>) {
+  // group consecutive blocks sharing an indent into one operation
+  const runs: [indent: number, start: number, end: number][] = [];
+  for (const [block, offset] of editor.exec(BlocksInRange)) {
+    const indent = block.indent ?? 0;
+    const end = offset + getNodeSize(block);
+    const last = runs[runs.length - 1];
+    if (last && last[0] === indent) {
+      last[2] = end;
+    } else {
+      runs.push([indent, offset, end]);
+    }
+  }
+
+  for (const [indent, start, end] of runs) {
+    editor.apply({
+      type: "format",
+      range: [start, end],
+      key: "indent",
+      value: Math.max(indent - 1, 0),
+      depth: -2,
+    });
+  }
 }
 
 const defaultFontSize = 10;
@@ -271,7 +302,8 @@ export const RichText: StoryObj = {
           }
         })
         .exec(internalTransferPlugin)
-        .exec(plainTransferPlugin);
+        .exec(plainTransferPlugin)
+        .exec(nodeIdPlugin);
       e.on("change", () => {
         setDoc(e.doc);
         updateMenu();
@@ -374,16 +406,16 @@ export const RichText: StoryObj = {
             padding: 8,
           }}
         >
-          {doc.children.map((b, i) => (
+          {doc.children.map((b) => (
             <div
-              key={i}
+              key={NodeId(editor, b)}
               style={{
                 textAlign: b.align,
                 textIndent: b.indent ? `${b.indent}em` : undefined,
               }}
             >
-              {b.children.map((n, j) => (
-                <Text key={j} node={n} />
+              {b.children.map((n) => (
+                <Text key={NodeId(editor, n)} node={n} />
               ))}
             </div>
           ))}
@@ -533,7 +565,8 @@ export const Tag: StoryObj = {
         .exec(plainTransferPlugin, {
           voidToString: (node) => node.label,
         })
-        .exec(singlelinePlugin);
+        .exec(singlelinePlugin)
+        .exec(nodeIdPlugin);
       e.on("change", () => {
         setDoc(editor.doc);
       });
@@ -577,12 +610,12 @@ export const Tag: StoryObj = {
             padding: 8,
           }}
         >
-          {doc.children.map((t, j) =>
+          {doc.children.map((t) =>
             "text" in t ? (
               t.text || <br />
             ) : (
               <TagChip
-                key={j}
+                key={NodeId(editor, t)}
                 label={t.label}
                 onLabelClick={(e) => {
                   e.preventDefault();
@@ -776,7 +809,8 @@ export const Combobox: StoryObj = {
           ArrowDown: onNext,
           Enter: onComplete,
           Escape: onClose,
-        });
+        })
+        .exec(nodeIdPlugin);
       e.on("change", () => {
         const at = Math.min(...e.selection);
         setDoc(e.doc);
@@ -821,12 +855,12 @@ export const Combobox: StoryObj = {
               lineHeight: 2,
             }}
           >
-            {doc.children.map((t, j) =>
+            {doc.children.map((t) =>
               "text" in t ? (
                 t.text || <br />
               ) : (
                 <TagChip
-                  key={j}
+                  key={NodeId(editor, t)}
                   label={t.label}
                   onRemove={(e) => {
                     e.preventDefault();
@@ -1431,7 +1465,8 @@ export const Mention: StoryObj = {
             setPos(null);
           }
           setIndex(0);
-        });
+        })
+        .exec(nodeIdPlugin);
       e.on("change", () => {
         setDoc(e.doc);
       });
@@ -1453,14 +1488,14 @@ export const Mention: StoryObj = {
             padding: 8,
           }}
         >
-          {doc.children.map((r, i) => (
-            <div key={i}>
-              {r.children.map((n, j) =>
+          {doc.children.map((r) => (
+            <div key={NodeId(editor, r)}>
+              {r.children.map((n) =>
                 "text" in n ? (
                   n.text || <br />
                 ) : (
                   <span
-                    key={j}
+                    key={NodeId(editor, n)}
                     contentEditable={false}
                     style={{
                       background: "#EAF5F9",
@@ -1534,7 +1569,8 @@ export const Comment: StoryObj = {
         schema: commentSchema,
       })
         .exec(internalTransferPlugin)
-        .exec(plainTransferPlugin);
+        .exec(plainTransferPlugin)
+        .exec(nodeIdPlugin);
       e.on("change", () => {
         setDoc(e.doc);
         const ids = new Set<string>();
@@ -1600,11 +1636,11 @@ export const Comment: StoryObj = {
               minHeight: 120,
             }}
           >
-            {doc.children.map((b, i) => (
-              <div key={i}>
-                {b.children.map((t, j) => (
+            {doc.children.map((b) => (
+              <div key={NodeId(editor, b)}>
+                {b.children.map((t) => (
                   <span
-                    key={j}
+                    key={NodeId(editor, t)}
                     style={{
                       backgroundColor: t.comment
                         ? t.comment === activeId
@@ -1770,7 +1806,8 @@ export const Media: StoryObj = {
             },
           },
         })
-        .exec(plainTransferPlugin);
+        .exec(plainTransferPlugin)
+        .exec(nodeIdPlugin);
       e.on("change", () => {
         setDoc(e.doc);
       });
@@ -1811,14 +1848,14 @@ export const Media: StoryObj = {
             padding: 16,
           }}
         >
-          {doc.children.map((b, i) => (
-            <div key={i}>
-              {b.children.map((t, j) =>
+          {doc.children.map((b) => (
+            <div key={NodeId(editor, b)}>
+              {b.children.map((t) =>
                 "text" in t ? (
                   t.text || <br />
                 ) : t.type === "image" ? (
                   <img
-                    key={j}
+                    key={NodeId(editor, t)}
                     src={t.src}
                     style={{
                       maxWidth: 240,
@@ -1829,7 +1866,7 @@ export const Media: StoryObj = {
                 ) : t.type === "video" ? (
                   // safari needs contentEditable="false"
                   <video
-                    key={j}
+                    key={NodeId(editor, t)}
                     width={320}
                     controls
                     contentEditable="false"
@@ -1892,7 +1929,8 @@ export const BlockLock: StoryObj = {
       })
         .exec(internalTransferPlugin)
         .exec(plainTransferPlugin)
-        .exec(blockLockPlugin, { isLocked: (b) => !!b.locked });
+        .exec(blockLockPlugin, { isLocked: (b) => !!b.locked })
+        .exec(nodeIdPlugin);
       e.on("change", () => {
         setDoc(e.doc);
       });
@@ -1974,7 +2012,7 @@ export const BlockLock: StoryObj = {
         >
           {doc.children.map((b, i) => (
             <div
-              key={i}
+              key={NodeId(editor, b)}
               style={{
                 padding: "4px 8px",
                 borderRadius: 2,
@@ -1989,8 +2027,8 @@ export const BlockLock: StoryObj = {
                 }),
               }}
             >
-              {b.children.map((n, j) => (
-                <span key={j}>{n.text || <br />}</span>
+              {b.children.map((n) => (
+                <span key={NodeId(editor, n)}>{n.text || <br />}</span>
               ))}
             </div>
           ))}
@@ -2056,9 +2094,11 @@ export const Ruby: StoryObj = {
       const e = createEditor({
         doc: doc,
         schema: rubySchema,
-      }).exec(plainTransferPlugin, {
-        voidToString: (n) => n.value,
-      });
+      })
+        .exec(plainTransferPlugin, {
+          voidToString: (n) => n.value,
+        })
+        .exec(nodeIdPlugin);
       e.on("change", () => {
         setDoc(e.doc);
       });
@@ -2079,13 +2119,13 @@ export const Ruby: StoryObj = {
             padding: 8,
           }}
         >
-          {doc.children.map((b, i) => (
-            <div key={i}>
-              {b.children.map((t, j) =>
+          {doc.children.map((b) => (
+            <div key={NodeId(editor, b)}>
+              {b.children.map((t) =>
                 "text" in t ? (
                   t.text || <br />
                 ) : (
-                  <ruby key={j} contentEditable={false}>
+                  <ruby key={NodeId(editor, t)} contentEditable={false}>
                     {t.value}
                     <rp>(</rp>
                     <rt>{t.ruby}</rt>

@@ -1,6 +1,6 @@
 {
   "name": "@lofcz/edix",
-  "version": "0.5.14",
+  "version": "0.5.15",
   "description": "An experimental, type-safe, framework agnostic and small (5kB+) contenteditable state manager.",
   "main": "lib/index.cjs",
   "module": "lib/index.js",
@@ -14,9 +14,6 @@
       "default": "./lib/index.js"
     }
   },
-  "publishConfig": {
-    "access": "public"
-  },
   "files": [
     "lib"
   ],
@@ -25,7 +22,7 @@
     "build": "vite build",
     "tsc": "tsc -p . --noEmit",
     "test": "vitest --run --project=unit --typecheck",
-    "test:browser": "vitest --run --project=browser",
+    "test:browser": "vitest --run --project browser",
     "format": "prettier '**/*.{js,ts,jsx,tsx}' --write --cache",
     "format:ci": "prettier '**/*.{js,ts,jsx,tsx}' -l",
     "storybook": "storybook dev -p 6006",
@@ -43,6 +40,7 @@
     "@chenglou/pretext": "^1.0.0",
     "@dnd-kit/helpers": "^0.5.0",
     "@dnd-kit/react": "^0.5.0",
+    "@non-standardworld/stone-engine.js": "^0.2.0",
     "@playwright/test": "^1.60.0",
     "@size-limit/preset-small-lib": "^12.0.0",
     "@storybook/addon-docs": "^10.4.0",
@@ -52,11 +50,10 @@
     "@types/prismjs": "^1.26.6",
     "@types/react": "^19.2.0",
     "@types/react-dom": "^19.2.0",
-    "@vitest/browser-playwright": "^4.1.6",
+    "@vitest/browser-playwright": "^5.0.0",
     "ai": "^7.0.42",
     "diff": "^9.0.0",
-    "esbuild": "^0.28.0",
-    "jsdom": "^30.0.0",
+    "jsdom": "^30.1.0",
     "kuromojin": "^3.0.1",
     "linkifyjs": "^4.3.1",
     "node-emoji": "^2.2.0",
@@ -82,7 +79,7 @@
     "valibot": "^1.4.0",
     "vite": "^8.0.13",
     "vite-plugin-dts": "^5.0.2",
-    "vitest": "^4.1.6"
+    "vitest": "^5.0.0"
   },
   "repository": {
     "type": "git",
@@ -115,7 +112,10 @@
   "author": "inokawa <stratoooo-taster@yahoo.co.jp> (https://github.com/inokawa/)",
   "license": "MIT",
   "bugs": {
-    "url": "https://github.com/lofcz/edix/issues"
+    "url": "https://github.com/inokawa/editate/issues"
   },
-  "homepage": "https://github.com/lofcz/edix#readme"
+  "homepage": "https://github.com/inokawa/editate#readme",
+  "publishConfig": {
+    "access": "public"
+  }
 }
