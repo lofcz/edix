@@ -1,0 +1,8 @@
+{
+  "version": 1,
+  "buildId": "sTFKeiPgX2DO9eyp",
+  "mode": "production",
+  "capabilities": {
+    "independentHydration": false
+  }
+}
