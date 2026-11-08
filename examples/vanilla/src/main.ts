@@ -1,9 +1,4 @@
-import {
-  createEditor,
-  plainTransferPlugin,
-  nodeIdPlugin,
-  NodeId,
-} from "@lofcz/edix";
+import { createEditor, plainTransferPlugin, nodeIdPlugin, NodeId } from "edix";
 import morphdom from "morphdom";
 import * as z from "zod";
 

@@ -5,7 +5,7 @@
     plainTransferPlugin,
     nodeIdPlugin,
     NodeId,
-  } from "@lofcz/edix";
+  } from "edix";
   import * as z from "zod";
 
   const schema = z.strictObject({

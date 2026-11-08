@@ -1,5 +1,5 @@
 import { Component, ElementRef, signal, viewChild } from '@angular/core';
-import { createEditor, plainTransferPlugin, nodeIdPlugin, NodeId } from "@lofcz/edix";
+import { createEditor, plainTransferPlugin, nodeIdPlugin, NodeId } from 'edix';
 import * as z from 'zod';
 
 const schema = z.strictObject({

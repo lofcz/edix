@@ -6,7 +6,7 @@
 
 > **Format**\<`T`, `N`, `K`\>(`editor`, `key`, `value`, `range?`): `void`
 
-Defined in: [commands.ts:85](https://github.com/inokawa/editate/blob/f40074584f982d89983e034df674fd6e901e116f/src/commands.ts#L85)
+Defined in: [commands.ts:130](https://github.com/lofcz/edix/blob/17a55a1433563bc0e7b6874892023dd16960c761/src/commands.ts#L130)
 
 Format content in the selection or specified range.
 

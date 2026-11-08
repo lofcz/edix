@@ -10,7 +10,7 @@ import {
 import { isCompositionInput } from "./dom/composition.js";
 import { createMutationObserver } from "./dom/mutation.js";
 import type { DocNode, Fragment, Selection } from "./doc/types.js";
-import { is, isFunction, isString, microtask } from "./utils.js";
+import { isFunction, isString, microtask } from "./utils.js";
 import {
   domSelectionToSelection,
   positionToOffset,
@@ -206,8 +206,8 @@ export type PasteHook = (
 
 type EditorHookMap = {
   /**
-   * Call `next(op)` to continue applying the operation, or `next()` with a nullish value to cancel it.
-   * `next` returns the operation applied to the document after the following hooks, or null if it was cancelled or rejected.
+   * Call `next(op)` to continue applying the operation, or `next()` with a nullish value to cancel it with its transaction.
+   * `next` returns the operation applied to the document after the following hooks, or null if it was cancelled or failed to apply. The transaction may still be discarded afterwards.
    *
    * If the hook returns without calling `next`, the operation is passed through as is.
    */
@@ -245,10 +245,10 @@ export interface Editor<T extends DocNode = DocNode> {
    */
   autoScroll: boolean;
   /**
-   * Dispatches editing operations.
+   * Applies editing operations as a transaction, which is discarded if one of them is cancelled or throws, or the result is rejected by the schema.
    * @param op {@link Operation}
    */
-  apply(op: Operation | Operation[]): this;
+  apply(op: Operation | readonly Operation[]): this;
   /**
    * Executes a function with editor bound as context.
    * @param fn {@link EditorCommandOrPlugin} or {@link EditorQuery}
@@ -417,17 +417,18 @@ export const createEditor = <
     Set<EditorEventMap[keyof EditorEventMap]>
   >();
 
-  const publishing = new Set<() => void>();
+  let publishing = new Set<() => void>();
 
   const publish = <K extends keyof EditorEventMap>(key: K) => {
     const sub = subs.get(key);
     if (sub) {
       if (!publishing.size) {
         microtask(() => {
-          publishing.forEach((cb) => {
+          const callbacks = publishing;
+          publishing = new Set();
+          callbacks.forEach((cb) => {
             cb();
           });
-          publishing.clear();
         });
       }
       sub.forEach((s) => {
@@ -436,69 +437,79 @@ export const createEditor = <
     }
   };
 
-  const apply = (op: Operation | Operation[]) => {
+  const apply = (input: Operation | readonly Operation[]) => {
     if (!readonly) {
-      if (Array.isArray(op)) {
-        for (const o of op) {
-          applyOp(o);
+      const applyHooks = getHook("apply");
+      const length = applyHooks.length;
+      const before = doc;
+      const beforeSelection = selection;
+      let ok = false;
+      try {
+        let unsafe = false;
+        for (let op of Array.isArray(input) ? input : [input]) {
+          let index = 0;
+          let applied: Operation | null = null;
+
+          const dispatch = () => {
+            if (index < length) {
+              const i = index;
+              applyHooks[index]!(op, next);
+              if (i === index) {
+                next(op);
+              }
+            } else if (index === length) {
+              index++;
+
+              try {
+                const [nextDoc, nextSelection] = applyOperation(
+                  doc,
+                  selection,
+                  op,
+                );
+                doc = nextDoc;
+                updateSelection(nextSelection);
+                applied = op;
+                if (isUnsafeOperation(op)) {
+                  unsafe = true;
+                }
+              } catch (e) {
+                // rollback
+                onWarn("rollback operation: " + e);
+              }
+            }
+          };
+
+          const next = (o?: Operation | null): Operation | null => {
+            if (o == null) {
+              // cancel
+              index = length + 1;
+            } else {
+              op = o;
+              index++;
+              dispatch();
+            }
+            return applied;
+          };
+
+          dispatch();
+
+          if (!applied) {
+            return editor;
+          }
         }
-      } else {
-        applyOp(op);
+        ok = !unsafe || validate(doc);
+      } finally {
+        if (!ok) {
+          doc = before;
+          selection = beforeSelection;
+        }
+      }
+      if (doc !== before) {
+        emptyDoc = computeEmpty(doc);
+        publish("change");
       }
     }
     return editor;
-  };
-
-  const applyOp = (op: Operation) => {
-    const currentDoc = doc;
-    const applyHooks = getHook("apply");
-    const length = applyHooks.length;
-
-    let index = 0;
-    let applied: Operation | null = null;
-
-    const dispatch = () => {
-      if (index < length) {
-        const i = index;
-        applyHooks[index]!(op, next);
-        if (i === index) {
-          next(op);
-        }
-      } else if (index === length) {
-        index++;
-
-        try {
-          const [nextDoc, nextSelection] = applyOperation(doc, selection, op);
-          if (!isUnsafeOperation(op) || validate(nextDoc)) {
-            doc = nextDoc;
-            updateSelection(nextSelection);
-            applied = op;
-          }
-        } catch (e) {
-          // rollback
-          onWarn("rollback operation: " + e);
-        }
-      }
-    };
-
-    const next = (o?: Operation | null): Operation | null => {
-      if (o == null) {
-        // cancel
-        index = length + 1;
-      } else {
-        op = o;
-        index++;
-        dispatch();
-      }
-      return applied;
-    };
-
-    dispatch();
-
-    if (!is(currentDoc, doc)) {
-      emptyDoc = computeEmpty(doc);
-      publish("change");
-    }
   };
 
   const updateSelection = (s: Selection) => {
@@ -590,9 +601,9 @@ export const createEditor = <
       return editor;
     },
     input: (element) => {
-      if (
-        !(window.InputEvent && isFunction(InputEvent.prototype.getTargetRanges))
-      ) {
+      if (!(
+        window.InputEvent && isFunction(InputEvent.prototype.getTargetRanges)
+      )) {
         onWarn("beforeinput event is not supported.");
         return noop;
       }
@@ -638,6 +649,9 @@ export const createEditor = <
 
       const syncFocus = () => {
         if (!hasFocus) {
+          // Otherwise the focus handler overwrites the selection with the stale DOM selection, which may not be in the editor while unfocused.
+          setSelectionToDOM(element, parser, doc, selection, true);
+          domSelection = selection;
           // Set focus imperatively to return focus to the editor after a command execution via click.
           // It must be queued after the MO callback because that may cause an additional selectionchange event.
           element.focus({ preventScroll: true });
@@ -762,8 +776,7 @@ export const createEditor = <
       };
 
       const onInput = (e: Event) => {
-        const composingEvent =
-          e instanceof InputEvent && isCompositionInput(e);
+        const composingEvent = e instanceof InputEvent && isCompositionInput(e);
         if (isComposing && !composingEvent) {
           // Chrome Android may skip compositionend; commit on the first
           // non-composition input (space / hardware key / suggestion accept).

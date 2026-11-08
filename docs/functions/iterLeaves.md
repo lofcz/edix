@@ -4,9 +4,9 @@
 
 # Function: iterLeaves()
 
-> **iterLeaves**\<`T`\>(`node`, `range`): `Generator`\<\[[`InferInlineNode`](../type-aliases/InferInlineNode.md)\<`T`\>, `number`\], `void`, `void`\>
+> **iterLeaves**\<`T`\>(`node`, `range`): `Generator`\<\[[`InferInlineNode`](../type-aliases/InferInlineNode.md)\<`T`\>, `number`, `Range`\], `void`, `void`\>
 
-Defined in: [doc/node.ts:301](https://github.com/inokawa/editate/blob/f40074584f982d89983e034df674fd6e901e116f/src/doc/node.ts#L301)
+Defined in: [doc/node.ts:295](https://github.com/lofcz/edix/blob/17a55a1433563bc0e7b6874892023dd16960c761/src/doc/node.ts#L295)
 
 ## Type Parameters
 
@@ -26,4 +26,4 @@ Defined in: [doc/node.ts:301](https://github.com/inokawa/editate/blob/f40074584f
 
 ## Returns
 
-`Generator`\<\[[`InferInlineNode`](../type-aliases/InferInlineNode.md)\<`T`\>, `number`\], `void`, `void`\>
+`Generator`\<\[[`InferInlineNode`](../type-aliases/InferInlineNode.md)\<`T`\>, `number`, `Range`\], `void`, `void`\>

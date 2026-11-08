@@ -1,10 +1,5 @@
 import { css, ref, type Handle } from "remix/component";
-import {
-  createEditor,
-  plainTransferPlugin,
-  nodeIdPlugin,
-  NodeId,
-} from "@lofcz/edix";
+import { createEditor, plainTransferPlugin, nodeIdPlugin, NodeId } from "edix";
 import * as z from "zod";
 
 const schema = z.strictObject({

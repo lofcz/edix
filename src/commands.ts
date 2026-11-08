@@ -68,9 +68,10 @@ export function ReplaceText(
   text: string,
   range: Range = toRange(editor.selection),
 ) {
-  editor
-    .apply({ type: "delete", range })
-    .apply({ type: "insert_text", at: range[0], text });
+  editor.apply([
+    { type: "delete", range },
+    { type: "insert_text", at: range[0], text },
+  ]);
 }
 
 /**
@@ -91,9 +92,10 @@ export function ReplaceDoc<T extends DocNode>(
 
 /** Replace the whole document with plain text, splitting lines into blocks. */
 export function ReplaceAll(editor: Editor, text: string) {
-  editor
-    .apply({ type: "delete", range: [0, getNodeSize(editor.doc)] })
-    .apply({ type: "insert_text", at: 0, text });
+  editor.apply([
+    { type: "delete", range: [0, getNodeSize(editor.doc)] },
+    { type: "insert_text", at: 0, text },
+  ]);
 }
 
 type ToggleableKey<T> = {

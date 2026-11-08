@@ -2,6 +2,7 @@ import { describe, expect, it } from "vitest";
 import { createEditor } from "./editor.js";
 import {
   Format,
+  ReplaceAll,
   SetBlockAttr,
   SetVoidAttr,
   ToggleBlockAttr,
@@ -14,6 +15,19 @@ type Doc = {
     children: ({ text: string; bold?: boolean } | { label: string })[];
   }[];
 };
+
+it("ReplaceAll rolls back deletion if insertion is cancelled", () => {
+  const doc = { children: [{ children: [{ text: "original" }] }] };
+  const editor = createEditor({ doc });
+  editor.selection = [3, 3];
+  editor.hook("apply", (op, next) =>
+    next(op.type === "insert_text" ? null : op),
+  );
+  editor.exec(ReplaceAll, "replacement");
+  expect(editor.doc).toBe(doc);
+  expect(editor.selection).toEqual([3, 3]);
+  expect(editor.isEmpty).toBe(false);
+});
 
 describe(Format.name, () => {
   it("skip void node in range", () => {
